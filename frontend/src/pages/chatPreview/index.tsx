@@ -186,7 +186,7 @@ const ChatPreview = (props) => {
     if (appInfo.id) {
       dispatch(setChatRunning(false));
       dispatch(setChatList([]));
-      if (appInfo.name && !appInfo.notShowHistory) {
+      if ((appInfo.name && !appInfo.notShowHistory) || location.pathname.includes('home')) {
         historyInit();
       }
     }

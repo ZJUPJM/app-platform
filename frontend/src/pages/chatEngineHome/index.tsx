@@ -23,7 +23,7 @@ const ChatRunning = () => {
     const res = await getAppInfo(TENANT_ID, HOME_APP_ID);
     if (res.code === 0) {
       const appInfo = res.data;
-      appInfo.notShowHistory = true;
+      appInfo.notShowHistory = false;
       dispatch(setAppInfo(appInfo));
       dispatch(setAippId(appInfo.aipp_id));
       dispatch(setAppId(appInfo.id));

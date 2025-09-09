@@ -85,12 +85,14 @@ const SendEditor = (props) => {
   const chatRunning = useAppSelector((state) => state.chatCommonStore.chatRunning);
   const loginStatus = useAppSelector((state) => state.chatCommonStore.loginStatus);
   const showMulti = useAppSelector((state) => state.commonStore.historySwitch);
+  const chatList = useAppSelector((state) => state.chatCommonStore.chatList);
   const editorRef = useRef<any>(null);
   const promptMapRef = useRef<any>([]);
   const recommondRef = useRef<any>(null);
   const isAlreadySent = useRef<any>(false);
   const isAutoSend = useRef<any>(false);
   const recommondListRef = useRef<any>([]);
+  const isHomepage = location.hash.includes('home');
   // 编辑器change事件
   function messageChange() {
     const editorDom = document.getElementById('ctrl-promet');
@@ -244,7 +246,8 @@ const SendEditor = (props) => {
     }
   }, [fileList]);
   return <>{(
-    <div className={setSpaClassName('send-editor-container')} style={{display: display ? 'block' : 'none'}}>
+    <div className={`${setSpaClassName('send-editor-container')} ${isHomepage && !chatList.length ? 'send-editor-home' : ''}`}
+         style={{display: display ? 'block' : 'none'}}>
       {
         showMask && <div className='send-editor-mask'>
           <div className='mask-inner'>

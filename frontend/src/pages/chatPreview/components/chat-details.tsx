@@ -63,32 +63,33 @@ const ChatDetail = ({ showMask = false }) => {
   return <>{(
     <div className='chat-details-content'>
       {appInfo?.name ? (isHomepage ? (
-        <div className='home-top'>
-          <div className='head-inner'>
-            <div className='inner-left'>
-              <div className='title'>ModelEngine</div>
-              <div className='sub-title'>{t('platformTitle')}</div>
-              <div className='desc'>{t('platformSubTitle')}</div>
-            </div>
-            <div className='inner-right'>
-              <div className=''>
-                <img src={robot2} />
-              </div>
-            </div>
-            <div className='inner-right-chat'>
-              {t('modelEngineGreet1')} <strong>{t('modelEngine')}</strong>，{t('modelEngineGreet6')}
-            </div>
-          </div>
-          <div className='head-nav'>
-            <div className='nav-left' onClick={addApp}>
-              <div className='tag-home-page'>
-                <CreateAppIcon />
-              </div>
-              <div className='nav-title'>{t('createApp')}</div>
-              <div className='nav-desc'>{t('createAppDescription')}</div>
-            </div>
-          </div>
-        </div>
+        <></>
+        // <div className='home-top'>
+        //   <div className='head-inner'>
+        //     <div className='inner-left'>
+        //       <div className='title'>ModelEngine</div>
+        //       <div className='sub-title'>{t('platformTitle')}</div>
+        //       <div className='desc'>{t('platformSubTitle')}</div>
+        //     </div>
+        //     <div className='inner-right'>
+        //       <div className=''>
+        //         <img src={robot2} />
+        //       </div>
+        //     </div>
+        //     <div className='inner-right-chat'>
+        //       {t('modelEngineGreet1')} <strong>{t('modelEngine')}</strong>，{t('modelEngineGreet6')}
+        //     </div>
+        //   </div>
+        //   <div className='head-nav'>
+        //     <div className='nav-left' onClick={addApp}>
+        //       <div className='tag-home-page'>
+        //         <CreateAppIcon />
+        //       </div>
+        //       <div className='nav-title'>{t('createApp')}</div>
+        //       <div className='nav-desc'>{t('createAppDescription')}</div>
+        //     </div>
+        //   </div>
+        // </div>
       ) : (
           <div className='top'>
             <div className='head'>

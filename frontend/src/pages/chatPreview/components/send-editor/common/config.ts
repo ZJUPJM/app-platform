@@ -13,7 +13,7 @@ export const imgArr = [
   'image/webp',
   'image/svg+xml',
 ];
-export const HOME_APP_ID = '3a617d8aeb1d41a9ad7453f2f0f70d61';
+export const HOME_APP_ID = '4ef2c47cfd6b4b61b7f6f19ad92b1421';
 export const TENANT_ID = '31f20efc7e0848deab6a6bc10fc3021e';
 
 export enum FileType {

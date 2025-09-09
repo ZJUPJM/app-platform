@@ -84,16 +84,17 @@ const EditorBtnHome = (props) => {
       setShowAt(false);
     })
     getImgPath(appInfo.attributes);
-    setAppName(appInfo.name || t('app'));
+    setAppName(appInfo.name);
     setMultiFileConfig(findConfigValue(appInfo, 'multimodal') || {});
   }, [appInfo]);
+
   useEffect(() => {
     if (atAppInfo) {
       getImgPath(atAppInfo.attributes);
       setAppName(atAppInfo.name);
     } else {
       getImgPath(appInfo.attributes);
-      setAppName(appInfo.name || t('app'));
+      setAppName(appInfo.name);
     }
   }, [atAppInfo]);
   // 获取图片
