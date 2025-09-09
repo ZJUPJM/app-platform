@@ -962,6 +962,7 @@
   "loading": "Loading",
   "noMore": "You've reached the end",
   "latest": "latest",
+  "AIWorkflow": "AI Workflow",
   "north": {
     "api": {
       "chat": {

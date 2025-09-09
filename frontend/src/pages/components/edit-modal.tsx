@@ -44,7 +44,7 @@ const EditModal = (props) => {
   const [imgPath, setImgPath] = useState('');
   const [showImg, setShowImg] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
-  const [appBuiltType, setAppBuiltType] = useState(APP_BUILT_TYPE.BASIC);
+  const [appBuiltType, setAppBuiltType] = useState(APP_BUILT_TYPE.WORK_FLOW);
   const [applicationType, setApplicationType] = useState(APP_BUILT_CLASSIFICATION.ASSISTANT);
   const [types, setTypes] = useState([]);
   const inputData = useRef<any>({});
@@ -366,49 +366,20 @@ const EditModal = (props) => {
                 onChange={applicationOnChange}
                 className='app-edit-btn-box'
               >
-                <Radio.Button value='assistant' className='app-edit-btn app-edit-btn-position'>
-                  <img src={assistant} alt='' className='app-edit-btn-img' />
-                  {t('conversationAssistant')}
-                </Radio.Button>
                 {/* <Radio.Button value='agent' className='app-edit-btn app-edit-btn-position'> */}
                 <Radio.Button value='agent' className='app-edit-btn'>
                   <img src={agent} alt='' className='app-edit-btn-img' />
                   {t('agent')}
+                </Radio.Button>
+                <Radio.Button value='assistant' className='app-edit-btn app-edit-btn-position'>
+                  <img src={assistant} alt='' className='app-edit-btn-img' />
+                  {t('AIWorkflow')}
                 </Radio.Button>
                 {/* <Radio.Button value='workflow' className='app-edit-btn'>
                   <img src={workflow} alt='' className='app-edit-btn-img' />
                   {t('workflow')}
                 </Radio.Button> */}
               </Radio.Group>
-            </div>
-          </>
-        )}
-        {type && applicationType === APP_BUILT_CLASSIFICATION.ASSISTANT && !isTemplate && (
-          <>
-            <div style={{ marginBottom: '4px', marginTop: '16px', fontSize: '12px' }}>
-              {t('arrangementTechniques')}
-            </div>
-            <div className='arrange-model'>
-              <div
-                className={`arrange-container ${appBuiltType === APP_BUILT_TYPE.BASIC ? 'chose' : ''}`}
-                onClick={() => setAppBuiltType(APP_BUILT_TYPE.BASIC)}
-              >
-                <div className='model-name'>
-                  <img src={BasicImg} alt='' />
-                  <span>{t('basicArrange')}</span>
-                </div>
-                <div className='model-desc'>{t('basicArrangeDescription')}</div>
-              </div>
-              <div
-                className={`arrange-container ${appBuiltType === APP_BUILT_TYPE.WORK_FLOW ? 'chose' : ''}`}
-                onClick={() => setAppBuiltType(APP_BUILT_TYPE.WORK_FLOW)}
-              >
-                <div className='model-name'>
-                  <img src={WorkFlowImg} alt='' />
-                  <span>{t('workflowArrange')}</span>
-                </div>
-                <div className='model-desc'>{t('workflowArrangeDescription')}</div>
-              </div>
             </div>
           </>
         )}

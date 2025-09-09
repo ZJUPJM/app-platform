@@ -962,6 +962,7 @@
   "loading": "加载中",
   "noMore": "已显示全部",
   "latest": "最新",
+  "AIWorkflow": "AI工作流",
   "north": {
     "api": {
       "chat": {

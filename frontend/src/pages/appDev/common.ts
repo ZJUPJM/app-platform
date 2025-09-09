@@ -6,12 +6,12 @@ export const tabItems = [
     key: 'all',
   },
   {
-    label: i18n.t('conversationAssistant'),
-    key: 'chatbot',
-  },
-  {
     label: i18n.t('agent'),
     key: 'agent',
+  },
+  {
+    label: i18n.t('AIWorkflow'),
+    key: 'chatbot',
   },
   // {
   //   label: i18n.t('workflow'),
