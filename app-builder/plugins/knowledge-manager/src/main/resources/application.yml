@@ -32,4 +32,4 @@ knowledge:
   support-list:
     - groupId: qianfanKnowledge
       name: 百度千帆知识库
-      description: 百度千帆知识库
+      description: 百度千帆知识库是百度智能云推出的一款专门面向大语言模型知识问答场景，旨在管理客户上传的知识并提供快速查询检索功能的产品。

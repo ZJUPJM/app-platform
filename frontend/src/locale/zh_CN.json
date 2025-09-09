@@ -201,6 +201,8 @@
   "indexType": "索引类型",
   "addCol": "添加列",
   "knowledgeCreated": "恭喜您，知识库已完成创建",
+  "updateKnowledgeConfigSucceeded": "更新知识库配置成功",
+  "updateKnowledgeConfigFailed": "更新知识库配置失败",
   "enterNameRule": "输入字符长度范围：1 - 64",
   "expandArrange": "展开编排区",
   "expandConfig": "展开配置区",

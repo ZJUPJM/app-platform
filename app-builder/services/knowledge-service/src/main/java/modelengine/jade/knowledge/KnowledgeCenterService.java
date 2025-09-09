@@ -27,10 +27,12 @@ public interface KnowledgeCenterService {
      * 增加用户的知识库配置信息。
      *
      * @param knowledgeConfigDto 表示用户知识库配置dto的 {@link KnowledgeConfigDto}。
+     * @return 表示用户知识库配置dto的 {@link KnowledgeConfigDto}。
      */
     @ToolMethod(name = "add_user_knowledge_config", description = "增加用户的知识库配置信息")
     @Genericable(id = "knowledge.center.service.addUserKnowledgeConfig")
-    void add(@Property(description = "知识库配置dto", required = true) KnowledgeConfigDto knowledgeConfigDto);
+    KnowledgeConfigDto add(
+            @Property(description = "知识库配置dto", required = true) KnowledgeConfigDto knowledgeConfigDto);
 
     /**
      * 修改用户的知识库配置信息。
@@ -70,7 +72,7 @@ public interface KnowledgeCenterService {
     List<KnowledgeDto> getSupportKnowledges(@Property(description = "用户id", required = false) String userId);
 
     /**
-     * 基于用户名，知识库平台获取 api Key。
+     * 基于知识库配置唯一 id，知识库平台获取 api Key。
      *
      * @param knowledgeConfigId 表示知识库配置唯一 id 的 {@link String}。
      * @param defaultValue 表示 api key 默认值的 {@link String}。
@@ -78,6 +80,15 @@ public interface KnowledgeCenterService {
      */
     @Genericable("knowledge.center.service.getApiKey")
     String getApiKey(String knowledgeConfigId, String defaultValue);
+
+    /**
+     * 基于用户名，知识库平台获取配置。
+     *
+     * @param userId 表示用户 id 的 {@link String}。
+     * @return 表示知识库配置的 {@link KnowledgeConfigDto}。
+     */
+    @Genericable("knowledge.center.service.get")
+    KnowledgeConfigDto get(String userId);
 
     /**
      * 基于用户名，知识库平台获取 config 唯一 id。

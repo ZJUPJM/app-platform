@@ -4,11 +4,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import React, { useEffect, useCallback, useState, useRef, useImperativeHandle, useContext } from 'react';
-import { Button, Alert, Spin } from 'antd';
-import { useParams } from 'react-router-dom';
-import { JadeFlow } from '@fit-elsa/elsa-react';
-import { validate } from '../utils';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState
+} from 'react';
+import {Alert, Button, Spin} from 'antd';
+import {useParams} from 'react-router-dom';
+import {JadeFlow} from '@fit-elsa/elsa-react';
+import {validate} from '../utils';
 import AddKnowledge from '../../configForm/configUi/components/add-knowledge';
 import HuggingFaceModal from './hugging-face-modal';
 import FormSelectDrawer from '../../intelligent-form/components/form-select-drawer';
@@ -16,19 +23,20 @@ import ToolModal from './tool-modal';
 import PromptWord from '../../configForm/configUi/components/prompt-word';
 import PromptTemplate from '../../configForm/configUi/components/prompt-template';
 import ConnectKnowledge from './connect-knowledge';
-import { debounce, getCurrentTime } from '@/shared/utils/common';
-import { updateFlowInfo } from '@/shared/http/aipp';
-import { getAddFlowConfig, getEvaluateConfig } from '@/shared/http/appBuilder';
-import { useAppDispatch, useAppSelector } from '@/store/hook';
-import { setAppInfo, setValidateInfo } from '@/store/appInfo/appInfo';
-import { setTestStatus, setTestTime } from '@/store/flowTest/flowTest';
-import { FlowContext, RenderContext } from '../../aippIndex/context';
+import {debounce, getCurrentTime} from '@/shared/utils/common';
+import {updateFlowInfo} from '@/shared/http/aipp';
+import {getAddFlowConfig, getEvaluateConfig} from '@/shared/http/appBuilder';
+import {useAppDispatch, useAppSelector} from '@/store/hook';
+import {setValidateInfo} from '@/store/appInfo/appInfo';
+import {setTestStatus, setTestTime} from '@/store/flowTest/flowTest';
+import {FlowContext, RenderContext} from '../../aippIndex/context';
 import CreateTestSet from '../../appDetail/evaluate/testSet/createTestset/createTestSet';
 import AddSearch from '../../configForm/configUi/components/add-search';
-import { configMap } from '../config';
-import { useTranslation } from 'react-i18next';
+import {configMap} from '../config';
+import {useTranslation} from 'react-i18next';
 import i18n from '../../../locale/i18n';
-import { cloneDeep } from 'lodash';
+import {cloneDeep} from 'lodash';
+import store from '@/store/store';
 
 /**
  * elsa编排组件
@@ -74,6 +82,7 @@ const Stage = (props) => {
   const appValidateInfo = useAppSelector((state) => state.appStore.validateInfo);
   const choseNodeId = useAppSelector((state) => state.appStore.choseNodeId);
   const pluginList = useAppSelector((state) => state.chatCommonStore.pluginList);
+  const knowledgeConfig =  useAppSelector((state) => state.chatCommonStore.knowledgeConfig);
   const { tenantId, appId } = useParams();
   const testStatusRef = useRef<any>();
   const modelCallback = useRef<any>();
@@ -177,11 +186,16 @@ const Stage = (props) => {
       });
       // 知识库模态框
       agent.onKnowledgeBaseSelect((args) => {
-        let { selectedKnowledgeBases, onSelect, groupId, selectedKnowledgeConfigId } = args;
-        setGroupId(groupId);
-        setKnowledgeConfigId(selectedKnowledgeConfigId);
-        knowledgeCallback.current = onSelect;
-        modalRef.current.showModal(selectedKnowledgeBases, groupId, selectedKnowledgeConfigId);
+        const latestConfig = store.getState().chatCommonStore.knowledgeConfig;
+        if (!latestConfig) {
+          connectKnowledgeRef.current.openModal();
+        } else {
+          let { selectedKnowledgeBases, onSelect} = args;
+          setGroupId(latestConfig.groupId);
+          setKnowledgeConfigId(latestConfig.knowledgeConfigId);
+          knowledgeCallback.current = onSelect;
+          modalRef.current.showModal(selectedKnowledgeBases, latestConfig.groupId, latestConfig.knowledgeConfigId);
+        }
       });
       // 插件模态框
       agent.onPluginSelect((args) => {

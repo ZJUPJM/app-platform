@@ -13,7 +13,8 @@ import {
   SET_USER_ROLE,
   SET_READ_ONLY,
   SET_NO_AUTH,
-  SET_PLUGIN_LIST
+  SET_PLUGIN_LIST,
+  SET_KNOWLEDGE_CONFIG
 } from './action-types';
 
 const initialState = {
@@ -32,6 +33,7 @@ const initialState = {
   readOnly: false,
   noAuth: false,
   pluginList: [],
+  knowledgeConfig: null
 }
 
 const chatReducers = (state = initialState, action) => {
@@ -66,6 +68,8 @@ const chatReducers = (state = initialState, action) => {
       return { ...state, noAuth: action.payload };
     case SET_PLUGIN_LIST:
       return { ...state, pluginList: action.payload };
+    case SET_KNOWLEDGE_CONFIG:
+      return { ...state, knowledgeConfig: action.payload };
     default:
       return state
   }

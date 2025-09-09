@@ -4,7 +4,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { get } from "./http";
+import {get, put, post} from "./http";
 import serviceConfig from './httpConfig';
 const { PLUGIN_URL } = serviceConfig;
 
@@ -50,10 +50,28 @@ const getKnowledgeConfigId = (groupId) => {
     });
   });
 }
-
+// 获取知识库获取配置
+const getKnowLedgeConfig = () => {
+  return new Promise((resolve, reject) => {
+    get(`${PLUGIN_URL}/knowledge-manager/config`).then((res) => {
+      resolve(res);
+    }, (error) => {
+      reject(error);
+    });
+  });
+}
+// 更新知识库配置
+export function updateKnowledgeConfig(updateConfig) {
+  return put(`${PLUGIN_URL}/knowledge-manager/config`, updateConfig);
+}
+// 添加知识库配置
+export function addKnowledgeConfig(addConfig) {
+  return post(`${PLUGIN_URL}/knowledge-manager/config`, addConfig);
+}
 export {
   getKnowledgesCard,
   getSearchParams,
   getConnectKnowledgeList,
-  getKnowledgeConfigId
+  getKnowledgeConfigId,
+  getKnowLedgeConfig
 };

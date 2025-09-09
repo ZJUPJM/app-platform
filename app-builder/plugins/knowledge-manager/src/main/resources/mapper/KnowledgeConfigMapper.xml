@@ -19,7 +19,8 @@
         id, name, user_id, group_id, api_key, is_default, created_at, created_by, updated_at, updated_by, knowledge_config_id
     </sql>
 
-    <insert id="insert" parameterType="modelengine.jade.knowledge.po.KnowledgeConfigPo">
+    <insert id="insert" parameterType="modelengine.jade.knowledge.po.KnowledgeConfigPo" useGeneratedKeys="true"
+            keyProperty="id">
         insert into t_app_engine_user_knowledge
         (name, user_id, group_id, api_key, is_default, created_by, created_at, updated_by, updated_at, knowledge_config_id)
         values (#{name}, #{userId}, #{groupId}, #{apiKey}, #{isDefault}, #{createdBy}, #{createdAt}, #{updatedBy},

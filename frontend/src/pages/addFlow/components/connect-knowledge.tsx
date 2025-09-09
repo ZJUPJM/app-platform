@@ -4,29 +4,37 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import React, { useState, useImperativeHandle, useEffect } from 'react';
-import { Modal, Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
-import { useAppDispatch } from '@/store/hook';
-import { setIsAutoOpen } from '@/store/common/common';
-import { getConnectKnowledgeList, getKnowledgeConfigId } from '@/shared/http/knowledge';
+import React, {useEffect, useImperativeHandle, useRef, useState} from 'react';
+import {Modal, Typography} from 'antd';
+import {useTranslation} from 'react-i18next';
+import {useHistory} from 'react-router-dom';
+import {useAppDispatch, useAppSelector} from '@/store/hook';
+import {setIsAutoOpen} from '@/store/common/common';
+import {
+  addKnowledgeConfig,
+  getConnectKnowledgeList,
+  getKnowLedgeConfig,
+  getKnowledgeConfigId,
+  updateKnowledgeConfig,
+} from '@/shared/http/knowledge';
 import BookIcon from '@/assets/images/ai/connect-knowledge.png';
-import NotConnectIcon from '@/assets/images/ai/not-connect.png';
-import ConnectedIcon from '@/assets/images/ai/connected.svg';
 import '../styles/connect-knowledge.scss'
+import KnowledgeHelperDrawer from "./knowledge-helper-drawer";
+import store from "@/store/store";
+import {setKnowledgeConfig} from "@/store/chatStore/chatStore";
+import {Message} from "@/shared/utils/message";
 
 /**
  * 连接知识库弹框
  *
  * @param modelRef 当前组件ref.
  * @param groupId 父组件组件groupId.
- * @param updateKnowledgeOption 更新父组件groupId的方法.
+ * @param updateKnowledgeConfig 更新父组件配置的方法.
  * @return {JSX.Element}
  * @constructor
  */
 
-const ConnectKnowledge = ({ modelRef, groupId, updateKnowledgeOption }) => {
+const ConnectKnowledge = ({ modelRef, groupId, updateKnowledgeOption}) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useHistory().push;
@@ -34,6 +42,9 @@ const ConnectKnowledge = ({ modelRef, groupId, updateKnowledgeOption }) => {
   const [connectList, setConnectList] = useState([]);
   const [chosenId, setChosenId] = useState(groupId);
   const [knowledgeConfigId, setKnowledgeConfigId] = useState('');
+  const helpRef = useRef();
+  const apiKeyRef = useRef<HTMLTextAreaElement>(null);
+  const knowledgeConfig =  useAppSelector((state) => state.chatCommonStore.knowledgeConfig);
 
   useImperativeHandle(modelRef, () => {
     return { openModal: () => setOpen(true) };
@@ -42,7 +53,35 @@ const ConnectKnowledge = ({ modelRef, groupId, updateKnowledgeOption }) => {
   // 确定
   const confirm = () => {
     setOpen(false);
-    updateKnowledgeOption(chosenId, knowledgeConfigId);
+    const apiKey = apiKeyRef.current?.value || '';
+    if (!apiKey.trim()) {
+      return;
+    }
+    const updateConfig = store.getState().chatCommonStore.knowledgeConfig;
+    if (updateConfig) {
+      updateConfig.apiKey = apiKey;
+      updateKnowledgeConfig(updateConfig);
+      store.dispatch(setKnowledgeConfig(updateConfig));
+      updateKnowledgeOption(chosenId, updateConfig.knowledgeConfigId);
+      Message({type: 'success', content: t('updateKnowledgeConfigSucceeded')});
+    } else if (connectList && connectList.length != 0) {
+      const firstItem = connectList[0];
+      const newConfig = {
+        name: firstItem.name || '',
+        groupId: firstItem.groupId || '',
+        apiKey: apiKey,
+        isDefault: true,
+      };
+      addKnowledgeConfig(newConfig).then((res) => {
+        if (res.code === 0) {
+          store.dispatch(setKnowledgeConfig(res.data));
+          updateKnowledgeOption(chosenId, res.data.knowledgeConfigId);
+          Message({type: 'success', content: t('updateKnowledgeConfigSucceeded')});
+        } else {
+          Message({type: 'error', content: t('updateKnowledgeConfigFailed')});
+        }
+      })
+    }
   };
 
   // 获取知识库列表
@@ -81,6 +120,32 @@ const ConnectKnowledge = ({ modelRef, groupId, updateKnowledgeOption }) => {
     dispatch(setIsAutoOpen(false));
   }, []);
 
+  function openKnowledgeHelper() {
+    helpRef.current?.openHelp();
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await getKnowLedgeConfig();
+      if (res.code !== 0) {
+         return;
+      }
+      store.dispatch(setKnowledgeConfig(res.data));
+    };
+    fetchData();
+    return () => {};
+  }, []);
+
+  useEffect(() => {
+    if (!apiKeyRef.current) {
+      return;
+    }
+    const latestConfig = store.getState().chatCommonStore.knowledgeConfig;
+    if (latestConfig) {
+      apiKeyRef.current.value = latestConfig.apiKey || '';
+    }
+  }, [apiKeyRef.current]);
+
   return <>
     <Modal
       title={t('connect') + t('knowledgeBase')}
@@ -90,29 +155,33 @@ const ConnectKnowledge = ({ modelRef, groupId, updateKnowledgeOption }) => {
       onOk={confirm}
       onCancel={() => setOpen(false)}
     >
-      <div className='connect-tip'>
-        <div>{t('connectTip')}</div>
-        <Typography.Link onClick={goPluginPage}>{t('toConnect')}</Typography.Link>
-      </div>
       <div className='connect-list'>
         {
           connectList.map(item =>
-            <div className={`knowledge-item ${chosenId === item.groupId ? 'chose' : ''}`}
-                 key={item.groupId}
-                 onClick={() => onClickKnowledgeSet(item.groupId)}
-            >
-              <div className='knowledge-title'>
+            <div className={`knowledge-item`}>
+              <div className='knowledge-title' style={{ display: 'flex', alignItems: 'center' }}>
                 <img src={BookIcon} alt="" style={{ marginRight: 8 }} />
                 {item.name}
+                <Typography.Link onClick={openKnowledgeHelper} className='use-help'
+                                 style={{ marginLeft: 'auto' }} >
+                  {t('help')}
+                </Typography.Link>
               </div>
-              <div className='knowledge-desc' title={item.description}>{item.description}</div>
-              <div className='connect-circle'>
-                <img src={chosenId === item.groupId ? ConnectedIcon : NotConnectIcon} alt="" />
+              <div className='knowledge-desc'
+                   title={`${item.description}`}>{item.description}
               </div>
             </div>
           )
         }
       </div>
+      <div class="connect-api-key-header">
+         API Key
+      </div>
+      <textarea class="connect-api-key-input" ref={apiKeyRef}>
+      </textarea>
+      <KnowledgeHelperDrawer
+        helpRef={helpRef}
+      />
     </Modal>
   </>
 };

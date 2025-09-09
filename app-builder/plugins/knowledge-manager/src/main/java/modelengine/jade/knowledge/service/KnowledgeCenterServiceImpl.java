@@ -68,7 +68,7 @@ public class KnowledgeCenterServiceImpl implements KnowledgeCenterService {
     @ToolMethod(name = "添加知识库配置", description = "增加用户的知识库配置信息",
             extensions = {@Attribute(key = "tags", value = "FIT"), @Attribute(key = "tags", value = "KNOWLEDGE")})
     @Property(description = "增加用户的知识库配置信息")
-    public void add(KnowledgeConfigDto knowledgeConfigDto) {
+    public KnowledgeConfigDto add(KnowledgeConfigDto knowledgeConfigDto) {
         log.info("Start add user knowledge config. [userId={}]", knowledgeConfigDto.getUserId());
         this.isConfigUnique(knowledgeConfigDto);
         List<KnowledgeConfigPo> result =
@@ -87,7 +87,10 @@ public class KnowledgeCenterServiceImpl implements KnowledgeCenterService {
             this.knowledgeCenterRepo.updateOthersIsDefaultFalse(condition);
         }
         knowledgeConfigDto.setKnowledgeConfigId(Entities.generateId());
-        this.knowledgeCenterRepo.insertKnowledgeConfig(this.getKnowledgeConfigPo(knowledgeConfigDto));
+        KnowledgeConfigPo knowledgeConfigPo = this.getKnowledgeConfigPo(knowledgeConfigDto);
+        this.knowledgeCenterRepo.insertKnowledgeConfig(knowledgeConfigPo);
+        knowledgeConfigDto.setId(knowledgeConfigPo.getId());
+        return knowledgeConfigDto;
     }
 
     @Override
@@ -195,6 +198,12 @@ public class KnowledgeCenterServiceImpl implements KnowledgeCenterService {
     }
 
     @Override
+    public KnowledgeConfigDto get(String userId) {
+        List<KnowledgeConfigDto> configDtos = this.list(userId);
+        return configDtos.stream().filter(KnowledgeConfigDto::getIsDefault).findAny().orElse(null);
+    }
+
+    @Override
     @Fitable(id = FITABLE_ID)
     public String getKnowledgeConfigId(String userId, String groupId) {
         KnowledgeConfigQueryCondition cond =
@@ -250,6 +259,7 @@ public class KnowledgeCenterServiceImpl implements KnowledgeCenterService {
                 .userId(knowledgeConfigPo.getUserId())
                 .apiKey(this.decryptor.decrypt(knowledgeConfigPo.getApiKey()))
                 .isDefault(knowledgeConfigPo.getIsDefault() == 1)
+                .knowledgeConfigId(knowledgeConfigPo.getKnowledgeConfigId())
                 .build();
     }
 }

@@ -823,6 +823,8 @@
   "indexType": "Index type",
   "addCol": "Add column",
   "knowledgeCreated": "Congratulations, your knowledge base has been created",
+  "updateKnowledgeConfigSucceeded": "Update knowledge base configuration successfully",
+  "updateKnowledgeConfigFailed": "Failed to update knowledge base configuration",
   "enterNameRule": "Input length: 1 - 64 characters",
   "expandArrange": "Expand orchestration area",
   "consumer": "Custom",

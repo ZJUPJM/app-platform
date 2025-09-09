@@ -7,7 +7,10 @@
 package modelengine.jade.knowledge.controller;
 
 import modelengine.fit.http.annotation.GetMapping;
+import modelengine.fit.http.annotation.PostMapping;
+import modelengine.fit.http.annotation.PutMapping;
 import modelengine.fit.http.annotation.RequestBean;
+import modelengine.fit.http.annotation.RequestBody;
 import modelengine.fit.http.annotation.RequestMapping;
 import modelengine.fit.http.annotation.RequestParam;
 import modelengine.fit.http.server.HttpClassicServerRequest;
@@ -15,6 +18,7 @@ import modelengine.fit.jane.common.controller.AbstractController;
 import modelengine.fit.jane.common.entity.OperationContext;
 import modelengine.fit.jane.task.gateway.Authenticator;
 import modelengine.fitframework.annotation.Component;
+import modelengine.fitframework.util.StringUtils;
 import modelengine.fitframework.validation.Validated;
 import modelengine.jade.common.vo.PageVo;
 import modelengine.jade.knowledge.KnowledgeCenterService;
@@ -27,6 +31,7 @@ import modelengine.jade.knowledge.ListRepoQueryParam;
 import modelengine.jade.knowledge.SchemaItem;
 import modelengine.jade.knowledge.config.KnowledgeConfig;
 import modelengine.jade.knowledge.controller.vo.KnowledgePropertyVo;
+import modelengine.jade.knowledge.dto.KnowledgeConfigDto;
 import modelengine.jade.knowledge.dto.KnowledgeDto;
 import modelengine.jade.knowledge.enums.IndexType;
 import modelengine.jade.knowledge.router.KnowledgeServiceRouter;
@@ -96,6 +101,26 @@ public class KnowledgeController extends AbstractController {
         return this.knowledgeServiceRouter.getInvoker(KnowledgeRepoService.class,
                 KnowledgeRepoService.GENERICABLE_LIST_REPOS,
                 groupId).invoke(apiKey, param);
+    }
+
+    @GetMapping("/config")
+    public KnowledgeConfigDto getConfig(HttpClassicServerRequest httpRequest) {
+        OperationContext operationContext = this.contextOf(httpRequest, StringUtils.EMPTY);
+        return this.knowledgeCenterService.get(operationContext.getOperator());
+    }
+
+    @PutMapping("/config")
+    public void updateConfig(HttpClassicServerRequest httpRequest, @RequestBody KnowledgeConfigDto configDto) {
+        OperationContext operationContext = this.contextOf(httpRequest, StringUtils.EMPTY);
+        configDto.setUserId(operationContext.getOperator());
+        this.knowledgeCenterService.edit(configDto);
+    }
+
+    @PostMapping("/config")
+    public KnowledgeConfigDto addConfig(HttpClassicServerRequest httpRequest, @RequestBody KnowledgeConfigDto configDto) {
+        OperationContext operationContext = this.contextOf(httpRequest, StringUtils.EMPTY);
+        configDto.setUserId(operationContext.getOperator());
+        return this.knowledgeCenterService.add(configDto);
     }
 
     /**
