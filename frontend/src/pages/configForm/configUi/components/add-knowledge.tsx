@@ -113,7 +113,7 @@ const AddKnowledge = (props) => {
       Message({ type: 'warning', content: t('plsSelectKnowledge') });
       return;
     }
-    handleDataChange(filterSameKnowledges(cachedKnowledgeList, checkData.current));
+    handleDataChange({knowledgeRepos: filterSameKnowledges(cachedKnowledgeList, checkData.current)});
     setOpen(false);
   };
   // 搜索

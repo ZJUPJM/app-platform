@@ -62,7 +62,7 @@ const ConnectKnowledge = ({ modelRef, groupId, updateKnowledgeOption}) => {
       updateConfig.apiKey = apiKey;
       updateKnowledgeConfig(updateConfig);
       store.dispatch(setKnowledgeConfig(updateConfig));
-      updateKnowledgeOption(chosenId, updateConfig.knowledgeConfigId);
+      updateKnowledgeOption(updateConfig.groupId, updateConfig.knowledgeConfigId);
       Message({type: 'success', content: t('updateKnowledgeConfigSucceeded')});
     } else if (connectList && connectList.length != 0) {
       const firstItem = connectList[0];
@@ -75,7 +75,7 @@ const ConnectKnowledge = ({ modelRef, groupId, updateKnowledgeOption}) => {
       addKnowledgeConfig(newConfig).then((res) => {
         if (res.code === 0) {
           store.dispatch(setKnowledgeConfig(res.data));
-          updateKnowledgeOption(chosenId, res.data.knowledgeConfigId);
+          updateKnowledgeOption(firstItem.groupId, res.data.knowledgeConfigId);
           Message({type: 'success', content: t('updateKnowledgeConfigSucceeded')});
         } else {
           Message({type: 'error', content: t('updateKnowledgeConfigFailed')});

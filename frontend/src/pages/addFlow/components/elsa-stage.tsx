@@ -186,16 +186,17 @@ const Stage = (props) => {
       });
       // 知识库模态框
       agent.onKnowledgeBaseSelect((args) => {
+        let { selectedKnowledgeBases, onSelect} = args;
         const latestConfig = store.getState().chatCommonStore.knowledgeConfig;
         if (!latestConfig) {
+          connectKnowledgeEvent.current = args;
           connectKnowledgeRef.current.openModal();
         } else {
-          let { selectedKnowledgeBases, onSelect} = args;
           setGroupId(latestConfig.groupId);
           setKnowledgeConfigId(latestConfig.knowledgeConfigId);
-          knowledgeCallback.current = onSelect;
           modalRef.current.showModal(selectedKnowledgeBases, latestConfig.groupId, latestConfig.knowledgeConfigId);
         }
+        knowledgeCallback.current = onSelect;
       });
       // 插件模态框
       agent.onPluginSelect((args) => {
@@ -436,7 +437,7 @@ const Stage = (props) => {
 
   // 更新groupId
   const updateKnowledgeOption = (groupId: String, knowledgeConfigId:String) => {
-    connectKnowledgeEvent.current.onSelect(groupId, knowledgeConfigId);
+    connectKnowledgeEvent.current.onSelect({groupId: groupId, knowledgeConfigId: knowledgeConfigId});
     setGroupId(groupId);
     setKnowledgeConfigId(knowledgeConfigId);
   };
