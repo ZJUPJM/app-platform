@@ -25,7 +25,7 @@ const ChatRunning = () => {
       const appInfo = res.data;
       appInfo.notShowHistory = false;
       dispatch(setAppInfo(appInfo));
-      dispatch(setAippId(appInfo.aipp_id));
+      dispatch(setAippId(appInfo.aippId));
       dispatch(setAppId(appInfo.id));
       const memoryItem = findConfigValue(appInfo, 'memory');
       dispatch(setHistorySwitch(memoryItem?.type !==  'NotUseMemory'));
