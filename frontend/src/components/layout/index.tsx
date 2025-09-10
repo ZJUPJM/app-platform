@@ -64,7 +64,7 @@ const AppLayout: React.FC = () => {
         len--;
       }
     } else {
-      setDefaultActive(['/app-develop']);
+      setDefaultActive(['/home']);
     }
   }
   const menuClick = (e: any) => {
