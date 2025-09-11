@@ -165,7 +165,7 @@ const AppLayout: React.FC = () => {
                 />
               ))}
               <Route exact path='/' key='/' >
-                <Redirect to='/app-develop' />
+                <Redirect to='/home' />
               </Route>
             </Switch>
           </Content>
