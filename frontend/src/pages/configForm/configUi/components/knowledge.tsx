@@ -28,9 +28,10 @@ const Knowledge = (props) => {
   });
 
   const handleChange = (value) => {
-    list.current = value;
-    setKnows(value)
-    updateData(value);
+    const knowledgeReposArray = value.knowledgeRepos;
+    list.current = knowledgeReposArray;
+    setKnows(knowledgeReposArray)
+    updateData(knowledgeReposArray);
   };
 
   // 删除

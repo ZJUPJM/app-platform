@@ -16,6 +16,7 @@ import CloseImg from '@/assets/images/close_arrow.png';
 import OpenImg from '@/assets/images/open_arrow.png';
 import AddImg from '@/assets/images/add_btn.svg';
 import SettingImg from '@/assets/svg/icon-search-args-config.svg';
+import store from '@/store/store';
 const { Panel } = Collapse;
 
 const KnowledgeContainer = (props) => {
@@ -68,6 +69,17 @@ const KnowledgeContainer = (props) => {
   const knowledgeModalOpen = (e) => {
     e.stopPropagation();
     connectKnowledgeRef.current.openModal();
+  }
+
+  // 知识库弹窗打开
+  const knowledgeOpen = (e) => {
+    const latestConfig = store.getState().chatCommonStore.knowledgeConfig;
+    if (!latestConfig) {
+      // api key没有配置的场景
+      knowledgeModalOpen(e);
+    } else {
+      addKnowledgeBase(e)
+    }
   }
 
   // 更新groupId
@@ -134,7 +146,7 @@ const KnowledgeContainer = (props) => {
           <span>{config.description}</span>
           <img src={SettingImg} onClick={(e) => knowledgeModalOpen(e)} className={!readOnly ? '' : 'version-preview'}/>
         </div>
-        <img src={AddImg} style={{ width: 16, height: 16 }} alt="" onClick={addKnowledgeBase} className={!readOnly ? '' : 'version-preview'} />
+        <img src={AddImg} style={{ width: 16, height: 16 }} alt="" onClick={(e) => knowledgeOpen(e)}className={!readOnly ? '' : 'version-preview'} />
       </div>} forceRender key='knowledge' className="site-collapse-custom-panel">
         <Knowledge 
           knowledgeRef={knowledgeRef} 
