@@ -277,5 +277,6 @@ INSERT INTO "public"."store_definition" ("name", "schema", "definition_group_nam
 INSERT INTO "public"."store_definition_group" ("name", "summary", "description", "extensions") VALUES ('60100103-dd46-4e9a-bb9d-20582cef9c43', 'no summary', 'no desc', 'null') ON CONFLICT("name") DO NOTHING;
 
 INSERT INTO "public"."store_tag" ("tool_unique_name", "name") VALUES ('60100103-dd46-4e9a-bb9d-20582cef9c43', 'APP') ON CONFLICT("tool_unique_name", "name") DO NOTHING;
+INSERT INTO "public"."store_tag" ("tool_unique_name", "name") VALUES ('60100103-dd46-4e9a-bb9d-20582cef9c43', 'BUILTIN') ON CONFLICT("tool_unique_name", "name") DO NOTHING;
 
 INSERT INTO "public"."store_tool_group" ("name", "definition_group_name", "summary", "description", "extensions") VALUES ('60100103-dd46-4e9a-bb9d-20582cef9c43', '60100103-dd46-4e9a-bb9d-20582cef9c43', 'no summary', 'no desc', 'null') ON CONFLICT("name") DO NOTHING;
