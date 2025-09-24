@@ -27,6 +27,7 @@ const UserAuthButton: React.FC = () => {
       await logOut();
       localStorage.removeItem('__account_name__');
       localStorage.removeItem('currentUser');
+      window.location.href = '/';
     } catch (error) {
       console.error('登出失败:', error);
     } finally {
