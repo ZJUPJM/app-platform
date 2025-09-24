@@ -5,12 +5,18 @@
   .apps_header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     margin-bottom: 8px;
     .apps_title {
       font-size: 20px;
       color: #1a1a1a;
       line-height: 1.5;
       font-weight: normal;
+    }
+    .apps_header_right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
     >span {
       font-size: 18px;

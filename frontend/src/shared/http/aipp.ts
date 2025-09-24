@@ -226,3 +226,9 @@ export function getApiDocument() {
 export function resetApp(tenantId, appId, params, headers) {
   return post(`${AIPP_URL}/${tenantId}/app/${appId}/recover`, params, headers);
 }
+
+// 独立部署使用
+// 退出登录
+export function logOut() {
+  return post(`${AIPP_URL}/auth/logout`, {});
+}

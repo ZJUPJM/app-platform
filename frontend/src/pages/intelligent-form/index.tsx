@@ -8,6 +8,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { getCookie, setSpaClassName } from '@/shared/utils/common';
+import UserAuthButton from '@/components/userAuthButton';
 import OwnerForm from './components/owner-form';
 import './index.scss';
 
@@ -31,6 +32,9 @@ const IntelligentForm = () => {
       <div className='aui-title-1'>
         {t('intelligentForm')}
         { process.env.PACKAGE_MODE === 'spa' && <QuestionCircleOutlined onClick={onlineHelp} style={{ marginLeft: '8px', fontSize: '18px' }} />}
+      </div>
+      <div className='aui-header-right'>
+        <UserAuthButton />
       </div>
     </div>
     <div className='aui-block'>

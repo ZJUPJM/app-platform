@@ -1,0 +1,51 @@
+.user-auth-button {
+  display: block;
+  
+  .auth-btn {
+    height: 32px;
+    padding: 4px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid #2673e5;
+    background-color: #2673e5;
+    color: #ffffff;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background-color: #1e5bb8;
+      border-color: #1e5bb8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(38, 115, 229, 0.3);
+    }
+    
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(38, 115, 229, 0.2);
+    }
+    
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(38, 115, 229, 0.2);
+    }
+    
+    &.ant-btn-loading {
+      background-color: #2673e5;
+      border-color: #2673e5;
+    }
+    
+    &:disabled {
+      background-color: #f5f5f5;
+      border-color: #d9d9d9;
+      color: #bfbfbf;
+      cursor: not-allowed;
+      
+      &:hover {
+        background-color: #f5f5f5;
+        border-color: #d9d9d9;
+        transform: none;
+        box-shadow: none;
+      }
+    }
+  }
+}

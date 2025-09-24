@@ -7,6 +7,7 @@
 import React, { useEffect } from 'react';
 import CommonChat from '../chatPreview/chatComminPage';
 import InfoModal from './components/InfoModal';
+import UserAuthButton from '@/components/userAuthButton';
 import { getAppInfo } from '@/shared/http/aipp';
 import { useAppDispatch } from '@/store/hook';
 import { setHistorySwitch, setIsDebug } from '@/store/common/common';
@@ -43,6 +44,9 @@ const ChatRunning = () => {
   },[]);
   return (
     <div className='chat-engine-container'>
+      <div className='chat-engine-header'>
+        <UserAuthButton />
+      </div>
       <CommonChat />
       <InfoModal />
     </div>

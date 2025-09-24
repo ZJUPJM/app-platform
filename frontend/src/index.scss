@@ -13,6 +13,12 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
+  
+  .aui-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
 }
 
 .aui-block {

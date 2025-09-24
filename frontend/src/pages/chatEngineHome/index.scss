@@ -1,4 +1,10 @@
 .chat-engine-container {
+  .chat-engine-header {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+  }
   .chat-preview-inner {
     width: 100%;
   }
