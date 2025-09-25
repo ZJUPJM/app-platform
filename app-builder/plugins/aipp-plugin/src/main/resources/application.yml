@@ -52,6 +52,8 @@ app-engine:
   file:
     upload:
       maxStorageRatio: 0.9
+    nas:
+      accessBaseUrl: http://localhost:8080/v1/api/31f20efc7e0848deab6a6bc10fc3021e/file
   ttl:
     businessData: 15
     nonBusinessData: 1

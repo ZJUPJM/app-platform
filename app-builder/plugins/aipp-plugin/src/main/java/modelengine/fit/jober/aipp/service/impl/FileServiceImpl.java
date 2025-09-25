@@ -40,6 +40,7 @@ import modelengine.fit.http.protocol.HttpResponseStatus;
 import modelengine.fit.http.server.HttpClassicServerRequest;
 import modelengine.fit.http.server.HttpClassicServerResponse;
 import modelengine.fit.http.server.handler.CustomResourceHandler;
+import modelengine.fit.jober.entity.FileDeclaration;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.annotation.Value;
 import modelengine.fitframework.log.Logger;
@@ -219,6 +220,45 @@ public class FileServiceImpl implements FileService, CustomResourceHandler {
                 .fileName(fileName)
                 .filePath(targetFile.getCanonicalPath())
                 .fileType(getFileExtension(fileName))
+                .build();
+    }
+
+    @Override
+    public FileRspDto uploadFile(OperationContext context, String tenantId, String aippId,
+            FileDeclaration fileDeclaration) {
+        String uniqueFileName = generateUniqueFileName(fileDeclaration.getName());
+        log.info("Upload file. [fileName={}, uniqueFileName={}]", fileDeclaration.getName(), uniqueFileName);
+        File targetFile = Paths.get(NAS_SHARE_DIR, uniqueFileName).toFile();
+
+        String canonicalPath;
+        try {
+            canonicalPath = targetFile.getCanonicalPath();
+            org.apache.commons.io.FileUtils.writeByteArrayToFile(targetFile, fileDeclaration.getContent());
+            uploadedFileManageService.addFileRecord(aippId, context.getAccount(), canonicalPath,
+                    Entities.generateId());
+        } catch (IOException e) {
+            Path fileToDeletePath = Paths.get(targetFile.getPath());
+            if (Files.exists(fileToDeletePath)) {
+                try {
+                    Files.delete(fileToDeletePath);
+                } catch (IOException deleteEx) {
+                    log.error("Failed to delete file.", deleteEx);
+                }
+            }
+            log.error("Failed to write file. [fileName={}, uniqueFileName={}, errorMessage={}]",
+                    fileDeclaration.getName(),
+                    uniqueFileName,
+                    e.getMessage());
+            throw new AippException(AippErrCode.UPLOAD_FAILED);
+        }
+
+        log.info("Upload file successfully. [fileName={}, uniqueFileName={}]",
+                fileDeclaration.getName(),
+                uniqueFileName);
+        return FileRspDto.builder()
+                .fileName(fileDeclaration.getName())
+                .filePath(canonicalPath)
+                .fileType(getFileExtension(fileDeclaration.getName()))
                 .build();
     }
 

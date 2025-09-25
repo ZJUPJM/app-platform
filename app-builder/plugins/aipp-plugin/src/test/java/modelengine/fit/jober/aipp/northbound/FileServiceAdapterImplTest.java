@@ -46,7 +46,7 @@ public class FileServiceAdapterImplTest {
     private final PartitionedEntity partitionedEntity = mock(PartitionedEntity.class);
     private final AppVersionService appVersionService = mock(AppVersionService.class);
     private final FileServiceAdapter fileServiceAdapterImpl = new FileServiceAdapterImpl(fileService,
-            appVersionService);
+            appVersionService, "http://localhost:80/v1/path");
 
     private final FileEntity fileEntity = mock(FileEntity.class);
 
@@ -72,5 +72,15 @@ public class FileServiceAdapterImplTest {
         assertThat(result.getFileName()).isEqualTo(fileRspDto.getFileName());
         assertThat(result.getFilePath()).isEqualTo(fileRspDto.getFilePath());
         verify(fileService, times(1)).uploadFile(operationContext, tenantId, fileName, appSuiteId, fileEntity);
+    }
+
+    @Test
+    @DisplayName("测试上传文件。")
+    public void shouldOkWhenGetUrlGivenFileInfo() {
+        FileUploadInfo fileUploadInfo = new FileUploadInfo("name", "/var/1.png", "png");
+
+        String result = fileServiceAdapterImpl.getUrl(operationContext, fileUploadInfo);
+
+        assertThat(result).isEqualTo("http://localhost:80/v1/path?fileName=name&filePath=%2Fvar%2F1.png");
     }
 }

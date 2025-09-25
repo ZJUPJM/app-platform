@@ -9,6 +9,7 @@ package modelengine.fit.jober.aipp.genericable.adapter;
 import modelengine.fit.http.entity.PartitionedEntity;
 import modelengine.fit.jane.common.entity.OperationContext;
 import modelengine.fit.jober.aipp.dto.chat.FileUploadInfo;
+import modelengine.fit.jober.entity.FileDeclaration;
 
 import java.io.IOException;
 
@@ -34,4 +35,25 @@ public interface FileServiceAdapter {
      */
     FileUploadInfo uploadFile(OperationContext context, String tenantId, String fileName, String appId,
             PartitionedEntity receivedFile) throws IOException;
+
+    /**
+     * 上传文件。
+     *
+     * @param context 表示操作上下文的 {@link OperationContext}。
+     * @param tenantId 表示租户唯一标识符的 {@link String}。
+     * @param appId 表示应用唯一标识符的 {@link String}。
+     * @param fileDeclaration 表示文件数据的 {@link FileDeclaration}，
+     * @return 表示上传文件后的响应信息的 {@link FileUploadInfo}。
+     */
+    FileUploadInfo upload(OperationContext context, String tenantId, String appId,
+            FileDeclaration fileDeclaration);
+
+    /**
+     * 获取文件访问的地址。
+     *
+     * @param context 表示操作上下文的 {@link OperationContext}。
+     * @param fileInfo 表示文件信息的 {@link FileUploadInfo}。
+     * @return 表示文件访问地址的 {@link String}。
+     */
+    String getUrl(OperationContext context, FileUploadInfo fileInfo);
 }

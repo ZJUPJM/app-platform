@@ -16,6 +16,7 @@ import modelengine.fit.http.entity.FileEntity;
 import modelengine.fit.http.entity.PartitionedEntity;
 import modelengine.fit.http.server.HttpClassicServerRequest;
 import modelengine.fit.http.server.HttpClassicServerResponse;
+import modelengine.fit.jober.entity.FileDeclaration;
 
 import java.io.IOException;
 
@@ -60,6 +61,17 @@ public interface FileService {
      */
     FileRspDto uploadFile(OperationContext context, String tenantId, String fileName, String aippId,
             FileEntity receivedFile) throws IOException;
+
+    /**
+     * 上传文件。
+     *
+     * @param context 表示操作上下文的 {@link OperationContext}。
+     * @param tenantId 表示租户标识的 {@link String}。
+     * @param aippId 表示应用标识的 {@link String}。
+     * @param fileDeclaration 表示接收到的文件信息的 {@link FileDeclaration}。
+     * @return 表示上传文件结果的 {@link FileRspDto}。
+     */
+    FileRspDto uploadFile(OperationContext context, String tenantId, String aippId, FileDeclaration fileDeclaration);
 
     /**
      * 上传表单文件。
