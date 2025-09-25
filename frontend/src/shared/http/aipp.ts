@@ -229,6 +229,10 @@ export function resetApp(tenantId, appId, params, headers) {
 
 // 独立部署使用
 // 退出登录
-export function logOut() {
+export function oauthLogout() {
   return post(`${AIPP_URL}/auth/logout`, {});
+}
+
+export function oauthLogin() {
+  return post(`${AIPP_URL}/auth/login`, {});
 }

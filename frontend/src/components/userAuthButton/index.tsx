@@ -7,7 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { logOut } from '@/shared/http/aipp';
+import { oauthLogout, oauthLogin } from '@/shared/http/aipp';
 import './index.scss';
 
 /**
@@ -24,10 +24,10 @@ const UserAuthButton: React.FC = () => {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      await logOut();
+      await oauthLogout();
       localStorage.removeItem('__account_name__');
       localStorage.removeItem('currentUser');
-      window.location.href = '/';
+      await oauthLogin();
     } catch (error) {
       console.error('登出失败:', error);
     } finally {

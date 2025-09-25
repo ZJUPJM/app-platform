@@ -688,7 +688,7 @@
   "referenceLimit": "引用上限",
   "similarityThreshold": "最低相关度",
   "rerankParam": "结果重排",
-  "logout": "退出登录",
+  "logout": "重新登录",
   "login": "登录",
   "startAsk": "开始提问",
   "please": "请先",
