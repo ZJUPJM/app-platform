@@ -1,0 +1,13 @@
+fit:
+  beans:
+    packages:
+    - 'modelengine.fit.jade.oauth.controller'
+
+oauth:
+  client:
+    id: ${OAUTH_CLIENT_ID:app-platform}
+    secret: ${OAUTH_CLIENT_SECRET:app-platform-secret}
+    redirect-uri: ${OAUTH_REDIRECT_URI:http://oauth.client.local/v1/api/auth/callback}
+  token-endpoint: ${OAUTH_TOKEN_ENDPOINT:http://oauth.server.local/token}
+  auth-url: ${OAUTH_AUTH_URL:http://oauth.server.local/#/login?response_type=code&client_id=app-platform&redirect_uri=http://oauth.client.local/v1/api/auth/callback&scope=read}
+  home-url: ${OAUTH_HOME_URL:http://oauth.client.local/#/home}
