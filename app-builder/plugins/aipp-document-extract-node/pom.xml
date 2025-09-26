@@ -79,6 +79,11 @@
                 <groupId>org.fitframework</groupId>
                 <artifactId>fit-build-maven-plugin</artifactId>
                 <version>${fit.version}</version>
+                <configuration>
+                    <!--插件加载优先级(高1-7低)，默认4-->
+                    <category>user</category>
+                    <level>5</level>
+                </configuration>
                 <executions>
                     <execution>
                         <id>build-plugin</id>
