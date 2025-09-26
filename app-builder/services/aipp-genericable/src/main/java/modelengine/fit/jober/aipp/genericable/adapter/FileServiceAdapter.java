@@ -56,4 +56,13 @@ public interface FileServiceAdapter {
      * @return 表示文件访问地址的 {@link String}。
      */
     String getUrl(OperationContext context, FileUploadInfo fileInfo);
+
+    /**
+     * 读取文件内容。
+     *
+     * @param context 表示操作上下文的 {@link OperationContext}。
+     * @param filePath 表示文件路径的 {@link String}。
+     * @return 表示文件内容的 {@link String}。
+     */
+    byte[] readFile(OperationContext context, String filePath) throws IOException;
 }

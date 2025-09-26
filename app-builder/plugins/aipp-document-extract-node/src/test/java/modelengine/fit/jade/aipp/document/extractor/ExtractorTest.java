@@ -18,6 +18,7 @@ import modelengine.fel.core.chat.ChatModel;
 import modelengine.fel.core.chat.support.AiMessage;
 import modelengine.fel.tool.model.transfer.ToolData;
 import modelengine.fel.tool.service.ToolExecuteService;
+import modelengine.fit.jober.aipp.genericable.adapter.FileServiceAdapter;
 import modelengine.fitframework.flowable.Choir;
 import modelengine.fitframework.test.annotation.FitTestWithJunit;
 import modelengine.fitframework.test.annotation.Mock;
@@ -27,6 +28,7 @@ import modelengine.jade.voice.service.VoiceService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +55,9 @@ public class ExtractorTest {
     @Mock
     private ToolExecuteService toolExecuteService;
 
+    @Mock
+    private FileServiceAdapter fileService;
+
     @Test
     @DisplayName("测试音频提取成功")
     void shouldOkWhenExtractAudio() {
@@ -64,14 +69,15 @@ public class ExtractorTest {
 
     @Test
     @DisplayName("测试图片提取成功")
-    void shouldOkWhenExtractImage() {
+    void shouldOkWhenExtractImage() throws IOException {
         String mockResult = "Test Result";
         Choir<ChatMessage> mockChatMessage = Choir.just(new AiMessage(mockResult));
         when(this.chatModel.generate(any(), any())).thenReturn((mockChatMessage));
-        this.baseExtractor = new ImageExtractor(this.chatModel);
+        when(this.fileService.readFile(any(), any())).thenReturn(new byte[1]);
+        this.baseExtractor = new ImageExtractor(this.chatModel, "", "", "", this.fileService);
         Map<String, Object> mockMap = new HashMap<>();
         mockMap.put("prompt", "mockprompt");
-        assertThat(this.baseExtractor.extract("http://mockurl.png", mockMap)).isEqualTo(mockResult);
+        assertThat(this.baseExtractor.extract("/var/share/mockurl.png", mockMap)).isEqualTo(mockResult);
     }
 
     @Test

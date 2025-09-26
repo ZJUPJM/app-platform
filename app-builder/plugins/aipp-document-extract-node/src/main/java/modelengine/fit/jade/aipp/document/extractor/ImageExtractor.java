@@ -13,8 +13,15 @@ import modelengine.fel.core.chat.support.ChatMessages;
 import modelengine.fel.core.chat.support.HumanMessage;
 import modelengine.fit.jade.aipp.document.code.DocumentExtractRetCode;
 import modelengine.fit.jade.aipp.document.exception.DocumentExtractException;
+import modelengine.fit.jane.common.entity.OperationContext;
+import modelengine.fit.jober.aipp.common.exception.AippErrCode;
+import modelengine.fit.jober.aipp.common.exception.AippException;
+import modelengine.fit.jober.aipp.entity.FileExtensionEnum;
+import modelengine.fit.jober.aipp.genericable.adapter.FileServiceAdapter;
+import modelengine.fit.jober.aipp.service.OperatorService;
 import modelengine.fit.jober.aipp.service.OperatorService.FileType;
 import modelengine.fitframework.annotation.Component;
+import modelengine.fitframework.annotation.Value;
 import modelengine.fitframework.log.Logger;
 import modelengine.fitframework.resource.web.Media;
 import modelengine.fitframework.util.CollectionUtils;
@@ -22,9 +29,9 @@ import modelengine.fitframework.util.MapUtils;
 import modelengine.fitframework.util.ObjectUtils;
 import modelengine.fitframework.util.StringUtils;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +47,20 @@ public class ImageExtractor implements BaseExtractor {
     private static final Logger LOG = Logger.get(ImageExtractor.class);
 
     private final ChatModel chatModel;
+    private final String baseUrl;
+    private final String modelName;
+    private final String apiKey;
+    private final FileServiceAdapter fileService;
 
-    public ImageExtractor(ChatModel chatModel) {
+
+    public ImageExtractor(ChatModel chatModel, @Value("${model.imageExtractor.url}") String baselUrl,
+            @Value("${model.imageExtractor.model}") String modelName,
+            @Value("${model.imageExtractor.apiKey}") String apiKey, FileServiceAdapter fileService) {
         this.chatModel = chatModel;
+        this.baseUrl = baselUrl;
+        this.modelName = modelName;
+        this.apiKey = apiKey;
+        this.fileService = fileService;
     }
 
     /**
@@ -54,31 +72,45 @@ public class ImageExtractor implements BaseExtractor {
      */
     @Override
     public String extract(String fileUrl, Map<String, Object> context) {
+        LOG.info("Start to extract image. [file={}]", fileUrl);
         if (MapUtils.isEmpty(context) || !context.containsKey("prompt")) {
             LOG.error("There is no key of prompt when extract prompt, fileUrl:{0}", fileUrl);
             throw new DocumentExtractException(DocumentExtractRetCode.EMPTY_EXTRACT_PARAM, "prompt");
         }
-        try {
-            String prompt = ObjectUtils.cast(context.get("prompt"));
-            if (StringUtils.isEmpty(prompt)) {
-                prompt = "请描述一下图片。";
-            }
-            ChatMessages chatMessages =
-                    ChatMessages.from(Arrays.asList(new HumanMessage(prompt),
-                            new HumanMessage(StringUtils.EMPTY,
-                                    Collections.singletonList(new Media(new URL(fileUrl))))));
-            ChatOption option = ChatOption.custom().model("Qwen2-VL").stream(false).build();
-            List<ChatMessage> messages = chatModel.generate(chatMessages, option).blockAll();
-            if (CollectionUtils.isEmpty(messages)) {
-                LOG.error("chat model response is empty.");
-                return StringUtils.EMPTY;
-            }
-            String ans = messages.get(0).text();
-            LOG.info("question={} ans={}", ObjectUtils.<String>cast(chatMessages.messages().get(0).text()), ans);
-            return ans;
-        } catch (MalformedURLException e) {
-            throw new DocumentExtractException(DocumentExtractRetCode.WRONG_FILE_URL, fileUrl);
+        String prompt = ObjectUtils.cast(context.get("prompt"));
+        if (StringUtils.isEmpty(prompt)) {
+            prompt = "请描述一下图片。";
         }
+        FileType fileType = FileExtensionEnum.findType(fileUrl)
+                .orElseThrow(() -> new AippException(AippErrCode.INPUT_PARAM_IS_INVALID, "fileType"));
+        if (!OperatorService.FileType.IMAGE.equals(fileType)) {
+            throw new AippException(AippErrCode.INPUT_PARAM_IS_INVALID, "fileType");
+        }
+        String base64Content;
+        try {
+            base64Content =
+                    Base64.getEncoder().encodeToString(this.fileService.readFile(new OperationContext(), fileUrl));
+        } catch (IOException e) {
+            LOG.error("Failed to read file.", e);
+            throw new AippException(AippErrCode.EXTRACT_FILE_FAILED);
+        }
+        String mimeType = "image/" + FileExtensionEnum.getFileExtension(fileUrl);
+        ChatMessages chatMessages = ChatMessages.from(Arrays.asList(new HumanMessage(prompt),
+                new HumanMessage(StringUtils.EMPTY, Collections.singletonList(new Media(mimeType, base64Content)))));
+        ChatOption option = ChatOption.custom()
+                .baseUrl(this.baseUrl)
+                .model(this.modelName)
+                .apiKey(this.apiKey)
+                .stream(false)
+                .build();
+        List<ChatMessage> messages = chatModel.generate(chatMessages, option).blockAll();
+        if (CollectionUtils.isEmpty(messages)) {
+            LOG.error("Chat model response is empty.");
+            return StringUtils.EMPTY;
+        }
+        String ans = messages.get(0).text();
+        LOG.debug("question={} ans={}", ObjectUtils.<String>cast(chatMessages.messages().get(0).text()), ans);
+        return ans;
     }
 
     @Override

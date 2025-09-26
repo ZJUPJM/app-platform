@@ -363,6 +363,26 @@ public class FileServiceImpl implements FileService, CustomResourceHandler {
     }
 
     @Override
+    public byte[] readFile(String filePath, OperationContext context) throws IOException {
+        if (StringUtils.isBlank(filePath)) {
+            throw new IllegalArgumentException("File path is empty.");
+        }
+        String operator = context.getOperator();
+        if (!(filePath.startsWith(NAS_SHARE_DIR) || filePath.startsWith(Paths.get(NAS_SHARE_DIR)
+                .toAbsolutePath()
+                .toString())) || filePath.contains("..")) {
+            log.error("Invalid file path. [filePath={}]", filePath);
+            throw new AippException(AippErrCode.INVALID_FILE_PATH);
+        }
+        log.debug("Read file. [operator={}, filePath={}]", operator, filePath);
+        Path path = Paths.get(filePath);
+        if (!path.toFile().exists()) {
+            throw new AippException(context, AippErrCode.FILE_EXPIRED_OR_BROKEN);
+        }
+        return Files.readAllBytes(path);
+    }
+
+    @Override
     public FileEntity handle(String positionName, HttpClassicServerRequest request,
             HttpClassicServerResponse response) {
         String requestPath = request.path();

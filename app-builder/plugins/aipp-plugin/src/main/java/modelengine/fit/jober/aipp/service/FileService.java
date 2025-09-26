@@ -94,4 +94,13 @@ public interface FileService {
      * @throws IOException 文件读取异常。
      */
     FileEntity getSmartFormTemplate(HttpClassicServerRequest httpRequest, OperationContext context) throws IOException;
+
+    /**
+     * 读取文件内容。
+     *
+     * @param filePath 表示文件路径的 {@link String}。
+     * @param context 表示操作上下文的 {@link OperationContext}。
+     * @return 表示文件内容的 {@link String}。
+     */
+    byte[] readFile(String filePath, OperationContext context) throws IOException;
 }

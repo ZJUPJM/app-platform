@@ -2,3 +2,9 @@ fit:
   beans:
     packages:
       - 'modelengine.fit.jade.aipp.document'
+
+model:
+  imageExtractor:
+    model:
+    url:
+    apiKey:

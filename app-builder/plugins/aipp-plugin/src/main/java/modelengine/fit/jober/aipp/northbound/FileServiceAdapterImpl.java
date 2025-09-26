@@ -85,6 +85,11 @@ public class FileServiceAdapterImpl implements FileServiceAdapter {
                         .build());
     }
 
+    @Override
+    public byte[] readFile(OperationContext context, String filePath) throws IOException {
+        return this.fileService.readFile(filePath, context);
+    }
+
     private static String buildUrl(String baseUrl, Map<String, String> params) {
         StringBuilder urlBuilder = new StringBuilder(baseUrl);
         if (params != null && !params.isEmpty()) {
