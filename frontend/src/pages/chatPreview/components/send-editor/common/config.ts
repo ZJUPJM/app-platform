@@ -27,6 +27,7 @@ export enum FileType {
   PNG = 'png',
   JPG = 'jpg',
   JPEG = 'jpeg',
+  WAV = 'wav',
   CSV = 'csv'
 };
 
