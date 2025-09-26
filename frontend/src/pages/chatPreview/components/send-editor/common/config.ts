@@ -24,6 +24,9 @@ export enum FileType {
   MD = 'md',
   HTM = 'htm',
   HTML = 'html',
+  PNG = 'png',
+  JPG = 'jpg',
+  JPEG = 'jpeg',
   CSV = 'csv'
 };
 
