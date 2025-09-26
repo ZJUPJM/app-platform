@@ -55,6 +55,11 @@
     "uniqueName": ""
   },
   {
+    "type": "textToImageNodeState",
+    "name": "文生图",
+    "uniqueName": ""
+  },
+  {
     "type": "fileExtractionNodeState",
     "name": "文件提取",
     "uniqueName": ""

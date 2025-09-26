@@ -4,4 +4,8 @@ fit:
       - 'modelengine.jade.app.engine.image'
 model:
   imageGen:
-    model: FLUX.1-dev
+    model:
+    url:
+    apiKey:
+    imageSize: 768x1024
+    imageMimeType: image/png
