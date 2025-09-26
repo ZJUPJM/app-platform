@@ -20,13 +20,7 @@ import UploadFile from './upload-file';
 import StarApps from '../../star-apps';
 import ConversationConfiguration from './conversation-configuration';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
-import {
-  setAtChatId,
-  setChatId,
-  setChatList,
-  setChatRunning,
-  setOpenStar
-} from '@/store/chatStore/chatStore';
+import { setAtChatId, setChatId, setChatList, setChatRunning, setOpenStar, setShowChatHistory } from '@/store/chatStore/chatStore';
 import { setAtAppInfo, setAtAppId } from '@/store/appInfo/appInfo';
 import { getAppInfo } from '@/shared/http/aipp';
 import { setUseMemory } from '@/store/common/common';

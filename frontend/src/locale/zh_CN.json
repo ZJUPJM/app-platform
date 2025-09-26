@@ -123,6 +123,8 @@
   "lastWeek": "上周",
   "thisMonth": "本月",
   "lastMonth": "上月",
+  "previous": "上一页",
+  "next": "下一页",
   "totalRequestNum": "总请求数",
   "totalPV": "总活跃用户数",
   "averRspSpeed": "平均响应速度",
@@ -964,6 +966,9 @@
   "noMore": "已显示全部",
   "latest": "最新",
   "AIWorkflow": "AI工作流",
+  "newConversation": "新对话",
+  "explore": "探索",
+  "workbench": "工作台",
   "north": {
     "api": {
       "chat": {

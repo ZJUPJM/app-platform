@@ -779,6 +779,8 @@
   "lastWeek": "Last Week",
   "thisMonth": "This Month",
   "lastMonth": "Last Month",
+  "previous": "Previous",
+  "next": "Next",
   "totalRequestNum": "Total Requests",
   "totalPV": "Total Active Users",
   "averRspSpeed": "Average Response Speed",
@@ -963,6 +965,9 @@
   "noMore": "You've reached the end",
   "latest": "latest",
   "AIWorkflow": "AI Workflow",
+  "newConversation": "New Conversation",
+  "explore": "Explore",
+  "workbench": "Workbench",
   "north": {
     "api": {
       "chat": {

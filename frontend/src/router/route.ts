@@ -111,6 +111,7 @@ export const routeList: MenuItem[] = [
     icon: Icons.app({}),
     label: i18n.t('intelligentForm'),
     component: IntelligentForm,
+    hidden:true,
     children: [],
   },
   {
@@ -118,6 +119,7 @@ export const routeList: MenuItem[] = [
     icon: Icons.app({}),
     label: i18n.t('plugin'),
     component: Plugin,
+    hidden:true,
     children: [
       {
         key: '/plugin/detail/:pluginId',

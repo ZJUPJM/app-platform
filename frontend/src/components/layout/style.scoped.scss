@@ -60,7 +60,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    
+
     // 用户信息模块容器放在底部
     .layout-sider-user {
       margin-top: auto;
@@ -73,21 +73,21 @@
       flex-shrink: 0;
       min-height: 40px;
     }
-    
+
     // 展开态：为用户信息增加左侧内边距
     .layout-sider:not(.collapsed) & {
       .layout-sider-user {
         padding-left: 8px;
       }
     }
-    
+
     .layout-sider-user-name {
       font-size: 14px;
       font-weight: 400;
       color: #333;
       margin-left: 2px;
     }
-    
+
     // 折叠态：仅显示头像，不显示用户名
     .layout-sider.collapsed & {
       .layout-sider-user-name {
@@ -222,4 +222,8 @@
   .ant-menu-item:hover {
     background-color: #f5f5f5 !important;
   }
+}
+
+.menu {
+  background: transparent !important;
 }

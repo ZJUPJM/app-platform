@@ -48,7 +48,7 @@ const HistoryContext = createContext<{
 // 历史记录状态管理组件
 const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [listCurrentList, setListCurrentList] = useState<any[]>([]);
-  
+
   return (
     <HistoryContext.Provider value={{ setListCurrentList }}>
       {children}
@@ -203,10 +203,10 @@ const AppLayout: React.FC = () => {
             >
               <div className='layout-sider-header'>
                 <div className='layout-sider-content'>
-                  <img 
+                  <img
                     style={{width: '44px', height: '44px', objectFit: 'contain', cursor: 'pointer'}}
-                    src={AidoIcon} 
-                    alt="Aido Icon" 
+                    src={AidoIcon}
+                    alt="Aido Icon"
                     className={`project-icon ${isCollapsed ? 'collapsed' : ''}`}
                     onClick={() => {
                       if (isCollapsed) {
