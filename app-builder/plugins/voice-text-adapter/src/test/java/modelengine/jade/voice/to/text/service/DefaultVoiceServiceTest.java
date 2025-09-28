@@ -7,11 +7,15 @@
 package modelengine.jade.voice.to.text.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import modelengine.fel.service.pipeline.HuggingFacePipelineService;
+import modelengine.fit.jober.aipp.common.exception.AippException;
+import modelengine.fit.jober.aipp.genericable.adapter.FileServiceAdapter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,27 +34,23 @@ public class DefaultVoiceServiceTest {
     @Mock
     private HuggingFacePipelineService mockPipelineService;
 
+    @Mock
+    private FileServiceAdapter fileService;
+
     private DefaultVoiceService defaultVoiceServiceUnderTest;
 
     @Before
     public void setUp() {
-        defaultVoiceServiceUnderTest = new DefaultVoiceService(mockPipelineService);
+        this.defaultVoiceServiceUnderTest =
+                new DefaultVoiceService(mockPipelineService, "", "", "", 1, 1, 1, this.fileService);
     }
 
-    /**
-     * 测试语音转文字
-     */
     @Test
-    public void testGetText() {
-        // Setup
-        when(mockPipelineService.call(eq("automatic-speech-recognition"), eq("openai/whisper-large-v3"),
-                anyMap())).thenReturn("mockedResult!");
+    public void shouldErrorWhenGetTextGivenIllegalPath() {
+        String path = "wrong/1.wav";
+        when(this.fileService.isAllowedPath(eq(path), any())).thenReturn(false);
 
-        // Run the test
-        final String result = defaultVoiceServiceUnderTest.getText("voicePath" + "fileName");
-
-        // Verify the results
-        assertEquals("Result", result);
+        assertThrows(AippException.class, () -> this.defaultVoiceServiceUnderTest.getText(path));
     }
 
     /**
