@@ -90,6 +90,11 @@ public class FileServiceAdapterImpl implements FileServiceAdapter {
         return this.fileService.readFile(filePath, context);
     }
 
+    @Override
+    public boolean isAllowedPath(String filePath, OperationContext context) {
+        return this.fileService.isAllowedPath(filePath, context);
+    }
+
     private static String buildUrl(String baseUrl, Map<String, String> params) {
         StringBuilder urlBuilder = new StringBuilder(baseUrl);
         if (params != null && !params.isEmpty()) {

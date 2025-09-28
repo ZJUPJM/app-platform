@@ -103,4 +103,13 @@ public interface FileService {
      * @return 表示文件内容的 {@link String}。
      */
     byte[] readFile(String filePath, OperationContext context) throws IOException;
+
+    /**
+     * 校验文件路径是否被允许使用。
+     *
+     * @param filePath 表示文件路径的 {@link String}。
+     * @param context 表示操作上下文的 {@link OperationContext}。
+     * @return 表示是否允许使用的 {@code boolean}。
+     */
+    boolean isAllowedPath(String filePath, OperationContext context);
 }

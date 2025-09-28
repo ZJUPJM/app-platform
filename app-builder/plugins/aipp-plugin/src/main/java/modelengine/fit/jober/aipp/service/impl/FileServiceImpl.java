@@ -368,9 +368,7 @@ public class FileServiceImpl implements FileService, CustomResourceHandler {
             throw new IllegalArgumentException("File path is empty.");
         }
         String operator = context.getOperator();
-        if (!(filePath.startsWith(NAS_SHARE_DIR) || filePath.startsWith(Paths.get(NAS_SHARE_DIR)
-                .toAbsolutePath()
-                .toString())) || filePath.contains("..")) {
+        if (!this.isAllowedPath(filePath, context)) {
             log.error("Invalid file path. [filePath={}]", filePath);
             throw new AippException(AippErrCode.INVALID_FILE_PATH);
         }
@@ -380,6 +378,13 @@ public class FileServiceImpl implements FileService, CustomResourceHandler {
             throw new AippException(context, AippErrCode.FILE_EXPIRED_OR_BROKEN);
         }
         return Files.readAllBytes(path);
+    }
+
+    @Override
+    public boolean isAllowedPath(String filePath, OperationContext context) {
+        return (filePath.startsWith(NAS_SHARE_DIR) || filePath.startsWith(Paths.get(NAS_SHARE_DIR)
+                .toAbsolutePath()
+                .toString())) && !filePath.contains("..");
     }
 
     @Override
