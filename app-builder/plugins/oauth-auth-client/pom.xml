@@ -13,6 +13,7 @@
     <artifactId>oauth-auth-client</artifactId>
 
     <dependencies>
+        <!-- FIT core -->
         <dependency>
             <groupId>org.fitframework</groupId>
             <artifactId>fit-api</artifactId>
@@ -22,14 +23,15 @@
             <artifactId>fit-http-classic</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.fitframework.service</groupId>
+            <artifactId>fit-http-protocol</artifactId>
+        </dependency>
+
+        <!-- OAuth2 -->
+        <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>oauth2-oidc-sdk</artifactId>
             <version>11.28</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>modelengine.fit.jade.service</groupId>
-            <artifactId>authentication-service</artifactId>
         </dependency>
 
         <!-- Test -->
@@ -40,12 +42,8 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
