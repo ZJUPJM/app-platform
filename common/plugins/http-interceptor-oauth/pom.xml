@@ -12,15 +12,17 @@
     <artifactId>http-interceptor-oauth</artifactId>
 
     <dependencies>
-        <!-- Service -->
+        <!-- FIT core -->
         <dependency>
-            <groupId>org.fitframework.service</groupId>
-            <artifactId>fit-http-protocol</artifactId>
+            <groupId>org.fitframework</groupId>
+            <artifactId>fit-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.fitframework.service</groupId>
             <artifactId>fit-http-classic</artifactId>
         </dependency>
+
+        <!-- Services -->
         <dependency>
             <groupId>modelengine.fit.jade.service</groupId>
             <artifactId>authentication-service</artifactId>
@@ -29,13 +31,25 @@
         <!-- Third-party -->
         <dependency>
             <groupId>com.nimbusds</groupId>
-            <artifactId>oauth2-oidc-sdk</artifactId>
-            <version>11.28</version>
-        </dependency>
-        <dependency>
-            <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
             <version>10.5</version>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

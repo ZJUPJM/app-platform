@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * 全局 HTTP 过滤器，用于验证请求中的 JWT，并根据结果执行后续请求或返回 401。
  * 支持 JWK 缓存、自动刷新、验证失败回退及旧密钥清理。
  *
- * @author Maiicy
+ * @author 徐吴昊
  * @since 2025-09-22
  */
 @Component
@@ -137,7 +137,7 @@ public class OAuthJwtFilter implements HttpServerFilter {
      * @param jwtString 待验证的 JWT 字符串
      * @return 验证成功返回 token 的 subject（用户名），否则返回 null
      */
-    private String parseTokenSubject(String jwtString) {
+    String parseTokenSubject(String jwtString) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(jwtString);
             Date exp = signedJWT.getJWTClaimsSet().getExpirationTime();
@@ -170,7 +170,7 @@ public class OAuthJwtFilter implements HttpServerFilter {
     /**
      * 用本地缓存的 JWK 验证 JWT。
      */
-    private boolean verifyWithCachedJwks(SignedJWT signedJWT, String kid) throws JOSEException {
+    boolean verifyWithCachedJwks(SignedJWT signedJWT, String kid) throws JOSEException {
         long now = System.currentTimeMillis();
         List<CachedJwk> activeKeys = cachedJwks.stream()
                 .filter(c -> now - c.loadTime <= JWKS_KEY_MAX_AGE)
@@ -217,7 +217,7 @@ public class OAuthJwtFilter implements HttpServerFilter {
      *
      * @param response 当前 HTTP 响应对象
      */
-    private void sendUnAuthResponse(HttpClassicServerResponse response) {
+    void sendUnAuthResponse(HttpClassicServerResponse response) {
         response.statusCode(401);
         response.headers().add("fit-redirect-to-prefix", authUrl + "&useless=");
         response.send();
