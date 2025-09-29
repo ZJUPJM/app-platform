@@ -31,7 +31,7 @@ const CommonChat = (props: any) => {
   const isPreview = useMemo(() => !!uid, [uid]);
 
   const searchParams = useSearchParams();
-  const [plugin, setPlugin] = useState();
+  const [plugin, setPlugin] = useState<any>();
 
   useEffect(() => {
     const found = pluginList.find((item: any) => item.name === pluginName);
@@ -39,7 +39,7 @@ const CommonChat = (props: any) => {
   }, [pluginList, pluginName]);
 
   const iframeUrl = useMemo(() => {
-    let url = plugin?.url;
+    let url = plugin?.url || '';
     const hasSearch = url?.includes('?');
     const search = qs.stringify(searchParams);
     if (search) {
@@ -78,14 +78,28 @@ const CommonChat = (props: any) => {
   };
 
   useEffect(() => {
-    const handler = (e: { data: string }) => {
-      const data = JSON.parse(e.data);
-      if (data.type === 'ready') {
-        handleReady();
-      } else if (data.type === 'back') {
-        handleBack();
-      } else if (data.type === 'navigate') {
-        handleNavigate(data);
+    const handler = (e: { data: string | object }) => {
+      try {
+        // 检查数据是否为字符串，如果是对象则直接使用
+        let data;
+        if (typeof e.data === 'string') {
+          data = JSON.parse(e.data);
+        } else if (typeof e.data === 'object' && e.data !== null) {
+          data = e.data;
+        } else {
+          console.warn('Invalid message data received:', e.data);
+          return;
+        }
+        
+        if (data.type === 'ready') {
+          handleReady();
+        } else if (data.type === 'back') {
+          handleBack();
+        } else if (data.type === 'navigate') {
+          handleNavigate(data);
+        }
+      } catch (error) {
+        console.error('Error parsing message data:', error, 'Data:', e.data);
       }
     };
     window.addEventListener('message', handler);
@@ -94,13 +108,20 @@ const CommonChat = (props: any) => {
 
   // 给iframe的对话界面传递参数
   const sendMessageToIframe = () => {
+    // 确保appInfo已加载且有必要的属性
+    if (!appInfo || !appInfo.id) {
+      console.warn('AppInfo not loaded yet, skipping iframe message');
+      return;
+    }
+    
+    const memoryConfig = findConfigValue(appInfo, 'memory');
     let params = {
       tenantId: TENANT_ID,
       appId: appInfo.id,
-      useMemory: findConfigValue(appInfo, 'memory').memorySwitch,
+      useMemory: memoryConfig?.memorySwitch || false,
       isDebug
     }
-    iframeRef.current?.contentWindow.postMessage({...params}, '*');
+    iframeRef.current?.contentWindow?.postMessage(JSON.stringify(params), '*');
   }
 
   useEffect(() => {
@@ -108,6 +129,17 @@ const CommonChat = (props: any) => {
       dispatch(setAppInfo({}));
     };
   }, []);
+
+  // 当appInfo加载完成且iframe已准备好时，发送消息
+  useEffect(() => {
+    if (appInfo && appInfo.id && iframeRef.current) {
+      // 延迟一点时间确保iframe完全加载
+      const timer = setTimeout(() => {
+        sendMessageToIframe();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [appInfo]);
 
   return (
     (plugin && !showElsa)
