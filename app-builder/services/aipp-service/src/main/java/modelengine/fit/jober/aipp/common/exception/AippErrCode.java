@@ -762,6 +762,11 @@ public enum AippErrCode implements ErrorCode, RetCode {
     GENERATE_CONTENT_FAILED(90002140, "大模型生成{0}失败，请尝试更换默认模型，失败原因：{1}。"),
 
     /**
+     * 应用模板不存在。
+     */
+    TEMPLATE_NOT_FOUND(90003000, "应用模板不存在"),
+
+    /**
      * 错误码截止值
      */
     ERROR_CODE_BUTT(99999999, "Error code butt.");
