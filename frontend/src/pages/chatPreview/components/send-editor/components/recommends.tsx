@@ -69,11 +69,11 @@ const Recommends = (props) => {
     recommendList.length > 0 && setLoading(true);
     try {
       const res:any = await getRecommends(params);
-      if (res.code === 0 && res.data.length > 0) {
+      if (res.code === 0 && res.data && res.data.length > 0) {
         let list = shuffle(res.data);
         curRecommendList.current = list;
         setRecommendList(list);
-      } else if (res.data.length === 0 && recommendList.length > 0) {
+      } else if (res.data && res.data.length === 0 && recommendList.length > 0) {
         let list = shuffle(recommendList);
         curRecommendList.current = list;
         setRecommendList(list);
@@ -84,6 +84,9 @@ const Recommends = (props) => {
   }
   // 数组打乱排序
   const shuffle = (arr) => {
+    if (!arr || !Array.isArray(arr)) {
+      return [];
+    }
     return arr.sort(() => Math.random() - 0.5);
   }
   // 打开收起灵感大全

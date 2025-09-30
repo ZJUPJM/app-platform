@@ -103,7 +103,7 @@
   "newChat": "新聊天",
   "clearCurrentChat": "确认清空当前聊天",
   "clearCurrentChatContent": "清空后当前窗口聊天内容将不会被系统保存。",
-  "historyChat": "历史聊天",
+  "historyChat": "聊天",
   "continueChat": "继续聊天",
   "clearHistoryChatContent": "确认要清空所有聊天记录？清空后该数据无法恢复。",
   "zeroCostTime": "0小时0分钟0秒",

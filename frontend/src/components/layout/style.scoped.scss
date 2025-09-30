@@ -1,5 +1,7 @@
 .layout-sider {
   z-index: 1;
+  background: #f0f4f9 !important;
+  padding: 0 10px !important; // 左右内边距10px
 
   &-header {
     display: flex;
@@ -30,5 +32,60 @@
     left: 16px;
     top: 16px;
     cursor: pointer;
+  }
+
+  &-history {
+    margin-top: 16px;
+    padding-top: 16px;
+    height: calc(100vh - 200px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.menu {
+  background: transparent !important;
+
+  .ant-menu-item {
+    display: flex;
+    align-items: center;
+    height: 36px !important;
+    line-height: 36px !important;
+    margin: 4px 0 !important;
+    border-radius: 8px !important;
+    padding: 0 16px !important;
+    color: #666666 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+
+    .anticon {
+      margin-right: 10px;
+    }
+  }
+
+  // 选中状态样式
+  .ant-menu-item-selected {
+    background-color: #dee4ec !important;
+    color: #000000 !important; // 明确设置为黑色
+    border: none !important; // 去除所有边框
+    border-right: none !important; // 确保右边没有边框
+
+    // 确保所有子元素都是黑色
+    .ant-menu-title-content,
+    .anticon {
+      color: #000000 !important;
+    }
+
+    // 去除可能的伪元素边框
+    &::after {
+      display: none !important;
+    }
+  }
+
+  // 悬停状态样式
+  .ant-menu-item:hover {
+    background-color: #f5f5f5 !important;
   }
 }

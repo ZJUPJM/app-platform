@@ -9,7 +9,7 @@ import ReactDOM, { createRoot } from 'react-dom/client';
 import singleSpaReact from 'single-spa-react';
 import App from './app';
 
-const render = (Component) => {
+const render = (Component: React.ComponentType) => {
     const container = document.getElementById('mfe-content-right');
     const root = createRoot(container);
     return root.render(
@@ -43,12 +43,12 @@ const reactLifecycles = singleSpaReact({
     },
 });
 export const bootstrap = async (props) => {
-    Promise.resolve(reactLifecycles.bootstrap(props));
-}
+    return Promise.resolve(reactLifecycles.bootstrap(props));
+};
 export const mount = async (props) => {
-    Promise.resolve(reactLifecycles.mount(props))
+    return Promise.resolve(reactLifecycles.mount(props));
 };
 
 export const unmount = async (props) => {
-    Promise.resolve(reactLifecycles.unmount(props))
+    return Promise.resolve(reactLifecycles.unmount(props));
 };

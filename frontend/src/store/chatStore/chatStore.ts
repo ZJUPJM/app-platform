@@ -14,7 +14,8 @@ import {
   SET_NO_AUTH,
   SET_USER_ROLE,
   SET_PLUGIN_LIST,
-  SET_KNOWLEDGE_CONFIG
+  SET_KNOWLEDGE_CONFIG,
+  SET_SHOW_CHAT_HISTORY
 } from './action-types';
 
 export const setChatId = (item) => {
@@ -64,4 +65,7 @@ export const setPluginList = (item) => {
 }
 export const setKnowledgeConfig = (item) => {
   return { type: SET_KNOWLEDGE_CONFIG, payload: item }
+}
+export const setShowChatHistory = (item) => {
+  return { type: SET_SHOW_CHAT_HISTORY, payload: item }
 }

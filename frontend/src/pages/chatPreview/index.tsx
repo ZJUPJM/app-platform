@@ -53,6 +53,7 @@ import SendEditor from './components/send-editor/send-editor';
 import CheckGroup from './components/check-group';
 import Inspiration from './components/inspiration';
 import PreviewPicture from './components/receive-box/preview-picture';
+import { HistoryContext } from '@/components/layout';
 import './styles/chat-preview.scss';
 
 /**
@@ -66,6 +67,8 @@ import './styles/chat-preview.scss';
 const ChatPreview = (props) => {
   const { t } = useTranslation();
   const { previewBack } = props;
+  const historyContext = useContext(HistoryContext);
+  const { setListCurrentList } = historyContext || {};
   const dispatch = useAppDispatch();
   const appInfo = useAppSelector((state) => state.appStore.appInfo);
   const tenantId = useAppSelector((state) => state.appStore.tenantId);
@@ -83,7 +86,8 @@ const ChatPreview = (props) => {
   const showMulti = useAppSelector((state) => state.commonStore.historySwitch);
   const useMemory = useAppSelector((state) => state.commonStore.useMemory);
   const isDebug = useAppSelector((state) => state.commonStore.isDebug);
-  const { showElsa } = useContext(AippContext);
+  const aippContext = useContext(AippContext);
+  const { showElsa } = aippContext || {};
   const [checkedList, setCheckedList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showStop, setShowStop] = useState(false);
@@ -647,10 +651,8 @@ const ChatPreview = (props) => {
       setEditorShow(false);
     }
   }
-  // 继续会话回填chatlist
-  const setListCurrentList = (list) => {
-    listRef.current = deepClone(list);
-  }
+  // 继续会话回填chatlist - 使用从 HistoryContext 获取的 setListCurrentList
+  // setListCurrentList 函数已在第70行从 HistoryContext 中解构获取
   // 关闭链接
   const closeConnected = () => {
     chatRender.current = false;
@@ -725,7 +727,6 @@ const ChatPreview = (props) => {
               stopLoading={stopLoading}
               setEditorShow={setEditorShow}
               inspirationOpen={inspirationOpen}
-              setListCurrentList={setListCurrentList}
               checkMutipleInput={checkMutipleInput}
               updateUserContext={(val) => setUserContext(val)}
               setChatFileList={handleUpdateFileList}

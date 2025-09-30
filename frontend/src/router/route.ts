@@ -36,7 +36,7 @@ export const routeList: MenuItem[] = [
   {
     key: '/home',
     icon: Icons.home({}),
-    label: i18n.t('homepage'),
+    label: i18n.t('newConversation'), // 新对话
     component: ChatHome
   },
   {
@@ -48,8 +48,8 @@ export const routeList: MenuItem[] = [
   },
   {
     key: '/app',
-    icon: Icons.app({}),
-    label: i18n.t('applicationMarket'),
+    icon: Icons.explore({}),
+    label: i18n.t('explore'), // 探索
     component: Apps,
     children: [
       {
@@ -64,7 +64,7 @@ export const routeList: MenuItem[] = [
   {
     key: '/app-develop',
     icon: Icons.app({}),
-    label: i18n.t('appDevelopment'),
+    label: i18n.t('workbench'), // 工作台
     component: AppDev,
     children: [
       {

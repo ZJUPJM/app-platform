@@ -5,40 +5,39 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Drawer, Dropdown, Tooltip, Modal, Spin, Empty } from 'antd';
+import { Dropdown, Tooltip, Modal, Spin, Empty } from 'antd';
 import type { MenuProps } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import {
   EllipsisOutlined,
-  ClearOutlined,
-  CloseOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons';
 import { clearChatHistory, getChatList, queryFeedback } from '@/shared/http/chat';
-import { getChatRecentLog } from '@/shared/http/aipp';
+import { getChatRecentLog, getAppInfo } from '@/shared/http/aipp';
 import { formatLocalDate } from '@/common/dataUtil';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { isChatRunning } from '@/shared/utils/chat';
-import { setChatList, setChatRunning, setChatId, setOpenStar } from '@/store/chatStore/chatStore';
+import { setChatList, setChatRunning, setChatId, setOpenStar, setAtChatId } from '@/store/chatStore/chatStore';
+import { setAtAppInfo, setAtAppId } from '@/store/appInfo/appInfo';
 import { updateChatId } from "@/shared/utils/common";
-import { historyChatProcess } from '../../utils/chat-process';
+import { historyChatProcess } from '@/pages/chatPreview/utils/chat-process';
 import { useTranslation } from 'react-i18next';
 import * as dayjs from 'dayjs'
 import { Message } from '@/shared/utils/message';
-import './style.scoped.scss';
+import './history-sidebar.scss';
 
 /**
- * 应用聊天历史记录列表
+ * 历史记录侧边栏组件
  *
  * @return {JSX.Element}
- * @param openHistorySignal 打开抽屉
+ * @param setListCurrentList 设置当前会话列表
  * @constructor
  */
-interface HistoryChatProps {
-  openHistorySignal: number;
+interface HistorySidebarProps {
   setListCurrentList: any;
 }
 
-const HistoryChatDrawer: React.FC<HistoryChatProps> = ({ openHistorySignal, setListCurrentList }) => {
+const HistorySidebar: React.FC<HistorySidebarProps> = ({ setListCurrentList }) => {
   const { t } = useTranslation();
   const currentChat = useRef<any>(null);
   const dispatch = useAppDispatch();
@@ -49,10 +48,10 @@ const HistoryChatDrawer: React.FC<HistoryChatProps> = ({ openHistorySignal, setL
   const chatId = useAppSelector((state) => state.chatCommonStore.chatId);
   const openStar = useAppSelector((state) => state.chatCommonStore.openStar);
   const inspirationOpen = useAppSelector((state) => state.chatCommonStore.inspirationOpen);
-  const [open, setOpen] = useState(false);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isClearOpen, setClearOpen] = useState(false);
+  const [isDeleteOpen, setDeleteOpen] = useState(false);
+  const [deleteChatId, setDeleteChatId] = useState<string | null>(null);
 
   const refreshList = async () => {
     try {
@@ -66,9 +65,9 @@ const HistoryChatDrawer: React.FC<HistoryChatProps> = ({ openHistorySignal, setL
       };
       const chatRes:any = await getChatList(tenantId, requestBody);
       let timeTag = [false, false, false];
-      chatRes?.data?.results.forEach((item, idx) => {
-        const uTime = dayjs(new Date(item?.update_time_timestamp));
-        const cTime = dayjs(new Date(item?.current_time_timestamp));
+      chatRes?.data?.results.forEach((item: any, idx: number) => {
+        const uTime = dayjs.default(new Date(item?.update_time_timestamp));
+        const cTime = dayjs.default(new Date(item?.current_time_timestamp));
         if (!timeTag[0] && uTime.isSame(cTime, 'day')) {
           timeTag[0] = true;
           item.categoryTag = 'today';
@@ -85,12 +84,13 @@ const HistoryChatDrawer: React.FC<HistoryChatProps> = ({ openHistorySignal, setL
       setLoading(false);
     }
   }
+
   // 删除单个对话
-  const deleteAllChat = async () => {
+  const deleteSingleChat = async (chatIdToDelete: string) => {
     let params = {
-      'chat_id': currentChat.current?.chat_id
+      'chat_id': chatIdToDelete
     }
-    if (isChatRunning() && (chatId === currentChat.current?.chat_id)) {
+    if (isChatRunning() && (chatId === chatIdToDelete)) {
       Message({ type: 'warning', content: t('tryLater') });
       return;
     }
@@ -99,33 +99,38 @@ const HistoryChatDrawer: React.FC<HistoryChatProps> = ({ openHistorySignal, setL
       await clearChatHistory(tenantId, appId, params);
       let storageParams:any =  { 
         deleteAppId: appId, 
-        deleteChatId: currentChat?.current?.chat_id,
+        deleteChatId: chatIdToDelete,
         type: 'deleteChat',
       }
-      if (chatId === currentChat?.current?.chat_id) {
+      if (chatId === chatIdToDelete) {
         dispatch(setChatId(null));
         dispatch(setChatList([]));
         storageParams.refreshChat = true;
       }
       localStorage.setItem('storageMessage', JSON.stringify(storageParams));
-      if (data.length === 1 && page > 1) {
-        setPage(page - 1);
-      } else {
-        refreshList();
-      }
+      refreshList();
     } catch {
       setLoading(false);
     }
   }
-  const items: MenuProps['items'] = [
-    {
-      key: '1',
-      label: <div onClick={deleteAllChat}>{t('delete')}</div>,
-    },
-  ];
+  // 处理删除按钮点击
+  const handleDeleteClick = (e: React.MouseEvent, chatIdToDelete: string) => {
+    e.stopPropagation(); // 阻止事件冒泡，避免触发对话选择
+    setDeleteChatId(chatIdToDelete);
+    setDeleteOpen(true);
+  };
+
+  // 确认删除
+  const confirmDelete = async () => {
+    if (deleteChatId) {
+      await deleteSingleChat(deleteChatId);
+      setDeleteOpen(false);
+      setDeleteChatId(null);
+    }
+  };
 
   // 继续聊天
-  const continueChat = async (chat_id, dimensionId = '') => {
+  const continueChat = async (chat_id: string, dimensionId = '') => {
     if (isChatRunning()) {
       Message({ type: 'warning', content: t('tryLater') })
       return;
@@ -138,7 +143,7 @@ const HistoryChatDrawer: React.FC<HistoryChatProps> = ({ openHistorySignal, setL
       let chatItem = historyChatProcess(chatListRes);
       let chatArr = await Promise.all(chatItem.map(async (item) => {
         if (item.type === 'receive' && item?.instanceId) {
-          const res = await queryFeedback(item.instanceId);
+          const res: any = await queryFeedback(item.instanceId);
           item.feedbackStatus = res?.usrFeedback ?? -1
         }
         return item;
@@ -146,112 +151,75 @@ const HistoryChatDrawer: React.FC<HistoryChatProps> = ({ openHistorySignal, setL
       setListCurrentList(chatArr);
       await dispatch(setChatList(chatArr));
       dispatch(setChatId(chat_id));
-      setOpen(false);
       updateChatId(chat_id, appId);
     } finally {
       setLoading(false);
     }
   }
-  const onClearList = async () => {
-    if (isChatRunning()) {
-      Message({ type: 'warning', content: t('tryLater') })
-      return;
-    }
-    setClearOpen(false);
-    let storageParams = {
-      deleteAppId: appId,
-      refreshChat: true,
-      key: uuidv4(),
-      type: 'deleteChat'
-    }
-    setLoading(true);
-    try {
-      await clearChatHistory(tenantId, appId);
-      refreshList();
-      dispatch(setChatList([]));
-      dispatch(setChatId(null));
-      localStorage.setItem('storageMessage', JSON.stringify(storageParams));
-      updateChatId(null, appId)
-      setOpen(false);
-    } catch {
-      setLoading(false);
-    }
-  }
   const removeTagContent = (content: string) => {
     if (!content) return '';
-    return content.replace(/^[\s\S]*?<\/think>/s, '');
+    return content.replace(/^[\s\S]*?<\/think>/, '');
   }
 
-  useEffect(() => {
-    if (openHistorySignal > 0 && !open) {
-      setOpen(true);
-      dispatch(setOpenStar(false));
-      refreshList();
-    }
-  }, [openHistorySignal]);
 
   useEffect(() => {
-    if (openStar === true) {
-      setOpen(false);
+    if (appId && aippId) {
+      refreshList();
     }
-  }, [openStar]);
-  useEffect(() => {
-    if (inspirationOpen && open) {
-      setOpen(false);
-    }
-  }, [inspirationOpen])
-  useEffect(() => {
-    open && refreshList();
-  }, [open]);
+  }, [appId, aippId]);
+
   return (
-    <Drawer
-      destroyOnClose
-      mask={false}
-      title={
-        <div className='history-title'>
-          <div className='history-title-left'>
-            <span>{t('historyChat')}</span>
-            <div className='history-clear-btn' onClick={() => setClearOpen(true)}>
-              <ClearOutlined style={{ fontSize: 14, marginLeft: 8 }} />
-              <span className='history-clear-btn-text' >{t('clear')}</span>
-            </div>
+    <div className="history-sidebar">
+      <div className="history-sidebar-header">
+        <div className="history-sidebar-title">
+          <span>{t('historyChat')}</span>
+        </div>
+      </div>
+      
+      <div className="history-sidebar-content">
+        <Spin spinning={loading}>
+          {data.length > 0 && <div className='history-wrapper'>
+            {data?.map((item:any) => (
+              <div 
+                className={`history-item ${chatId === item?.chat_id ? 'active' : ''}`} 
+                key={item?.chat_id} 
+                onClick={() => { 
+                  currentChat.current = item; 
+                  continueChat(item?.chat_id);
+                }}
+              >
+                <div className='history-item-title'>{item?.chat_name}</div>
+                <div 
+                  className="history-item-delete"
+                  onClick={(e) => handleDeleteClick(e, item?.chat_id)}
+                >
+                  <DeleteOutlined />
+                </div>
+              </div>
+            ))}
           </div>
-          <CloseOutlined
-            style={{ fontSize: 20 }}
-            onClick={() => setOpen(false)}
-          />
-        </div>
-      }
-      onClose={() => setOpen(false)}
-      open={open}
-      closeIcon={false}
-      width='460px'
-      bodyStyle={{ padding: 0 }}
-    >
-      <Spin spinning={loading}>
-        {data.length > 0 && <div className='history-wrapper'>
-          {data?.map((item:any) => (
-            <div className='history-item' key={item?.chat_id} onClick={() => { currentChat.current = item; }}>
-              <div className='history-item-title'>{item?.chat_name}</div>
-            </div>
-          ))}
-        </div>
-        }
-        {data.length === 0 && <div
-          className='history-wrapper flex-box'>
-          <Empty description={t('noData')} />
-        </div>}
-      </Spin>
+          }
+          {data.length === 0 && <div
+            className='history-wrapper flex-box'>
+            <Empty description={t('noData')} />
+          </div>}
+        </Spin>
+      </div>
+      
+      
       <Modal
         title={t('alert')}
-        open={isClearOpen}
-        onOk={onClearList}
-        onCancel={() => setClearOpen(false)}
+        open={isDeleteOpen}
+        onOk={confirmDelete}
+        onCancel={() => {
+          setDeleteOpen(false);
+          setDeleteChatId(null);
+        }}
       >
-        <p>{t('clearHistoryChatContent')}</p>
+        <p>确认是否删除此条记录？</p>
       </Modal>
-    </Drawer>
+    </div>
   );
 };
 
-export default HistoryChatDrawer;
+export default HistorySidebar;

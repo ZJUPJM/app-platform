@@ -4,7 +4,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import type { MenuProps } from 'antd';
 import { Layout, Menu } from 'antd';
 import { MenuFoldOutlined } from '@ant-design/icons';
@@ -23,15 +23,44 @@ import {
 } from '../../router/route';
 import { Provider } from 'react-redux';
 import { Icons, KnowledgeIcons } from '../icons/index';
-import store from '@/store/store';
-import { setSpaClassName } from '@/shared/utils/common';
+import AippIcon from '../../assets/images/aipp-icon.png';
+import { store } from '@/store';
+import { setSpaClassName, updateChatId } from '@/shared/utils/common';
 import { getUser, getOmsUser, getRole, getChatPluginList } from '../../pages/helper';
+import { useAppDispatch, useAppSelector } from '@/store/hook';
+import { setChatId, setChatList, setChatRunning, setAtChatId } from '@/store/chatStore/chatStore';
+import { setAtAppInfo, setAtAppId } from '@/store/appInfo/appInfo';
+import HistorySidebar from './history-sidebar';
 import './style.scoped.scss';
 
 const { Content, Sider } = Layout;
 type MenuItem = Required<MenuProps>['items'][number];
 const items: MenuItem[] = getMenus(routeList);
 const flattenRouteList = flattenRoute(routeList);
+
+// 创建Context用于传递setListCurrentList函数
+const HistoryContext = createContext<{
+  setListCurrentList: (list: any) => void;
+}>({
+  setListCurrentList: () => {}
+});
+
+// 历史记录状态管理组件
+const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [listCurrentList, setListCurrentList] = useState<any[]>([]);
+
+  return (
+    <HistoryContext.Provider value={{ setListCurrentList }}>
+      {children}
+    </HistoryContext.Provider>
+  );
+};
+
+// 使用Context的HistorySidebar组件
+const HistorySidebarWithContext: React.FC = () => {
+  const { setListCurrentList } = useContext(HistoryContext);
+  return <HistorySidebar setListCurrentList={setListCurrentList} />;
+};
 
 /**
  * 页面整体布局组件
@@ -44,12 +73,20 @@ const AppLayout: React.FC = () => {
   const [defaultActive, setDefaultActive] = useState<string[]>([])
   const navigate = useHistory().push;
   const location = useLocation();
-  
+  const dispatch = useAppDispatch();
+  const appId = useAppSelector((state) => state.appStore.appId);
+
   /**
    * @description 从后往前遍历路由 父子路由，子路由前缀需要是父路由
    * @pathname 当前路径
    * */
   const getCurrentRoute = (pathname: string) => {
+    // 如果是新对话页面，不设置选中状态
+    if (pathname === '/home') {
+      setDefaultActive([]);
+      return;
+    }
+
     // 拆开路由
     const pathGroup = pathname.split('/').filter(item => item !== '');
     if (pathGroup?.length) {
@@ -64,10 +101,40 @@ const AppLayout: React.FC = () => {
         len--;
       }
     } else {
-      setDefaultActive(['/home']);
+      setDefaultActive([]);
     }
   }
   const menuClick = (e: any) => {
+    // 如果是新对话菜单项，需要清空聊天状态和选中状态
+    if (e.key === '/home') {
+      // 清空聊天相关的状态
+      dispatch(setChatRunning(false));
+      dispatch(setChatId(null));
+      dispatch(setChatList([]));
+      dispatch(setAtAppInfo(null));
+      dispatch(setAtChatId(null));
+      dispatch(setAtAppId(null));
+
+      // 清空本地存储的聊天ID
+      if (appId) {
+        updateChatId(null, appId);
+      }
+
+      // 设置存储参数用于页面刷新
+      const storageParams = {
+        deleteAppId: null,
+        refreshChat: true,
+        key: Date.now().toString(),
+        type: 'deleteChat'
+      };
+      localStorage.setItem('storageMessage', JSON.stringify(storageParams));
+
+      // 清空菜单选中状态
+      setDefaultActive([]);
+    } else {
+      // 其他菜单项保持正常的选中状态
+      setDefaultActive([e.key]);
+    }
     navigate(e.key);
   };
 
@@ -88,6 +155,11 @@ const AppLayout: React.FC = () => {
       return false;
     }
     return true;
+  }
+
+  // 判断是否显示历史记录侧边栏
+  const shouldShowHistorySidebar = () => {
+    return location.pathname.includes('/chat/') || location.pathname.includes('/home');
   }
   const isSpaMode = () => {
     return  (process.env.NODE_ENV !== 'development' && process.env.PACKAGE_MODE !== 'common')
@@ -116,63 +188,71 @@ const AppLayout: React.FC = () => {
     getChatPluginList();
   }, [])
   return (
-    <Layout>
-      { layoutValidate() && (
-        <>
-          <Sider
-            collapsible
-            collapsed={false}
-            onCollapse={() => setShowMenu(false)}
-            trigger={null}
-            width={showMenu ? 220 : 0}
-            className='layout-sider'
-          >
-            <div className='layout-sider-header'>
-              <div className='layout-sider-content'>
-                <Icons.logo />
-                <span className='layout-sider-title'>ModelEngine</span>
-              </div>
-              <MenuFoldOutlined
-                style={{ color: '#6d6e72' }}
-                onClick={() => setShowMenu(false)}
-              />
-            </div>
-            <Menu
-              className='menu'
-              theme='dark'
-              selectedKeys={defaultActive}
-              mode='inline'
-              items={items}
-              onClick={menuClick}
-            />
-          </Sider>
-          <div className='layout-sider-folder'>
-            <KnowledgeIcons.menuFolder onClick={() => setShowMenu(true)} />
-          </div>
-        </>
-      )
-    }
-      <Layout className={setClassName()}>
-        <Provider store={store}>
-          <Content style={{ padding: (layoutValidate() || isSpaMode()) ? '0 16px' : '0', background: colorBgContainer }}>
-            <Switch>
-              {flattenRouteList.map((route) => (
-                <Route
-                  exact
-                  path={route.key}
-                  key={route.key}
-                  component={route.component}
+    <HistoryProvider>
+      <Layout>
+        { layoutValidate() && (
+          <>
+            <Sider
+              collapsible
+              collapsed={false}
+              onCollapse={() => setShowMenu(false)}
+              trigger={null}
+              width={showMenu ? 280 : 0}
+              className='layout-sider'
+            >
+              <div className='layout-sider-header'>
+                <div className='layout-sider-content'>
+                  <img style={{width: '44px', height: '44px'}} src={AippIcon} alt="Aipp Icon" />
+                  {/*<span className='layout-sider-title'>ModelEngine</span>*/}
+                </div>
+                <MenuFoldOutlined
+                  style={{ color: '#6d6e72' }}
+                  onClick={() => setShowMenu(false)}
                 />
-              ))}
-              <Route exact path='/' key='/' >
-                <Redirect to='/home' />
-              </Route>
-            </Switch>
-          </Content>
-        </Provider>
+              </div>
+              <Menu
+                className='menu'
+                theme='light'
+                selectedKeys={defaultActive}
+                mode='inline'
+                items={items}
+                onClick={menuClick}
+              />
+              {shouldShowHistorySidebar() && (
+                <div className='layout-sider-history'>
+                  <HistorySidebarWithContext />
+                </div>
+              )}
+            </Sider>
+            <div className='layout-sider-folder'>
+              <KnowledgeIcons.menuFolder onClick={() => setShowMenu(true)} />
+            </div>
+          </>
+        )
+      }
+        <Layout className={setClassName()}>
+          <Provider store={store}>
+            <Content style={{ padding: (layoutValidate() || isSpaMode()) ? '0 16px' : '0', background: colorBgContainer }}>
+              <Switch>
+                {flattenRouteList.map((route) => (
+                  <Route
+                    exact
+                    path={route.key}
+                    key={route.key}
+                    component={route.component}
+                  />
+                ))}
+                <Route exact path='/' key='/' >
+                  <Redirect to='/home' />
+                </Route>
+              </Switch>
+            </Content>
+          </Provider>
+        </Layout>
       </Layout>
-    </Layout>
+    </HistoryProvider>
   );
 };
 
+export { HistoryContext };
 export default AppLayout;

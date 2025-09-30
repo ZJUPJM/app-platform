@@ -36,7 +36,6 @@ import '../../styles/send-editor.scss';
  * @param showStop 是否显示终止会话按钮
  * @param stopLoading 终止会话按钮loading
  * @param setEditorShow 是否消息消息列表多选框
- * @param setListCurrentList 更新聊天会话消息列表
  * @param checkMutipleInput 校验多输入是否必填
  * @param setChatFileList 多模态设置文件列表
  * @param checkFileSuccess 多模态校验文件是否都上传成功
@@ -66,7 +65,6 @@ const SendEditor = (props) => {
     showStop,
     stopLoading,
     setEditorShow,
-    setListCurrentList,
     checkMutipleInput,
     setChatFileList,
     checkFileSuccess,
@@ -379,7 +377,6 @@ const SendEditor = (props) => {
           chatType={chatType}
           showMask={showMask}
           setEditorShow={setEditorShow}
-          setListCurrentList={setListCurrentList}
           updateUserContext={props.updateUserContext}
         />
         <div className='editor-input' id='drop'>

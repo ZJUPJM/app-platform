@@ -19,7 +19,6 @@ import ReferencingApp from './referencing-app';
 import UploadFile from './upload-file';
 import StarApps from '../../star-apps';
 import ConversationConfiguration from './conversation-configuration';
-import HistoryChatDrawer from '../../history-chat';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import {
   setAtChatId,
@@ -45,14 +44,13 @@ import knowledgeBase from '@/assets/images/knowledge/knowledge-base.png';
  * @param fileCallBack 更新文件列表的方法
  * @param editorRef 输入框编辑器引用
  * @param setEditorShow 显示消息多选框
- * @param setListCurrentList 设置当前会话列表list
  * @param showMask 未登录显示遮罩层，无法操作
  * @param fileList 多模态文件列表
  * @constructor
  */
 const EditorBtnHome = (props) => {
   const { t } = useTranslation();
-  const { fileCallBack, editorRef, setEditorShow, setListCurrentList, showMask, fileList, display } = props;
+  const { fileCallBack, editorRef, setEditorShow, showMask, fileList, display } = props;
   const dispatch = useAppDispatch();
   const appInfo = useAppSelector((state) => state.appStore.appInfo);
   const appId = useAppSelector((state) => state.appStore.appId);
@@ -71,7 +69,6 @@ const EditorBtnHome = (props) => {
   const [notice, setNotice] = useState('');
   const [appName, setAppName] = useState('');
   const [appIcon, setAppIcon] = useState('');
-  const [openHistorySignal, setOpenHistorySignal] = useState(0);
   const [searchKey, setSearchKey] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [multiFileConfig, setMultiFileConfig] = useState<any>({});
@@ -230,11 +227,6 @@ const EditorBtnHome = (props) => {
     dispatch(setAtChatId(null));
     dispatch(setAtAppId(null));
   }
-  // 点击历史对话图标回调
-  const historyChatClick = (e) => {
-    if (isChatRunning()) { return; }
-    setOpenHistorySignal(e.timeStamp);
-  }
   // 点击更多应用按钮回调
   const onClickShowMore = () => {
     return
@@ -248,6 +240,11 @@ const EditorBtnHome = (props) => {
       setNotice(t('noAnnouncement'));
     }
     setShowNotice(true);
+  }
+  // 历史记录
+  const historyChatClick = () => {
+    if (isChatRunning()) { return; }
+    dispatch(setShowChatHistory(true));
   }
   return (
     <div className={`${setSpaClassName('btn-inner')} ${fileList.length === 0 ? 'btn-radius' : ''} ${showMask ? 'btn-inner-disabled' : ''}`}>
@@ -281,25 +278,26 @@ const EditorBtnHome = (props) => {
             (
               <div className='inner-item'>
                 <NotificationIcon onClick={announcementsClick} />
-                {!isDebug && <HistoryIcon onClick={historyChatClick} />}
-                {<div className='multi-conversation-title'>
-                  <span>{t('multiTurnConversation')}</span>
-                  <Switch
-                    className='multi-conversation-switch'
-                    disabled={showMask}
-                    size='small'
-                    checked={useMemory}
-                    onChange={onMultiConverChange}
-                  />
-                </div>
-                }
-                {!showMask &&
+                {/* {!isDebug && <HistoryIcon onClick={historyChatClick} />} */}
+                {/*{<div className='multi-conversation-title'>*/}
+                {/*  <span>{t('multiTurnConversation')}</span>*/}
+                {/*  <Switch*/}
+                {/*    className='multi-conversation-switch'*/}
+                {/*    disabled={showMask}*/}
+                {/*    size='small'*/}
+                {/*    checked={useMemory}*/}
+                {/*    onChange={onMultiConverChange}*/}
+                {/*  />*/}
+                {/*</div>*/}
+                {/*}*/}
+                {/* 创建新对话图标已移除 */}
+                {/* {!showMask &&
                   <Tooltip
                     title={<span style={{ color: '#4d4d4d' }}>{t('newChat')}</span>}
                     color='#ffffff'
                   >
                     <span className='item-clear' onClick={onClickNewChat}></span>
-                  </Tooltip>}
+                  </Tooltip>} */}
               </div>
             )
         }
@@ -349,7 +347,6 @@ const EditorBtnHome = (props) => {
           updateModal={setModalOpen}
         />
       </Modal>
-      {!isDebug && <HistoryChatDrawer openHistorySignal={openHistorySignal} setListCurrentList={setListCurrentList} />}
     </div>
   );
 }

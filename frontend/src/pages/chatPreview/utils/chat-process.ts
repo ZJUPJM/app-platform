@@ -7,6 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 // 历史会话消息处理
 export const historyChatProcess = (res) => {
   let chatArr = [];
+  if (!res || !res.data || !Array.isArray(res.data)) {
+    return chatArr;
+  }
   res.data.forEach((item) => {
     let questionObj:any = { type: 'send', sendType: 'text' };
     if (item.question) {
