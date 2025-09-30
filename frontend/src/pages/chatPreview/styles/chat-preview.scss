@@ -206,6 +206,11 @@
     max-width: 1400px;
     min-width: 700px;
   }
+  
+  .send-editor-container {
+    max-width: 780px;
+    margin: 0 auto;
+  }
   .chat-left-close {
     .chat-details-content,
     .message-box,
@@ -214,6 +219,11 @@
       width: calc(100% - 260px);
       max-width: 1200px;
       min-width: 700px;
+    }
+    
+    .send-editor-container {
+      max-width: 780px;
+      margin: 0 auto;
     }
   }
 }
@@ -225,6 +235,12 @@
     width: calc(100% - 60px);
     min-width: 700px;
   }
+  
+  .send-editor-container {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  
   .chat-left-close {
     .chat-details-content,
     .message-box,
@@ -232,6 +248,11 @@
     .message-check-toolbox-wrap {
       width: calc(100% - 60px);
       min-width: 700px;
+    }
+    
+    .send-editor-container {
+      max-width: 780px;
+      margin: 0 auto;
     }
   }
 }
