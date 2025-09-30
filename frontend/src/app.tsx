@@ -7,6 +7,7 @@
 import React, { useEffect } from 'react';
 import { HashRouter, BrowserRouter } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
+import { Provider } from 'react-redux';
 import AppLayout from '@/components/layout/index';
 import zhCN from 'antd/lib/locale/zh_CN';
 import enUS from 'antd/lib/locale/en_US';
@@ -18,6 +19,7 @@ import '@/styles/workSpace.scss';
 import '@/styles/antStyle.scss';
 import './index.scss';
 import { getCookie, setCookie } from './shared/utils/common';
+import { store } from './store';
 
 let userName = localStorage.getItem('__account_name__') || '';
 localStorage.getItem('currentUser') || localStorage.setItem('currentUser', userName);
@@ -55,10 +57,12 @@ const AppRouter = ({ children }) => (
 );
 export default function App() {
   return (
-    <ConfigProvider locale={getCookie('locale').toLocaleLowerCase() === 'en-us' ? enUS : zhCN} autoInsertSpace={true}>
-      <AppRouter>
-        <AppLayout />
-      </AppRouter>
-    </ConfigProvider>
+    <Provider store={store}>
+      <ConfigProvider locale={getCookie('locale').toLocaleLowerCase() === 'en-us' ? enUS : zhCN} autoInsertSpace={true}>
+        <AppRouter>
+          <AppLayout />
+        </AppRouter>
+      </ConfigProvider>
+    </Provider>
   );
 }
