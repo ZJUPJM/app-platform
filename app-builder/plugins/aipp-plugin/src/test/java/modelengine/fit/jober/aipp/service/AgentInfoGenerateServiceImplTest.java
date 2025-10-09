@@ -68,7 +68,7 @@ public class AgentInfoGenerateServiceImplTest {
                 this.aippModelCenter,
                 this.toolService,
                 this.localeService,
-                this.appRepository);
+                this.appRepository, "system");
     }
 
     @Test
