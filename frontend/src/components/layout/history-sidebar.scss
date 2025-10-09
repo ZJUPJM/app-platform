@@ -17,7 +17,7 @@
     align-items: center;
     justify-content: space-between;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
     color: #999999;
     height: 28px;
     padding: 0 16px;
@@ -55,7 +55,7 @@
   .history-category {
     padding: 8px 16px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     color: #666;
     background: #f8f9fa;
     margin: 0 8px 8px 8px;
@@ -70,7 +70,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     border: none;
-    height: 28px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -93,7 +93,7 @@
 
     &-title {
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 400;
       color: #666666;
       overflow: hidden;
       white-space: nowrap;

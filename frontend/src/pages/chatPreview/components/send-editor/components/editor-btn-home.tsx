@@ -250,12 +250,13 @@ const EditorBtnHome = (props) => {
     <div className={`${setSpaClassName('btn-inner')} ${fileList.length === 0 ? 'btn-radius' : ''} ${showMask ? 'btn-inner-disabled' : ''}`}>
       <div className='inner-left'>
         <div className='inner-item'>
-          {appIcon ? <img src={appIcon} alt='' /> : <img src={knowledgeBase} alt='' />}
-          <div className={['switch-app', atAppId ? 'switch-active' : null].join(' ')} onClick={onClickShowMore}>
+          {/* 隐藏顶部头像与名称：按需恢复请取消注释 */}
+          {/** {appIcon ? <img src={appIcon} alt='' /> : <img src={knowledgeBase} alt='' />} */}
+          {/** <div className={['switch-app', atAppId ? 'switch-active' : null].join(' ')} onClick={onClickShowMore}>
             {atAppId && <span style={{ marginLeft: '6px' }}>{t('chatWith')}</span>}
             <span className='item-name' title={appName}>{appName}</span>
             {atAppId && <span style={{ marginLeft: '6px' }}>{t('chat')}</span>}
-          </div>
+          </div> */}
           {multiFileConfig.useMultimodal && <span className='item-upload' onClick={uploadClick}></span>}
           <ConversationConfiguration
             appInfo={appInfo}
