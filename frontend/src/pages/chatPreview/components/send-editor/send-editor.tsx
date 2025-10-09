@@ -14,6 +14,7 @@ import { useAppSelector, useAppDispatch } from '@/store/hook';
 import { setUseMemory } from '@/store/common/common';
 import { setSpaClassName } from '@/shared/utils/common';
 import { isChatRunning } from '@/shared/utils/chat';
+import { uploadChatFile, voiceToText } from '@/shared/http/aipp';
 import { useTranslation } from 'react-i18next';
 import { cloneDeep } from 'lodash';
 import Recommends from './components/recommends';
@@ -21,6 +22,7 @@ import EditorBtnHome from './components/editor-btn-home';
 import EditorSelect from './components/editor-selet';
 import FileList from './components/file-list';
 import stopImg from '@/assets/images/ai/stop.png';
+import '@/shared/utils/rendos';
 import '../../styles/send-editor.scss';
 
 /**
@@ -93,6 +95,11 @@ const SendEditor = (props) => {
   const isAutoSend = useRef<any>(false);
   const recommondListRef = useRef<any>([]);
   const isHomepage = location.hash.includes('home');
+  const recording = useRef(false);
+  const audioBtnRef = useRef<any>(null);
+  const audioDomRef = useRef<any>(null);
+  const appId = useAppSelector((state) => state.appStore.appId);
+  const tenantId = useAppSelector((state) => state.appStore.tenantId);
   // 编辑器change事件
   function messageChange() {
     const editorDom = document.getElementById('ctrl-promet');
@@ -189,6 +196,91 @@ const SendEditor = (props) => {
       clearFileList,
     };
   });
+
+  let recorderInstanceId = 0; // 添加实例ID
+  // 语音实时转文字
+  let recorderHome = useRef<any>(null);
+  let intervalData = useRef<any>(null);
+  // 点击语音按钮
+  const onRecord = async () => {
+    if (isChatRunning()) {
+      return;
+    }
+    if (!recording.current) {
+      recorderInstanceId++; // 每次创建新实例时递增
+      (window as any).HZRecorder.get((rec) => {
+        recorderHome.current = rec;
+        // 为 recorderHome 添加唯一标识
+        recorderHome.current._instanceId = recorderInstanceId;
+        recorderHome.current._createdAt = Date.now();
+        console.log(`${new Date().toISOString()} 🎤 Recorder START - ID: ${recorderHome.current._instanceId}`);
+        recorderHome.current.start();
+        recording.current = true;
+        audioBtnRef.current.setActive(true);
+        intervalData.current = setInterval(() => {
+          console.log(`${new Date().toISOString()} 🔄 Interval - Current Recorder ID: ${recorderHome.current?._instanceId || 'null'}`);
+          uploadFile();
+        }, 5000);
+      });
+    } else {
+      console.log(`${new Date().toISOString()} 🛑 Recorder STOP - ID: ${recorderHome.current?._instanceId || 'null'}`);
+      recording.current = false;
+      recorderHome.current.stop();
+      audioBtnRef.current.setActive(false);
+      clearInterval(intervalData.current);
+      uploadFile();
+    }
+  }
+
+  async function uploadFile() {
+    console.log(`${new Date().toISOString()} 📤 UploadFile - Recorder ID: ${recorderHome.current?._instanceId || 'null'}`);
+    let newBlob = recorderHome.current?.getBlob();
+    if (!newBlob) {
+      console.log(`${new Date().toISOString()} ❌ No blob available - stopping recording. Recorder ID: ${recorderHome.current?._instanceId || 'null'}`);
+      recording.current = false;
+      recorderHome.current.stop();
+      audioBtnRef.current.setActive(false);
+      clearInterval(intervalData.current);
+      return;
+    }
+    console.log(`${new Date().toISOString()} start to upload file. Recorder ID: ${recorderHome.current?._instanceId || 'null'}`);
+    const fileOfBlob = new File([newBlob], new Date().getTime() + '.wav', {
+      type: 'audio/wav',
+    })
+    const formData = new FormData();
+    formData.append('file', fileOfBlob);
+    let headers = {
+      'attachment-filename': encodeURI(fileOfBlob.name || ''),
+    };
+    if (fileOfBlob.size) {
+      const result: any = await uploadChatFile(tenantId, appId, formData, headers);
+      if (result.data) {
+        let res: any = await voiceToText(tenantId, `${result.data.file_path}`, fileOfBlob.name);
+        if (res.data && res.data.trim().length) {
+          const editorDom = document.getElementById('ctrl-promet');
+          const textNode = document.createTextNode(res.data.trim());
+          editorDom.appendChild(textNode);
+          setTextLenth(editorDom.innerText.length);
+          setShowClear(true);
+        }
+      }
+    }
+  }
+
+  function handleEditorClick(e) {
+    if (!audioDomRef.current?.contains(e.target)) {
+      recording.current
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      recording.current = false;
+      recorderHome.current?.stop();
+      audioBtnRef.current?.setActive(false);
+      intervalData.current && clearInterval(intervalData.current);
+    }
+  }, []);
 
   useEffect(() => {
     if (showMulti) {
@@ -308,6 +400,15 @@ const SendEditor = (props) => {
               </Tooltip>
             }
           </div>
+          <Tooltip title={<span style={{ color: '#4d4d4d' }}>{t('recordTip')}</span>} color='white'>
+            <div
+              className='audio-icon'
+              ref={audioDomRef}
+              onClick={onRecord}
+              >
+              <AudioBtn ref={audioBtnRef} />
+            </div>
+          </Tooltip>
           {showClear && <div className='send-icon clear-icon' onClick={clearContent}><DeleteContentIcon /></div>}
         </div>
       </div>

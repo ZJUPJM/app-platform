@@ -23,6 +23,16 @@ export const getCurUser = () => {
     );
   });
 };
+
+export function voiceToText(tenantId, voicePath, fileName) {
+  let url = `http://${window.location.host}${AIPP_URL}`;
+  return get(`${PLUGIN_URL || '/api/jober'}/voice/toText`, { voicePath: `${voicePath}` });
+}
+
+export function textToVoice(text, tone) {
+  return get(`${PLUGIN_URL || '/api/jober'}/voice/toVoice`, { text, tone });
+}
+
 // 获取oms当前用户信息
 export const getOmsCurUser = () => {
   return new Promise((resolve, reject) => {
