@@ -59,6 +59,42 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    
+    // 用户信息模块容器放在底部
+    .layout-sider-user {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 0px 0px 0px;
+      border-top: 1px solid #e6e9ee;
+      color: #333;
+    }
+    
+    // 展开态：为用户信息增加左侧内边距
+    .layout-sider:not(.collapsed) & {
+      .layout-sider-user {
+        padding-left: 8px;
+      }
+    }
+    
+    .layout-sider-user-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-left: 2px;
+    }
+    
+    // 折叠态：仅显示头像，不显示用户名
+    .layout-sider.collapsed & {
+      .layout-sider-user-name {
+        display: none;
+      }
+      .layout-sider-user {
+        justify-content: center; // 居中，保持头像位置稳定
+        padding-left: 0; // 折叠态不增加左侧间距
+      }
+    }
   }
 }
 

@@ -6,8 +6,8 @@
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import type { MenuProps } from 'antd';
-import { Layout, Menu } from 'antd';
-import { MenuFoldOutlined } from '@ant-design/icons';
+import { Layout, Menu, Avatar } from 'antd';
+import { MenuFoldOutlined, UserOutlined } from '@ant-design/icons';
 import {
   Route,
   useHistory,
@@ -198,7 +198,7 @@ const AppLayout: React.FC = () => {
               collapsed={isCollapsed}
               onCollapse={() => setShowMenu(false)}
               trigger={null}
-              width={showMenu ? (isCollapsed ? 80 : 280) : 0}
+              width={showMenu ? (isCollapsed ? 60 : 280) : 0}
               className={`layout-sider ${isCollapsed ? 'collapsed' : ''}`}
             >
               <div className='layout-sider-header'>
@@ -235,9 +235,15 @@ const AppLayout: React.FC = () => {
                 items={items}
                 onClick={menuClick}
               />
-              {shouldShowHistorySidebar() && !isCollapsed && (
+              {shouldShowHistorySidebar() && (
                 <div className='layout-sider-history'>
-                  <HistorySidebarWithContext />
+                  {!isCollapsed && (
+                    <HistorySidebarWithContext />
+                  )}
+                  <div className='layout-sider-user'>
+                    <Avatar size={28} icon={<UserOutlined />} />
+                    <span className='layout-sider-user-name'>User</span>
+                  </div>
                 </div>
               )}
             </Sider>
