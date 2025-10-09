@@ -82,6 +82,7 @@ const SendEditor = (props) => {
   const [openHistory, setOpenHistory] = useState(false);
   const [positionConfig, setPositionConfig] = useState({});
   const [fileList, setFileList] = useState([]);
+  const [openUploadModal, setOpenUploadModal] = useState(() => null);
   const chatRunning = useAppSelector((state) => state.chatCommonStore.chatRunning);
   const loginStatus = useAppSelector((state) => state.chatCommonStore.loginStatus);
   const showMulti = useAppSelector((state) => state.commonStore.historySwitch);
@@ -378,8 +379,13 @@ const SendEditor = (props) => {
           showMask={showMask}
           setEditorShow={setEditorShow}
           updateUserContext={props.updateUserContext}
+        setExternalUploadOpener={setOpenUploadModal}
         />
         <div className='editor-input' id='drop'>
+        {/* 输入框左侧上传按钮 */}
+        {typeof openUploadModal === 'function' && (
+          <div className='left-upload-icon' onClick={() => openUploadModal()}></div>
+        )}
           <div
             className='chat-promet-editor'
             id='ctrl-promet'

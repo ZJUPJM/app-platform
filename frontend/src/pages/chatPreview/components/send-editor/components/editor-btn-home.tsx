@@ -51,6 +51,7 @@ import knowledgeBase from '@/assets/images/knowledge/knowledge-base.png';
 const EditorBtnHome = (props) => {
   const { t } = useTranslation();
   const { fileCallBack, editorRef, setEditorShow, showMask, fileList, display } = props;
+  const setExternalUploadOpener = props.setExternalUploadOpener;
   const dispatch = useAppDispatch();
   const appInfo = useAppSelector((state) => state.appStore.appInfo);
   const appId = useAppSelector((state) => state.appStore.appId);
@@ -210,6 +211,12 @@ const EditorBtnHome = (props) => {
     }
     setModalOpen(true);
   }
+  // 将上传触发器暴露给父组件（用于在输入框内部展示上传按钮）
+  useEffect(() => {
+    if (typeof setExternalUploadOpener === 'function') {
+      setExternalUploadOpener(() => uploadClick);
+    }
+  }, [setExternalUploadOpener, fileList, multiFileConfig]);
   //是否使用多轮对话
   const onMultiConverChange = (checked) => {
     dispatch(setUseMemory(checked));
@@ -257,7 +264,8 @@ const EditorBtnHome = (props) => {
             <span className='item-name' title={appName}>{appName}</span>
             {atAppId && <span style={{ marginLeft: '6px' }}>{t('chat')}</span>}
           </div> */}
-          {multiFileConfig.useMultimodal && <span className='item-upload' onClick={uploadClick}></span>}
+          {/* 当父组件把上传入口放到输入框内部时，不再在顶部渲染上传按钮 */}
+          {multiFileConfig.useMultimodal && !setExternalUploadOpener && <span className='item-upload' onClick={uploadClick}></span>}
           <ConversationConfiguration
             appInfo={appInfo}
             display={display}

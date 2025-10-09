@@ -133,6 +133,29 @@
       border: 1px solid #ecedec;
       border-radius: 8px;
       position: relative;
+      .left-upload-icon {
+        position: absolute;
+        left: 16px;
+        bottom: 22px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #ffffff;
+        background-image: url('/src/assets/images/ai/upload_icon.svg');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 20px 20px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        &:hover {
+          background-color: #F2F6FC;
+          background-image: url('/src/assets/images/ai/upload_icon.svg');
+        }
+        &:active {
+          background-color: #F2F6FC;
+          background-image: url('/src/assets/images/ai/upload_icon.svg');
+        }
+      }
       .chat-promet-editor {
         box-sizing: border-box;
         line-height: 1.42;
@@ -147,7 +170,7 @@
         word-wrap: break-word;
         border-radius: 16px;
         padding-right: 120px;
-        padding-left: 20px;
+        padding-left: 70px;
         line-height: 25px;
         min-height: 85px;
         &:focus {
