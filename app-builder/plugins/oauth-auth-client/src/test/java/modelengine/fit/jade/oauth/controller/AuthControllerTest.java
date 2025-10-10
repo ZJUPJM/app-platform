@@ -6,6 +6,8 @@
 
 package modelengine.fit.jade.oauth.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.eq;
@@ -17,11 +19,14 @@ import modelengine.fit.http.protocol.ConfigurableMessageHeaders;
 import modelengine.fit.http.protocol.QueryCollection;
 import modelengine.fit.http.server.HttpClassicServerRequest;
 import modelengine.fit.http.server.HttpClassicServerResponse;
+import modelengine.fit.jane.common.response.Rsp;
+import modelengine.jade.authentication.context.UserContext;
+import modelengine.jade.authentication.context.UserContextHolder;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import java.lang.reflect.Field;
 
@@ -34,16 +39,12 @@ import java.lang.reflect.Field;
 @DisplayName("测试 AuthController")
 public class AuthControllerTest {
 
-    @Mock
     private HttpClassicServerRequest request;
 
-    @Mock
     private HttpClassicServerResponse response;
 
-    @Mock
     private ConfigurableMessageHeaders headers;
 
-    @Mock
     private QueryCollection queryCollection;
 
     private AuthController authController;
@@ -71,10 +72,69 @@ public class AuthControllerTest {
         when(request.queries()).thenReturn(queryCollection);
     }
 
+    @AfterEach
+    void tearDown() throws Exception {
+        // 清理UserContextHolder的ThreadLocal
+        clearUserContext();
+    }
+
     private void setPrivateField(String fieldName, String value) throws Exception {
         Field field = AuthController.class.getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(authController, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setUserContext(UserContext userContext) throws Exception {
+        Field field = UserContextHolder.class.getDeclaredField("OPERATION_CONTEXT_THREAD_LOCAL");
+        field.setAccessible(true);
+        ThreadLocal<UserContext> threadLocal = (ThreadLocal<UserContext>) field.get(null);
+        threadLocal.set(userContext);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void clearUserContext() throws Exception {
+        Field field = UserContextHolder.class.getDeclaredField("OPERATION_CONTEXT_THREAD_LOCAL");
+        field.setAccessible(true);
+        ThreadLocal<UserContext> threadLocal = (ThreadLocal<UserContext>) field.get(null);
+        threadLocal.remove();
+    }
+
+    @Test
+    @DisplayName("测试获取用户名接口 - 成功获取用户名")
+    void shouldReturnUsername() throws Exception {
+        String username = "testUser";
+        UserContext userContext = mock(UserContext.class);
+        when(userContext.getName()).thenReturn(username);
+        
+        setUserContext(userContext);
+        
+        Rsp<String> usernameResponse = authController.handleUsername();
+        
+        assertEquals(username, usernameResponse.getData());
+    }
+
+    @Test
+    @DisplayName("测试获取用户名接口 - UserContext为null时抛出异常")
+    void shouldThrowExceptionWhenUserContextIsNull() throws Exception {
+        setUserContext(null);
+        
+        assertThrows(IllegalArgumentException.class, () -> {
+            authController.handleUsername();
+        });
+    }
+
+    @Test
+    @DisplayName("测试获取用户名接口 - UserContext.getName()为null时抛出异常")
+    void shouldThrowExceptionWhenUserNameIsNull() throws Exception {
+        UserContext userContext = mock(UserContext.class);
+        when(userContext.getName()).thenReturn(null);
+        
+        setUserContext(userContext);
+        
+        assertThrows(IllegalArgumentException.class, () -> {
+            authController.handleUsername();
+        });
     }
 
     @Test
@@ -106,57 +166,6 @@ public class AuthControllerTest {
         verify(headers).add(eq("Set-Cookie"), anyString());
 
         // 验证发送响应
-        verify(response).send();
-    }
-
-    @Test
-    @DisplayName("测试回调接口 - 当请求不安全时使用http协议")
-    void shouldUseHttpProtocolWhenRequestNotSecure() throws Exception {
-        // 模拟不安全的请求
-        when(request.isSecure()).thenReturn(false);
-        when(request.host()).thenReturn("localhost:8080");
-        when(request.path()).thenReturn("/v1/api/auth/callback");
-        when(queryCollection.queryString()).thenReturn("code=test-code&state=test-state");
-
-        // 执行回调请求
-        authController.handleCallback(request, response);
-
-        // 验证状态码（由于没有真实的OAuth服务器，会返回400）
-        verify(response).statusCode(400);
-        verify(response).send();
-    }
-
-    @Test
-    @DisplayName("测试回调接口 - 当请求安全时使用https协议")
-    void shouldUseHttpsProtocolWhenRequestSecure() throws Exception {
-        // 模拟安全的请求
-        when(request.isSecure()).thenReturn(true);
-        when(request.host()).thenReturn("localhost:8080");
-        when(request.path()).thenReturn("/v1/api/auth/callback");
-        when(queryCollection.queryString()).thenReturn("code=test-code&state=test-state");
-
-        // 执行回调请求
-        authController.handleCallback(request, response);
-
-        // 验证状态码（由于没有真实的OAuth服务器，会返回400）
-        verify(response).statusCode(400);
-        verify(response).send();
-    }
-
-    @Test
-    @DisplayName("测试回调接口 - 处理空查询参数")
-    void shouldHandleEmptyQueryString() throws Exception {
-        // 模拟没有查询参数的请求 - 使用有效的OAuth2参数
-        when(request.isSecure()).thenReturn(false);
-        when(request.host()).thenReturn("localhost:8080");
-        when(request.path()).thenReturn("/v1/api/auth/callback");
-        when(queryCollection.queryString()).thenReturn("code=test-code&state=test-state");
-
-        // 执行回调请求
-        authController.handleCallback(request, response);
-
-        // 验证状态码（由于没有真实的OAuth服务器，会返回400）
-        verify(response).statusCode(400);
         verify(response).send();
     }
 

@@ -27,6 +27,12 @@
             <artifactId>fit-http-protocol</artifactId>
         </dependency>
 
+        <!-- Service -->
+        <dependency>
+            <groupId>modelengine.fit.jane</groupId>
+            <artifactId>jane-common-component</artifactId>
+        </dependency>
+
         <!-- OAuth2 -->
         <dependency>
             <groupId>com.nimbusds</groupId>

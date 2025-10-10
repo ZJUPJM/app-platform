@@ -25,12 +25,16 @@ import modelengine.fit.http.annotation.PostMapping;
 import modelengine.fit.http.annotation.RequestMapping;
 import modelengine.fit.http.server.HttpClassicServerRequest;
 import modelengine.fit.http.server.HttpClassicServerResponse;
+import modelengine.fit.jane.common.response.Rsp;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.annotation.Value;
 import modelengine.fitframework.validation.Validated;
+import modelengine.jade.authentication.context.UserContext;
+import modelengine.jade.authentication.context.UserContextHolder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 /**
  * 用户认证控制器（OAuth2）。
@@ -132,16 +136,26 @@ public class AuthController {
     }
 
     /**
+     * 获取用户名信息
+     */
+    @PostMapping("/username")
+    public Rsp<String> handleUsername() {
+        String username = Optional.ofNullable(UserContextHolder.get())
+                .map(UserContext::getName)
+                .orElseThrow(() -> new IllegalArgumentException("The user name cannot be null."));
+        return Rsp.ok(username);
+    }
+
+    /**
      * 处理登录请求。
      * <p>
      * 返回 401 Unauthorized 状态，并在自定义响应头中指明 OAuth2 授权端点。
      * 前端可根据该头信息发起 OAuth2 授权流程。
      *
      * @param response 当前的 HTTP 响应对象，用于写入状态码和自定义跳转头
-     * @throws Exception 发送响应时可能抛出的异常
      */
     @PostMapping("/login")
-    public void handleLogin(HttpClassicServerResponse response) throws Exception {
+    public void handleLogin(HttpClassicServerResponse response) {
         response.statusCode(401);
         response.headers().add("fit-redirect-to-prefix", authUrl + "&useless=");
         response.send();
@@ -153,17 +167,16 @@ public class AuthController {
      * 清除客户端的 Access Token Cookie，将其 Max-Age 设置为 0。
      *
      * @param response 当前的 HTTP 响应对象，用于写入 Set-Cookie 头
-     * @throws Exception 发送响应时可能抛出的异常
      */
     @PostMapping("/logout")
-    public void handleLogout(HttpClassicServerResponse response) throws Exception {
+    public void handleLogout(HttpClassicServerResponse response) {
         Cookie cookie = Cookie.builder().name("access-token").value("").httpOnly(true)
                 // .secure(true)
                 .path("/").maxAge(0).build();
 
         // 拼接 Set-Cookie 字符串
         StringBuilder sb = new StringBuilder();
-        sb.append(cookie.name()).append("=").append(cookie.name());
+        sb.append(cookie.name()).append("=").append(cookie.value());
         if (cookie.path() != null) {
             sb.append("; Path=").append(cookie.path());
         }
