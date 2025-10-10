@@ -8,4 +8,4 @@ model:
     url:
     apiKey:
     imageSize: 768x1024
-    imageMimeType: image/png
+    defaultImageMimeType: image/png
