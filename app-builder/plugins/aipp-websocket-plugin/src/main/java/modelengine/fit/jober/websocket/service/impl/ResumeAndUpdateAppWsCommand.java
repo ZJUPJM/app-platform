@@ -54,6 +54,6 @@ public class ResumeAndUpdateAppWsCommand extends AbstractAppWsCommand<UpdateChat
         Long logId = params.getLogId();
         Map<String, Object> formArgs = params.getFormArgs();
         this.setUserInOperationContext(context, params.getName(), params.getAccount());
-        return this.aippRunTimeService.resumeAndUpdateAippInstance(metaInstId, formArgs, logId, context, false);
+        return this.aippRunTimeService.resumeAndUpdateAippInstance(metaInstId, formArgs, logId, context, false, false);
     }
 }

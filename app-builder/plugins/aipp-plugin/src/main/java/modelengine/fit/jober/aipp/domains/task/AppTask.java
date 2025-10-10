@@ -120,18 +120,18 @@ public class AppTask implements AppTaskRunnable {
     }
 
     /**
-     * 作为实体.
+     * 作为实体。
      *
-     * @return {@link TaskDomainEntity} 对象.
+     * @return {@link TaskDomainEntity} 对象。
      */
     public static TaskDomainEntity asEntity() {
         return new TaskDomainEntity();
     }
 
     /**
-     * 作为创建参数.
+     * 作为创建参数。
      *
-     * @return {@link TaskDomainEntity} 对象
+     * @return {@link TaskDomainEntity} 对象。
      */
     public static TaskDomainEntity asCreateEntity() {
         TaskDomainEntity entity = new TaskDomainEntity();
@@ -144,10 +144,10 @@ public class AppTask implements AppTaskRunnable {
     }
 
     /**
-     * 作为修改参数.
+     * 作为修改参数。
      *
-     * @param taskId 任务唯一标识.
-     * @return {@link TaskDomainEntity} 对象.
+     * @param taskId 任务唯一标识。
+     * @return {@link TaskDomainEntity} 对象。
      */
     public static TaskDomainEntity asUpdateEntity(String taskId) {
         TaskDomainEntity entity = new TaskDomainEntity();
@@ -156,21 +156,21 @@ public class AppTask implements AppTaskRunnable {
     }
 
     /**
-     * 作为查询参数.
+     * 作为查询参数。
      *
-     * @param offset 偏移量.
-     * @param limit 限制.
-     * @return {@link TaskQueryEntity} 对象.
+     * @param offset 偏移量。
+     * @param limit 限制。
+     * @return {@link TaskQueryEntity} 对象。
      */
     public static TaskQueryEntity asQueryEntity(long offset, int limit) {
         return new TaskQueryEntity(offset, limit);
     }
 
     /**
-     * 将entity转换为特定的Entity类型对象.
+     * 将entity转换为特定的Entity类型对象。
      *
-     * @param <T> 代表Entity的类型.
-     * @return 特定的 {@link TaskEntity} 类型.
+     * @param <T> 代表Entity的类型。
+     * @return 特定的 {@link TaskEntity} 类型。
      */
     public <T extends TaskEntity<T>> T getEntity() {
         return ObjectUtils.cast(this.entity);
@@ -312,9 +312,9 @@ public class AppTask implements AppTaskRunnable {
     }
 
     /**
-     * 获取表单配置项集合.
+     * 获取表单配置项集合。
      *
-     * @return {@link List}{@code <}{@link AppBuilderFormProperty}{@code >} 集合.
+     * @return {@link List}{@code <}{@link AppBuilderFormProperty}{@code >} 集合。
      */
     public List<AppBuilderFormProperty> getFormProperties() {
         return UsefulUtils.lazyGet(this.formProperties,
@@ -346,9 +346,9 @@ public class AppTask implements AppTaskRunnable {
     }
 
     /**
-     * 是否处于草稿态.
+     * 是否处于草稿态。
      *
-     * @return true/false.
+     * @return true/false。
      */
     public boolean isDraft() {
         String baseLineVersion = this.entity.getBaseLineVersion();
@@ -357,47 +357,47 @@ public class AppTask implements AppTaskRunnable {
     }
 
     /**
-     * 是否是正常类型任务.
+     * 是否是正常类型任务。
      *
-     * @return true/false.
+     * @return true/false。
      */
     public boolean isNormal() {
         return StringUtils.equalsIgnoreCase(this.entity.getAippType(), NORMAL.name());
     }
 
     /**
-     * 是否处于active状态.
+     * 是否处于active状态。
      *
-     * @return true/false.
+     * @return true/false。
      */
     public boolean isActive() {
         return StringUtils.equals(AippMetaStatusEnum.ACTIVE.getCode(), this.entity.getStatus());
     }
 
     /**
-     * 通过最新的版本判断是否是升级.
+     * 通过最新的版本判断是否是升级。
      *
-     * @param newVersion 最新的版本号.
-     * @return true/false.
+     * @param newVersion 最新的版本号。
+     * @return true/false。
      */
     public boolean isUpgrade(String newVersion) {
         return this.isActive() || !StringUtils.equals(newVersion, this.entity.getVersion());
     }
 
     /**
-     * 判断任务是否属于某个app版本.
+     * 判断任务是否属于某个app版本。
      *
-     * @param appId 应用版本id.
-     * @return true/false.
+     * @param appId 应用版本id。
+     * @return true/false。
      */
     public boolean isBelongApp(String appId) {
         return StringUtils.equals(appId, this.entity.getAppId());
     }
 
     /**
-     * 是否已发布.
+     * 是否已发布。
      *
-     * @return true/false.
+     * @return true/false。
      */
     public boolean isPublished() {
         if (StringUtils.isBlank(this.entity.getAippType()) || StringUtils.isBlank(this.entity.getStatus())) {
@@ -408,9 +408,9 @@ public class AppTask implements AppTaskRunnable {
     }
 
     /**
-     * 停止所有运行中的实例.
+     * 停止所有运行中的实例。
      *
-     * @param context 操作人上下文信息.
+     * @param context 操作人上下文信息。
      */
     public void terminateAllInstances(OperationContext context) {
         String taskId = this.entity.getTaskId();
@@ -434,9 +434,9 @@ public class AppTask implements AppTaskRunnable {
     }
 
     /**
-     * 清理资源.
+     * 清理资源。
      *
-     * @param context 操作人上下文信息.
+     * @param context 操作人上下文信息。
      */
     public void cleanResource(OperationContext context) {
         String previewVersion = this.getEntity().getVersion();
@@ -457,10 +457,10 @@ public class AppTask implements AppTaskRunnable {
     }
 
     /**
-     * 获取所有实例.
+     * 获取所有实例。
      *
      * @param context 操作人上下文信息.
-     * @return {@link AppTaskInstance} 列表.
+     * @return {@link AppTaskInstance} 列表。
      */
     public List<AppTaskInstance> getInstances(OperationContext context) {
         return UsefulUtils.lazyGet(this.instances,
@@ -469,9 +469,9 @@ public class AppTask implements AppTaskRunnable {
     }
 
     /**
-     * 删除task，同时删除相关数据.
+     * 删除task，同时删除相关数据。
      *
-     * @param context 操作人上下文信息.
+     * @param context 操作人上下文信息。
      */
     public void delete(OperationContext context) {
         // 需要先删除instance，再删除task
@@ -483,14 +483,16 @@ public class AppTask implements AppTaskRunnable {
     }
 
     /**
-     * 恢复执行.
+     * 恢复执行。
      *
-     * @param instanceId 实例id.
-     * @param logId 日志id.
-     * @param formArgs 表单参数.
-     * @param context 操作人上下文.
+     * @param instanceId 实例id。
+     * @param logId 日志id。
+     * @param formArgs 表单参数。
+     * @param context 操作人上下文。
+     * @param isGuest 是否是游客模式。
      */
-    public void resume(String instanceId, Long logId, Map<String, Object> formArgs, OperationContext context) {
+    public void resume(String instanceId, Long logId, Map<String, Object> formArgs, OperationContext context,
+                       boolean isGuest) {
         AppTaskInstance instance = this.appTaskInstanceService.getInstanceById(instanceId, context)
                 .orElseThrow(() -> new JobberException(ErrorCodes.UN_EXCEPTED_ERROR,
                         StringUtils.format("App task instance[{0}] not found.", instanceId)));
@@ -503,6 +505,8 @@ public class AppTask implements AppTaskRunnable {
         runContext.setAippType(Optional.ofNullable(this.getEntity().getAippType()).orElse(NORMAL.name()));
         runContext.setTaskInstanceId(instanceId);
         runContext.setHttpContext(JsonUtils.toJsonString(context));
+        runContext.setIsGuest(isGuest);
+        runContext.setAppCreateBy(this.getEntity().getCreator());
 
         // 获取人工节点开始时间戳 [记录人工节点时延]
         runContext.setResumeDuration(

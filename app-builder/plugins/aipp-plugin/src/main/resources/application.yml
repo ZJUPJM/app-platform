@@ -83,6 +83,7 @@ tool:
     FILEEXTRACTNODESTATE: fileExtractionNodeState
     LOOPNODESTATE: loopNodeState
     PARALLELNODESTATE: parallelNodeState
+    TEXTCONCATENATENODESTATE: textConcatenateNodeState
 export-meta:
   version: 1.0.1
 sensitive:
@@ -98,3 +99,5 @@ chat:
   session:
     file:
       path: /var/share/backup/chat-session/
+domain-division:
+  isEnable: false

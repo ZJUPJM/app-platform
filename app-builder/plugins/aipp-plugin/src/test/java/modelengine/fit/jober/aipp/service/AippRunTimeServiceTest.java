@@ -248,7 +248,7 @@ public class AippRunTimeServiceTest {
         };
         Map<String, Object> formArgs = Collections.singletonMap(AippConst.BS_DATA_KEY, businessData);
         Assertions.assertDoesNotThrow(() ->
-                runTimeService.resumeAndUpdateAippInstance(DUMMY_INST_ID, formArgs, 1L, genTestOpContext(), true));
+                runTimeService.resumeAndUpdateAippInstance(DUMMY_INST_ID, formArgs, 1L, genTestOpContext(), true, false));
     }
 
     @Test

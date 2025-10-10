@@ -15,6 +15,7 @@
     <modules>
         <module>aipp-classify-question</module>
         <module>aipp-code</module>
+        <module>aipp-domain-division</module>
         <module>aipp-extractor</module>
         <module>aipp-file-extract-service</module>
         <module>aipp-genericable</module>
@@ -25,6 +26,7 @@
         <module>aipp-prompt-builder</module>
         <module>aipp-rewriter</module>
         <module>aipp-service</module>
+        <module>aipp-template-render-service</module>
         <module>aipp-variable-aggregation</module>
         <module>app-base</module>
         <module>dynamic-form-genericable</module>

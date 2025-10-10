@@ -20,6 +20,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import modelengine.fit.jade.aipp.domain.division.service.DomainDivisionService;
 import modelengine.fit.jade.waterflow.AippFlowDefinitionService;
 import modelengine.fit.jade.waterflow.service.FlowDefinitionService;
 import modelengine.fit.jane.common.entity.OperationContext;
@@ -109,6 +110,9 @@ public class AppBuilderAppServiceImplTest {
     private KnowledgeCenterService knowledgeCenterService;
 
     @Mock
+    private DomainDivisionService domainDivisionService;
+
+    @Mock
     private AppBuilderAppRepository appBuilderAppRepository;
 
     @BeforeEach
@@ -119,7 +123,12 @@ public class AppBuilderAppServiceImplTest {
                 this.appTaskService,
                 this.appVersionService,
                 this.appDomainService,
-                this.appDomainFactory, this.converterFactory, this.knowledgeCenterService, this.appBuilderAppRepository);
+                this.appDomainFactory,
+                this.converterFactory,
+                this.knowledgeCenterService,
+                this.domainDivisionService,
+                true,
+                this.appBuilderAppRepository);
         mockConvertUtils = mockStatic(ConvertUtils.class);
 
     }
@@ -315,6 +324,7 @@ public class AppBuilderAppServiceImplTest {
             Collections.singletonList(mockAppVersion(appPo)), 0, 10, 1L);
         when(appVersionService.pageListByTenantId(condition, tenantId, offset, limit)).thenReturn(mockResultSet);
         when(converterFactory.convert(any(), any())).thenReturn(AppBuilderAppMetadataDto.builder().build());
+        when(this.domainDivisionService.getUserGroupId()).thenReturn("g1");
 
         OperationContext context = new OperationContext();
         context.setTenantId(tenantId);

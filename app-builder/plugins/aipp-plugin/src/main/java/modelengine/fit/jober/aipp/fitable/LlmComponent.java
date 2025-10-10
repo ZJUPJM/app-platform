@@ -7,7 +7,7 @@
 package modelengine.fit.jober.aipp.fitable;
 
 import static modelengine.fit.jade.aipp.prompt.constant.Constant.PROMPT_METADATA_KEY;
-import static modelengine.fit.jober.aipp.constants.AippConst.INST_STATUS_KEY;
+import static modelengine.fit.jober.aipp.constants.AippConst.*;
 import static modelengine.fitframework.inspection.Validation.notNull;
 
 import modelengine.fel.core.chat.ChatMessage;
@@ -24,6 +24,7 @@ import modelengine.fel.tool.mcp.client.McpClient;
 import modelengine.fel.tool.mcp.client.McpClientFactory;
 import modelengine.fel.tool.mcp.entity.Tool;
 import modelengine.fel.tool.model.transfer.ToolData;
+import modelengine.fit.jober.aipp.domains.appversion.service.AppVersionService;
 import modelengine.fit.jober.aipp.enums.MetaInstStatusEnum;
 import modelengine.fit.jober.aipp.util.McpUtils;
 import modelengine.fitframework.inspection.Validation;
@@ -114,6 +115,7 @@ public class LlmComponent implements FlowableService {
     private final AppTaskInstanceService appTaskInstanceService;
     private final McpClientFactory mcpClientFactory;
     private final OutputFormatterChain formatterChain;
+    private final AppVersionService appVersionService;
 
     /**
      * 大模型节点构造器，内部通过提供的 agent 和 tool 构建智能体工作流。
@@ -139,7 +141,7 @@ public class LlmComponent implements FlowableService {
             PromptBuilderChain promptBuilderChain,
             AppTaskInstanceService appTaskInstanceService,
             OutputFormatterChain formatterChain,
-            McpClientFactory mcpClientFactory) {
+            McpClientFactory mcpClientFactory, AppVersionService appVersionService) {
         this.flowInstanceService = flowInstanceService;
         this.toolService = toolService;
         this.aippLogService = aippLogService;
@@ -157,6 +159,7 @@ public class LlmComponent implements FlowableService {
         this.appTaskInstanceService = appTaskInstanceService;
         this.mcpClientFactory = notNull(mcpClientFactory, "The mcp client factory cannot be null.");
         this.formatterChain = formatterChain;
+        this.appVersionService = appVersionService;
     }
 
     /**
@@ -437,6 +440,8 @@ public class LlmComponent implements FlowableService {
         OperationContext opContext = DataUtils.getOpContext(businessData);
         ModelAccessInfo modelAccessInfo = this.aippModelCenter.getModelAccessInfo(accessInfo.get("tag"),
                 accessInfo.get("serviceName"), opContext);
+        Map<String, Object> extensions = new HashMap<>();
+        this.setExtensions(businessData, extensions);
         return ChatOption.custom()
                 .model(accessInfo.get("serviceName"))
                 .baseUrl(modelAccessInfo.getBaseUrl())
@@ -445,7 +450,18 @@ public class LlmComponent implements FlowableService {
                 .apiKey(modelAccessInfo.getAccessKey())
                 .temperature(ObjectUtils.cast(businessData.get("temperature")))
                 .tools(this.buildToolInfos(businessData))
+                .extensions(extensions)
                 .build();
+    }
+
+    private void setExtensions(Map<String, Object> businessData, Map<String, Object> extensions) {
+        if (ObjectUtils.cast(businessData.getOrDefault(CONTEXT_IS_GUEST, false))) {
+            String newUserId = this.appVersionService.getByAppId(ObjectUtils.cast(businessData.get(CONTEXT_APP_ID)))
+                    .map(app -> app.getData().getCreateBy()).orElse(null);
+            extensions.put(AippConst.CONTEXT_USER_ID, businessData.getOrDefault(newUserId, null));
+        } else {
+            extensions.put(AippConst.CONTEXT_USER_ID, businessData.getOrDefault(AippConst.CONTEXT_USER_ID, null));
+        }
     }
 
     private List<ToolInfo> buildToolInfos(Map<String, Object> businessData) {

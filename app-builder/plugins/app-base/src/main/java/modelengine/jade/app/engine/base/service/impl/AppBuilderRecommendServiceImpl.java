@@ -30,7 +30,9 @@ import modelengine.jade.app.engine.base.dto.AppBuilderRecommendDto;
 import modelengine.jade.app.engine.base.service.AppBuilderRecommendService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 猜你想问服务的实现类。
@@ -56,8 +58,12 @@ public class AppBuilderRecommendServiceImpl implements AppBuilderRecommendServic
     @Override
     public List<String> queryRecommends(AppBuilderRecommendDto recommendDto, OperationContext context, boolean isGuest) {
         // 游客模式下，需要查询应用所属用户名下的模型信息
+        Map<String, Object> extensions = new HashMap<>();
         if (isGuest && recommendDto.getAppOwner() != null) {
+            extensions.put(AippConst.CONTEXT_USER_ID, recommendDto.getAppOwner());
             context.setOperator(recommendDto.getAppOwner());
+        } else {
+            extensions.put(AippConst.CONTEXT_USER_ID, context.getOperator());
         }
         ModelAccessInfo defaultModel = this.aippModelCenter.getDefaultModel(AippConst.CHAT_MODEL_TYPE, context);
         ModelAccessInfo modelAccessInfo =
@@ -86,6 +92,7 @@ public class AppBuilderRecommendServiceImpl implements AppBuilderRecommendServic
                                         ? null
                                         : SecureConfig.custom().ignoreTrust(true).build())
                                 .apiKey(modelAccessInfo.getAccessKey())
+                                .extensions(extensions)
                                 .build()))
                 .map(ChatMessage::text)
                 .close();

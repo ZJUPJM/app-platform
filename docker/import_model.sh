@@ -16,5 +16,5 @@ ${SED} "s#BASE_URL#${BASE_URL}#g" ${WORKSPACE}/sql/init/data/tr_init_models.sql
 ${SED} "s#APIKEY#${APIKEY}#g" ${WORKSPACE}/sql/init/data/tr_init_models.sql
 
 if [[ "${OS_TYPE}" == "Darwin" ]]; then
-  rm -f docker/sql/init/data/tr_init_models.sql\'.bak\'
+  rm -f ${WORKSPACE}/sql/init/data/tr_init_models.sql\'.bak\'
 fi

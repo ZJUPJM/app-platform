@@ -25,3 +25,6 @@ fit:
 
 mybatis:
   mapper-locations: 'mapper/*Mapper.xml'
+
+domain-division:
+  isEnable: false

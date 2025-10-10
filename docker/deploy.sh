@@ -10,6 +10,8 @@ mkdir -p app-platform-tmp/fit-runtime
 mkdir -p app-platform-tmp/jade-db
 mkdir -p app-platform-tmp/log
 echo "Starting service..."
-docker-compose up -d
+docker-compose -p app-platform up -d
 echo "Service started"
+docker stop db-initializer
+docker rm db-initializer
 echo "=== Finished ==="
