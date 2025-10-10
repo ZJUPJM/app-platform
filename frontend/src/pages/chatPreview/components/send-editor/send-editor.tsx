@@ -95,6 +95,7 @@ const SendEditor = (props) => {
   const isAutoSend = useRef<any>(false);
   const recommondListRef = useRef<any>([]);
   const isHomepage = location.hash.includes('home');
+  const enableVoiceInput = false;
   const recording = useRef(false);
   const audioBtnRef = useRef<any>(null);
   const audioDomRef = useRef<any>(null);
@@ -400,15 +401,17 @@ const SendEditor = (props) => {
               </Tooltip>
             }
           </div>
-          <Tooltip title={<span style={{ color: '#4d4d4d' }}>{t('recordTip')}</span>} color='white'>
-            <div
-              className='audio-icon'
-              ref={audioDomRef}
-              onClick={onRecord}
-              >
-              <AudioBtn ref={audioBtnRef} />
-            </div>
-          </Tooltip>
+          {enableVoiceInput && (
+            <Tooltip title={<span style={{ color: '#4d4d4d' }}>{t('recordTip')}</span>} color='white'>
+              <div
+                className='audio-icon'
+                ref={audioDomRef}
+                onClick={onRecord}
+                >
+                <AudioBtn ref={audioBtnRef} />
+              </div>
+            </Tooltip>
+          )}
           {showClear && <div className='send-icon clear-icon' onClick={clearContent}><DeleteContentIcon /></div>}
         </div>
       </div>
