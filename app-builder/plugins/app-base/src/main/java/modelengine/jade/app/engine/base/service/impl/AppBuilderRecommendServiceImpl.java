@@ -12,7 +12,9 @@ import com.alibaba.fastjson.JSONException;
 import modelengine.fel.core.chat.ChatMessage;
 import modelengine.fel.core.chat.ChatModel;
 import modelengine.fel.core.chat.ChatOption;
+import modelengine.fel.core.chat.support.ChatMessages;
 import modelengine.fel.core.model.http.SecureConfig;
+import modelengine.fel.core.template.support.HumanMessageTemplate;
 import modelengine.fel.core.util.Tip;
 import modelengine.fel.engine.flows.AiFlows;
 import modelengine.fel.engine.flows.AiProcessFlow;
@@ -56,7 +58,8 @@ public class AppBuilderRecommendServiceImpl implements AppBuilderRecommendServic
     }
 
     @Override
-    public List<String> queryRecommends(AppBuilderRecommendDto recommendDto, OperationContext context, boolean isGuest) {
+    public List<String> queryRecommends(AppBuilderRecommendDto recommendDto, OperationContext context,
+            boolean isGuest) {
         // 游客模式下，需要查询应用所属用户名下的模型信息
         Map<String, Object> extensions = new HashMap<>();
         if (isGuest && recommendDto.getAppOwner() != null) {
@@ -73,33 +76,29 @@ public class AppBuilderRecommendServiceImpl implements AppBuilderRecommendServic
                 + "inside <history></history> XML tags.\n<history>\n{{history}}\n</history>\n\n";
 
         String recommendPrompt = "Please predict the three most likely questions that human would ask, "
-                + "and keeping each question under 20 characters.\n"
-                + "Do not include any explanations, "
+                + "and keeping each question under 20 characters.\n" + "Do not include any explanations, "
                 + "only provide output that strictly following the specified JSON format:\n"
                 + "[\"question1\",\"question2\",\"question3\"]\n";
+        HumanMessageTemplate template = new HumanMessageTemplate(historyPrompt + recommendPrompt);
 
         List<String> res;
         try {
-            AiProcessFlow<Tip, String> flow = AiFlows.<Tip>create()
-                .prompt(Prompts.human(historyPrompt + recommendPrompt))
-                .generate(new ChatBlockModel(chatModelService)
-                        .bind(ChatOption.custom()
-                                .model(model)
-                                .stream(false)
-                                .temperature(0.3)
-                                .baseUrl(modelAccessInfo.getBaseUrl())
-                                .secureConfig(modelAccessInfo.isSystemModel()
-                                        ? null
-                                        : SecureConfig.custom().ignoreTrust(true).build())
-                                .apiKey(modelAccessInfo.getAccessKey())
-                                .extensions(extensions)
-                                .build()))
-                .map(ChatMessage::text)
-                .close();
+            ChatOption option = ChatOption.custom()
+                    .model(model)
+                    .stream(false)
+                    .temperature(0.3)
+                    .baseUrl(modelAccessInfo.getBaseUrl())
+                    .secureConfig(modelAccessInfo.isSystemModel()
+                            ? null
+                            : SecureConfig.custom().ignoreTrust(true).build())
+                    .apiKey(modelAccessInfo.getAccessKey())
+                    .build();
 
-            String chatHistory = "User: " + recommendDto.getQuestion() + '\n' + "Assistant: " + recommendDto.getAnswer()
-                + '\n';
-            String response = flow.converse().offer(Tip.from("history", chatHistory)).await();
+            String chatHistory =
+                    "User: " + recommendDto.getQuestion() + '\n' + "Assistant: " + recommendDto.getAnswer() + '\n';
+            String response =
+                    chatModelService.generate(ChatMessages.from(template.render(Tip.from("history", chatHistory)
+                            .freeze())), option).first().block().get().text();
 
             res = JSONArray.parseArray(ContentProcessUtils.filterReasoningContent(response), String.class);
         } catch (SerializationException | JSONException | IllegalStateException e) {
