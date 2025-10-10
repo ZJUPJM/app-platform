@@ -208,7 +208,14 @@ const ConversationConfiguration = ({ appInfo, updateUserContext, chatRunning, is
         color='#fff'
         overlayClassName={setSpaClassName('configuration-tooltip')}
       >
-        <div className={setSpaClassName('configuration-icon')} onClick={() => setOpen(!open)}></div>
+        <div className="action-btn config-btn" onClick={() => setOpen(!open)}>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M8 2.5C8.41421 2.5 8.75 2.16421 8.75 1.75C8.75 1.33579 8.41421 1 8 1C7.58579 1 7.25 1.33579 7.25 1.75C7.25 2.16421 7.58579 2.5 8 2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M8 9C8.41421 9 8.75 8.66421 8.75 8.25C8.75 7.83579 8.41421 7.5 8 7.5C7.58579 7.5 7.25 7.83579 7.25 8.25C7.25 8.66421 7.58579 9 8 9Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M8 15.5C8.41421 15.5 8.75 15.1642 8.75 14.75C8.75 14.3358 8.41421 14 8 14C7.58579 14 7.25 14.3358 7.25 14.75C7.25 15.1642 7.58579 15.5 8 15.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span>{t('conversationConfig')}</span>
+        </div>
       </Popover>
     }
   </>

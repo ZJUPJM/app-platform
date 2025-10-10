@@ -427,7 +427,7 @@
   "userPromptWordTemplate": "User prompt word template",
   "arrangeType": "Arrangement",
   "generatedTip": "Name and description cannot be empty",
-  "askTip": "How can I help you?",
+  "askTip": "Ask a question or @ another assistant",
   "serchParamsSetting": "Search Parameter Configuration",
   "searchMode": "Search Mode",
   "quoteCap": "Max. Number of References",

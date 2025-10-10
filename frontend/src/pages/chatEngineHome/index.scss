@@ -19,7 +19,51 @@
       flex-direction: column;
     }
     .chat-left-close {
-      width: calc(100% - 380px);
+      width: 40%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+    
+    // 响应式设计 - 使用窗口相对宽度
+    @media (max-width: 1400px) {
+      .chat-left-close {
+        width: 85%;
+        max-width: 1000px;
+        padding: 0 16px;
+      }
+    }
+    
+    @media (max-width: 1200px) {
+      .chat-left-close {
+        width: 80%;
+        max-width: 800px;
+        padding: 0 12px;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .chat-left-close {
+        width: 75%;
+        max-width: 700px;
+        padding: 0 10px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .chat-left-close {
+        width: 90%;
+        max-width: 100%;
+        padding: 0 8px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .chat-left-close {
+        width: 95%;
+        padding: 0 6px;
+      }
     }
     .chat-inner-right {
       width: 360px;

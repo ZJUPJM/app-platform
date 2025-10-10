@@ -7,14 +7,56 @@
     color: #71757f;
   }
   .feed-right {
-    svg {
-      width: 15px;
-      height: 15px;
+    display: flex;
+    align-items: center;
+    
+    .feedback-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
       margin-left: 26px;
       cursor: pointer;
-      &:hover {
+      border-radius: 6px;
+      background-color: transparent;
+      transition: background-color 0.2s ease;
+      
+      svg {
+        width: 14px;
+        height: 14px;
+        
         path {
-          stroke: #2673e5;
+          fill: transparent;
+          stroke: currentColor;
+        }
+      }
+      
+      &:hover {
+        background-color: #DEE4EC;
+      }
+      
+      &:active {
+        background-color: #DEE4EC;
+      }
+      
+      // 点赞后的状态
+      &.liked {
+        background-color: transparent;
+        
+        svg path {
+          fill: #636567;
+          stroke: #ffffff;
+        }
+      }
+      
+      // 点踩后的状态
+      &.unliked {
+        background-color: transparent;
+        
+        svg path {
+          fill: #636567;
+          stroke: #ffffff;
         }
       }
     }

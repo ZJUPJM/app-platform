@@ -98,10 +98,6 @@ const ReceiveBox = (props) => {
   return <>{(
     <div className='receive-box' data-logid={logId}>
       {showCheck && <Checkbox className='check-box' checked={checked} onChange={onChange}></Checkbox>}
-      <div className='user-image'>
-        {isAt ? <Img iconPath={appIcon} /> : <Img iconPath={appInfo.attributes?.icon} />}
-        {isAt ? <span>{appName}</span> : <span>{appInfo.name}</span>}
-      </div>
       <span className={recieveType !== 'form' ? 'receive-info-inner' : 'receive-info-inner receive-info-remote'}>
         {loading ? <Loading /> : setReceiveDom(recieveType)}
         {showIcon && <SendBtn content={content} sendType={recieveType} isRecieve={true} />}

@@ -202,18 +202,136 @@
   .send-editor-container,
   .message-check-toolbox-wrap,
   .message-box {
-    width: calc(100% - 260px);
-    max-width: 1400px;
-    min-width: 700px;
+    width: 40%;
+    max-width: 1200px;
+    min-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+  
+  // 响应式设计 - 使用窗口相对宽度
+  @media (max-width: 1400px) {
+    .chat-details-content,
+    .send-editor-container,
+    .message-check-toolbox-wrap,
+    .message-box {
+      width: 85%;
+      max-width: 1000px;
+      padding: 0 16px;
+    }
+  }
+  
+  @media (max-width: 1200px) {
+    .chat-details-content,
+    .send-editor-container,
+    .message-check-toolbox-wrap,
+    .message-box {
+      width: 80%;
+      max-width: 800px;
+      padding: 0 12px;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .chat-details-content,
+    .send-editor-container,
+    .message-check-toolbox-wrap,
+    .message-box {
+      width: 75%;
+      max-width: 700px;
+      padding: 0 10px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .chat-details-content,
+    .send-editor-container,
+    .message-check-toolbox-wrap,
+    .message-box {
+      width: 90%;
+      max-width: 100%;
+      min-width: 320px;
+      padding: 0 8px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .chat-details-content,
+    .send-editor-container,
+    .message-check-toolbox-wrap,
+    .message-box {
+      width: 95%;
+      padding: 0 6px;
+    }
   }
   .chat-left-close {
     .chat-details-content,
     .message-box,
     .send-editor-container,
     .message-check-toolbox-wrap {
-      width: calc(100% - 260px);
-      max-width: 1200px;
-      min-width: 700px;
+      width: 40%;
+      max-width: 1000px;
+      min-width: 600px;
+      margin: 0 auto;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+    
+    // 响应式设计 - 侧边栏打开时使用更窄的相对宽度
+    @media (max-width: 1400px) {
+      .chat-details-content,
+      .message-box,
+      .send-editor-container,
+      .message-check-toolbox-wrap {
+        width: 80%;
+        max-width: 800px;
+        padding: 0 16px;
+      }
+    }
+    
+    @media (max-width: 1200px) {
+      .chat-details-content,
+      .message-box,
+      .send-editor-container,
+      .message-check-toolbox-wrap {
+        width: 75%;
+        max-width: 700px;
+        padding: 0 12px;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .chat-details-content,
+      .message-box,
+      .send-editor-container,
+      .message-check-toolbox-wrap {
+        width: 70%;
+        max-width: 600px;
+        padding: 0 10px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .chat-details-content,
+      .message-box,
+      .send-editor-container,
+      .message-check-toolbox-wrap {
+        width: 85%;
+        max-width: 100%;
+        min-width: 320px;
+        padding: 0 8px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .chat-details-content,
+      .message-box,
+      .send-editor-container,
+      .message-check-toolbox-wrap {
+        width: 90%;
+        padding: 0 6px;
+      }
     }
   }
 }

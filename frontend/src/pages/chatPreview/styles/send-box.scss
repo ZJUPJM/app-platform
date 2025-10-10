@@ -1,8 +1,8 @@
 .send-box {
   position: relative;
-  margin: 20px 0;
+  margin: 20px 20px;
   .send-info {
-    color: #ffffff;
+    color: #1a1a1a;
     position: relative;
     margin: 16px 0;
     display: flex;
@@ -11,7 +11,7 @@
     .send-info-inner {
       display: inline-block;
       max-width: 100%;
-      background-color: #2673e5;
+      background-color: #f0f4f9;
       padding: 10px 16px;
       font-size: 14px;
       line-height: 25px;
@@ -48,7 +48,7 @@
       white-space: pre-wrap;
     }
     a {
-      color: #e9edfa;
+      color: #2673e5;
       text-decoration: underline;
     }
 
@@ -90,7 +90,7 @@
     }
   }
   .user-image {
-    display: flex;
+    display: none; // 隐藏用户头像和名称
     justify-content: flex-end;
     align-items: center;
     span {

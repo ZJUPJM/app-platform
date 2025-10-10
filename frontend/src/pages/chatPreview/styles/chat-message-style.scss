@@ -7,44 +7,110 @@
   position: relative;
   z-index: 10;
   .message-box {
-    width: 900px;
+    width: 40%;
+    max-width: 900px;
     padding: 0 48px;
     box-sizing: border-box;
     margin: 0 auto;
     margin-top: 30px;
+  }
+  
+  // 响应式设计 - 消息框在中小屏幕上使用相对宽度
+  @media (max-width: 1200px) {
+    .message-box {
+      width: 80%;
+      max-width: 800px;
+      padding: 0 32px;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .message-box {
+      width: 75%;
+      max-width: 700px;
+      padding: 0 24px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .message-box {
+      width: 90%;
+      max-width: 100%;
+      padding: 0 16px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .message-box {
+      width: 95%;
+      padding: 0 12px;
+    }
   }
 }
 .group-active {
   margin-bottom: 30px !important;
   .message-box {
     margin-top: 60px;
-    width: 940px;
-    .send-box {
-      background-color: #252b3a0d;
-      padding-top: 16px;
-      border-top-left-radius: 6px;
-      border-top-right-radius: 6px;
-      padding-right: 16px;
-      .send-info {
-        pointer-events: none;
-        cursor: not-allowed;
-        padding-bottom: 12px;
-      }
+    width: 40%;
+    max-width: 940px;
+  }
+  
+  // 响应式设计 - 激活状态的消息框
+  @media (max-width: 1200px) {
+    .message-box {
+      width: 80%;
+      max-width: 800px;
+      padding: 0 32px;
     }
-    .receive-box {
-      margin-bottom: 12px;
-      background-color: #252b3a0d;
-      padding-left: 50px;
-      padding-right: 16px;
-      padding-top: 12px;
-      margin-top: 0;
-      padding-bottom: 20px;
-      border-bottom-left-radius: 6px;
-      border-bottom-right-radius: 6px;
-      .receive-info-inner {
-        pointer-events: none;
-        cursor: not-allowed;
-      }
+  }
+  
+  @media (max-width: 992px) {
+    .message-box {
+      width: 75%;
+      max-width: 700px;
+      padding: 0 24px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .message-box {
+      width: 90%;
+      max-width: 100%;
+      padding: 0 16px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .message-box {
+      width: 95%;
+      padding: 0 12px;
+    }
+  }
+  .send-box {
+    background-color: #252b3a0d;
+    padding-top: 16px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    padding-right: 16px;
+    .send-info {
+      pointer-events: none;
+      cursor: not-allowed;
+      padding-bottom: 12px;
+    }
+  }
+  .receive-box {
+    margin-bottom: 12px;
+    background-color: #252b3a0d;
+    padding-left: 50px;
+    padding-right: 16px;
+    padding-top: 12px;
+    margin-top: 0;
+    padding-bottom: 20px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    .receive-info-inner {
+      pointer-events: none;
+      cursor: not-allowed;
     }
   }
 }

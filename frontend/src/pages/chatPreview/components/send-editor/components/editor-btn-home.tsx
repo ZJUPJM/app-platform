@@ -273,7 +273,8 @@ const EditorBtnHome = (props) => {
             chatRunning={chatRunning}
             isChatRunning={isChatRunning}
           />
-          {(!atAppId && appId === HOME_APP_ID) && <AtIcon onClick={atClick} />}
+          {/* 隐藏@按钮：按需恢复请取消注释 */}
+          {/* {(!atAppId && appId === HOME_APP_ID) && <AtIcon onClick={atClick} />} */}
         </div>
       </div>
       <div className='inner-right'>
@@ -286,7 +287,8 @@ const EditorBtnHome = (props) => {
             ) :
             (
               <div className='inner-item'>
-                <NotificationIcon onClick={announcementsClick} />
+                {/* 隐藏公告图标：按需恢复请取消注释 */}
+                {/* <NotificationIcon onClick={announcementsClick} /> */}
                 {/* {!isDebug && <HistoryIcon onClick={historyChatClick} />} */}
                 {/*{<div className='multi-conversation-title'>*/}
                 {/*  <span>{t('multiTurnConversation')}</span>*/}

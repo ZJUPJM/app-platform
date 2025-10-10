@@ -165,7 +165,7 @@
     height: 25px;
   }
   .user-image {
-    display: flex;
+    display: none; // 隐藏智能体头像和名称
     align-items: center;
     margin-bottom: 16px;
     img {

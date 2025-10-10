@@ -35,10 +35,6 @@ const SendBox = (props) => {
   return <>{(
     <div className='send-box' data-logid={logId}>
       {showCheck && <Checkbox className='check-box' checked={checked} onChange={onChange}></Checkbox>}
-      <div className='user-image'>
-        <ChatUserIcon />
-        <span>{shareUser || currentUser}</span>
-      </div>
       {
         fileList?.length > 0 && <span className='send-info'>
           <div className='send-info-inner file-send'>

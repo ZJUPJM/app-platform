@@ -3,6 +3,7 @@
   background: #f0f4f9 !important;
   padding: 0 10px !important; // 左右内边距10px
   transition: width 0.3s ease !important;
+  border-right: 1px solid #dadde1;
 
   &.collapsed {
     padding: 0 8px !important; // 折叠状态下减少内边距
@@ -55,7 +56,7 @@
   &-history {
     margin-top: 16px;
     padding-top: 16px;
-    height: calc(100vh - 200px);
+    height: calc(100vh - 210px);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -66,9 +67,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 0px 0px 0px;
+      padding: 12px 0px 12px 0px;
       border-top: 1px solid #e6e9ee;
       color: #333;
+      flex-shrink: 0;
+      min-height: 40px;
     }
     
     // 展开态：为用户信息增加左侧内边距
@@ -163,12 +166,12 @@
   .ant-menu-item {
     display: flex;
     align-items: center;
-    height: 28px !important;
-    line-height: 28px !important;
+    height: 36px !important;
+    line-height: 36px !important;
     margin: 2px 0 !important;
     border-radius: 6px !important;
     padding: 0 16px !important;
-    color: #666666 !important;
+    color: #333333 !important;
     font-size: 14px !important;
     font-weight: 400 !important;
     transition: all 0.2s ease !important;
