@@ -31,10 +31,13 @@ import java.util.stream.Collectors;
 @Component("customAippModelCenter")
 public class CustomAippModelCenter implements AippModelCenterExtension {
     private static final Logger LOG = Logger.get(CustomAippModelCenter.class);
+    private static final String JADE = "Jade";
 
     private final UserModelRepo userModelRepo;
 
     private final AippModelCenterExtension defaultModelCenter;
+
+    private OperationContext jadeContext;
 
     /**
      * 构造方法。
@@ -46,13 +49,16 @@ public class CustomAippModelCenter implements AippModelCenterExtension {
             @Fit(alias = "defaultAippModelCenter") AippModelCenterExtension defaultModelCenter) {
         this.userModelRepo = userModelRepo;
         this.defaultModelCenter = defaultModelCenter;
+        this.jadeContext = new OperationContext();
+        this.jadeContext.setOperator(JADE);
     }
 
     @Override
     public ModelListDto fetchModelList(String type, String scene, OperationContext context) {
         LOG.info("[Custom][fetchModelList] operator={}, type={}, scene={}.", context.getOperator(), type, scene);
         List<ModelPo> modelList = this.userModelRepo.listModelsByUserId(context.getOperator(), type);
-        if (CollectionUtils.isEmpty(modelList)) {
+        List<ModelPo> jadeModelList = this.userModelRepo.listModelsByUserId(this.jadeContext.getOperator(), type);
+        if (CollectionUtils.isEmpty(modelList) && CollectionUtils.isEmpty(jadeModelList)) {
             if (this.defaultModelCenter == null) {
                 return ModelListDto.builder().models(Collections.emptyList()).total(0).build();
             }
@@ -67,6 +73,14 @@ public class CustomAippModelCenter implements AippModelCenterExtension {
                         .type(po.getType())
                         .build())
                 .collect(Collectors.toList());
+        modelDtoList.addAll(jadeModelList.stream()
+                .map(po -> ModelAccessInfo.builder()
+                        .serviceName(po.getName())
+                        .baseUrl(po.getBaseUrl())
+                        .tag(CustomTag.pack(this.jadeContext, po))
+                        .type(po.getType())
+                        .build())
+                .toList());
         return ModelListDto.builder().models(modelDtoList).total(modelDtoList.size()).build();
     }
 
@@ -77,7 +91,11 @@ public class CustomAippModelCenter implements AippModelCenterExtension {
         // context暂时不使用，当前内置工具调用大模型场景用不了，统一基于tag特殊处理。
         CustomTag customTag = CustomTag.unpack(tag);
         if (customTag == null) {
-            return this.defaultModelCenter.getModelAccessInfo(tag, modelName, context);
+            ModelAccessInfo modelAccessInfo = this.defaultModelCenter.getModelAccessInfo(tag, modelName, context);
+            if (modelAccessInfo != null) {
+                return modelAccessInfo;
+            }
+            return this.defaultModelCenter.getModelAccessInfo(tag, modelName, jadeContext);
         }
         ModelAccessPo accessInfo = this.userModelRepo.getModelAccessInfo(customTag.userId, customTag.tag, modelName);
         if (accessInfo == null) {
@@ -95,6 +113,9 @@ public class CustomAippModelCenter implements AippModelCenterExtension {
     public ModelAccessInfo getDefaultModel(String type, OperationContext context) {
         LOG.info("[Custom][getDefaultModel] operator={}, type={}.", context.getOperator(), type);
         ModelPo defaultModel = this.userModelRepo.getDefaultModel(context.getOperator(), type);
+        if (defaultModel == null) {
+            defaultModel = this.userModelRepo.getDefaultModel(jadeContext.getOperator(), type);
+        }
         if (defaultModel == null) {
             return this.defaultModelCenter.getDefaultModel(type, context);
         }
