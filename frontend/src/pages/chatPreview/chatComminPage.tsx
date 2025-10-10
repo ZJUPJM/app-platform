@@ -90,7 +90,7 @@ const CommonChat = (props: any) => {
           console.warn('Invalid message data received:', e.data);
           return;
         }
-        
+
         if (data.type === 'ready') {
           handleReady();
         } else if (data.type === 'back') {
@@ -113,7 +113,7 @@ const CommonChat = (props: any) => {
       console.warn('AppInfo not loaded yet, skipping iframe message');
       return;
     }
-    
+
     const memoryConfig = findConfigValue(appInfo, 'memory');
     let params = {
       tenantId: TENANT_ID,

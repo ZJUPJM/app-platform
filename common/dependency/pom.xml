@@ -14,9 +14,9 @@
         <java.version>17</java.version>
 
         <!-- Framework version -->
-        <fit.version>3.5.1</fit.version>
-        <fel.version>3.5.1</fel.version>
-        <waterflow.core.version>3.5.1</waterflow.core.version>
+        <fit.version>3.5.3</fit.version>
+        <fel.version>3.5.3</fel.version>
+        <waterflow.core.version>3.5.3</waterflow.core.version>
         <waterflow.version>1.0.0-SNAPSHOT</waterflow.version>
         <carver.version>1.0.0-SNAPSHOT</carver.version>
         <store.version>1.0.0-SNAPSHOT</store.version>
@@ -42,7 +42,7 @@
         <druid.version>1.2.20</druid.version>
         <fastjson.version>1.2.83</fastjson.version>
         <jackson.version>2.16.2</jackson.version>
-        <lombok.version>1.18.26</lombok.version>
+        <lombok.version>1.18.30</lombok.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <mybatis.version>3.5.13</mybatis.version>
         <slf4j.version>2.0.12</slf4j.version>
@@ -58,6 +58,7 @@
         <influxdb.version>2.24</influxdb.version>
         <aws.version>1.12.468</aws.version>
         <opencsv.version>5.7.1</opencsv.version>
+        <fastexcel.version>1.1.0</fastexcel.version>
 
         <!-- Test framework versions -->
         <assertj.version>3.22.0</assertj.version>
@@ -68,6 +69,7 @@
 
         <!-- Not Necessary versions -->
         <commons-io.version>2.16.1</commons-io.version>
+        <file-extract.version>1.0.0-SNAPSHOT</file-extract.version>
 
     </properties>
 
@@ -357,6 +359,11 @@
             </dependency>
             <dependency>
                 <groupId>modelengine.jade.service</groupId>
+                <artifactId>aipp-domain-division-service</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>modelengine.jade.service</groupId>
                 <artifactId>aipp-output-formatter-service</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
@@ -368,6 +375,16 @@
             <dependency>
                 <groupId>modelengine.jade.service</groupId>
                 <artifactId>aipp-extractor-service</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>modelengine.fit.jade</groupId>
+                <artifactId>aipp-file-extract-service</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>modelengine.jade.service</groupId>
+                <artifactId>aipp-template-render-service</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
 
@@ -559,6 +576,11 @@
                 <artifactId>opencsv</artifactId>
                 <version>${opencsv.version}</version>
             </dependency>
+            <dependency>
+                <groupId>cn.idev.excel</groupId>
+                <artifactId>fastexcel</artifactId>
+                <version>${fastexcel.version}</version>
+            </dependency>
 
             <!-- Not Necessary -->
             <dependency>
@@ -585,6 +607,11 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-scratchpad</artifactId>
                 <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>modelengine.fit.jade.plugin</groupId>
+                <artifactId>aipp-file-extract-excel</artifactId>
+                <version>${file-extract.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.squareup.okhttp3</groupId>

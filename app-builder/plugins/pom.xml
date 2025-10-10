@@ -15,9 +15,11 @@
     <modules>
         <module>aipp-classify-question</module>
         <module>aipp-code</module>
+        <module>aipp-domain-division</module>
         <module>aipp-custom-model-center</module>
         <module>aipp-document-extract-node</module>
         <module>aipp-extractor</module>
+        <module>aipp-file-extract-excel</module>
         <module>aipp-http-call</module>
         <module>aipp-loop-tool</module>
         <module>aipp-memory</module>
@@ -28,13 +30,15 @@
         <module>aipp-plugin</module>
         <module>aipp-prompt-builder</module>
         <module>aipp-rewriter</module>
+        <module>aipp-template-render</module>
+        <module>aipp-text-concatenation</module>
         <module>aipp-variable-aggregation</module>
+        <module>aipp-variable-updater</module>
         <module>aipp-websocket-plugin</module>
         <module>app-announcement</module>
         <module>app-base</module>
         <module>app-metrics</module>
         <module>app-metrics-influxdb</module>
-        <module>edm-knowledge</module>
         <module>eval-dataset</module>
         <module>eval-task</module>
         <module>flow-graph-db-driver</module>

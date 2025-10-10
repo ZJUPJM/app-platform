@@ -25,9 +25,51 @@
 
 ---------
 
-## 安装数据库
+## 快速启动
 
-### Windows 系统
+### 1. 前置条件
+
+| 名称     | 规格                         |
+|--------|----------------------------|
+| CPU    | 2+ 核心                      |
+| CPU 架构 | x86                        |
+| 内存     | 4+ GB                      |
+| 软件     | 安装 Docker & Docker Compose |
+
+### 2. Docker Compose 启动
+克隆项目并进入项目根目录，执行以下命令：/ Clone the repository and enter the project root directory, then run the following commands:
+```shell
+# 用户按需配置环境变量，例如模型名称、基础 URL 和 APIKEY等 / Configure environment variables as needed, including model name, base URL and APIKEY
+cp docker/.env.example docker/.env
+bash docker/deploy.sh
+```
+> 容器全部 Running 后，浏览器打开 http://localhost:8001 体验
+
+> 如需修改数据库密码，二次启动前需要删除`docker/app-platform-tmp`目录
+
+## 本地快速开发测试
+本章节给出快速启动之后，本地快速开发测试的方法。
+
+### 1. 编译代码
+编写代码，在项目根目录下，执行以下命令编译：
+```shell
+mvn clean install
+```
+
+### 2. 一键部署修改
+在项目根目录下，执行以下命令快速部署：
+```shell
+bash docker/dev-app-builder.sh
+```
+
+### 3. 测试
+浏览器打开 http://localhost:8001 测试
+
+## 源码编译启动
+
+### 安装数据库
+
+#### Windows 系统
 
 - 下载并安装 [PostgresSQL](https://www.postgresql.org/download/) （**支持版本 ≥ 14**）
 - 初始化数据。进入 `shell` 目录，使用 `bash` 工具执行 `build_win.sh`（当前不支持 `cmd` 执行，待规划）：
@@ -39,11 +81,11 @@ sh build_win.sh ${ip} ${port} ${username} ${password}
 
 其中参数 ip、port、username、password 分别指的是数据库主机地址、数据库端口、数据用户名、数据库密码。该文件会初始化数据库内置数据，以及人工表单功能所需的数据。
 
-### Linux 系统
+#### Linux 系统
 
 待规划
 
-## 后端环境配置
+### 后端环境配置
 
 开发环境配置
 
@@ -105,7 +147,6 @@ app-builder/
 │   └── template.zip
 ```
 
-
 加入数据库配置项，修改后的配置项如下所示：
 
 ```yml
@@ -142,16 +183,24 @@ app-engine:
 在框架输出目录的 `bin` 目录下执行启动命令
 
 ```
-fit start -Dfit.profiles.active=prod
+fit start
 ```
 
 > 这里直接使用了 `fit` 命令，该命令请参考 `fit-framework` 项目的[指导手册](https://github.com/ModelEngine-Group/fit-framework/blob/main/docs/framework/fit/java/quick-start-guide/03.%20%E4%BD%BF%E7%94%A8%E6%8F%92%E4%BB%B6%E7%9A%84%E7%83%AD%E6%8F%92%E6%8B%94%E8%83%BD%E5%8A%9B.md)。
 > 
-> 当前，`app-platform` 使用了 `fit` 的 3.5.1 版本，因此，如果采用手动编译，需要在 `fit-framework` 仓库中切换到 `v3.5.1` 标签处进行编译构建操作。
+> 当前，`app-platform` 使用了 `fit` 的 3.5.3 版本，因此，如果采用手动编译，需要在 `fit-framework` 仓库中切换到 `v3.5.3` 标签处进行编译构建操作。
+
+**调试命令**
+
+```
+fit debug
+```
+
+> 这里的调试命令背后使用了 Java 内置的远程调试命令，通过该技术，可以在进程启动之后，在 `IDEA` 中绑定启动端口进行远程调试。
 
 ---------
 
-## 前端环境配置
+### 前端环境配置
 
 - 开发环境：`WebStorm`、`Visual Studio Code`
 

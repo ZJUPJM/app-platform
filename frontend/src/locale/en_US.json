@@ -1298,14 +1298,14 @@
           "description": "Prompt template"
         }
       },
-      "UsrFeedbackDto": {
+      "UserFeedbackDto": {
         "instanceId": {
           "description": "Instance ID"
         },
-        "usrFeedback": {
+        "userFeedback": {
           "description": "User feedback -1 No feedback 0 Like 1 Dislike"
         },
-        "usrFeedbackText": {
+        "userFeedbackText": {
           "description": "User feedback text"
         },
         "id": {
@@ -1685,6 +1685,28 @@
       "90002965": "Parent node of form property does not exist.",
       "90002973": "Invalid path format.",
       "90002998": "License expired."
-    }
-  }
+    },
+    "guestMode": "Guest Mode",
+    "guestTips": "Guest mode has no access authentication, there are potential threats such as data leakage, please use with caution.",
+    "wrongAddr": "Access address error",
+    "wrongAddrMsg": "Please visit the correct address"
+  },
+  "inputType": "Input",
+  "numberType": "Number",
+  "dropdownType": "Dropdown",
+  "switchType": "Switch",
+  "multiselectType": "Multi Select",
+  "maxLength": "Max Length",
+  "option": "option",
+  "plsEnterOption": "Please enter an option",
+  "optionShouldBeUnique": "Options should be unique",
+  "addOption": "Add option",
+  "maxValue": "Max Value",
+  "minValue": "Min Value",
+  "addParamField": "Add Param",
+  "editParamField": "Edit Param",
+  "varName": "Param Name",
+  "plsEnterVarName": "Please enter param name",
+  "attributeVarNameMustBeUnique": "Enter a unique param name.",
+  "noDefaultValue": "No default value"
 }

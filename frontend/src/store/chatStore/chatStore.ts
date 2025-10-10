@@ -14,6 +14,7 @@ import {
   SET_NO_AUTH,
   SET_USER_ROLE,
   SET_PLUGIN_LIST,
+  SET_CURRENT_ANSWER,
   SET_KNOWLEDGE_CONFIG,
   SET_SHOW_CHAT_HISTORY
 } from './action-types';
@@ -62,6 +63,9 @@ export const setNoAuth = (item) => {
 }
 export const setPluginList = (item) => {
   return { type: SET_PLUGIN_LIST, payload: item }
+}
+export const setCurrentAnswer = (item) => {
+  return { type: SET_CURRENT_ANSWER, payload: item }
 }
 export const setKnowledgeConfig = (item) => {
   return { type: SET_KNOWLEDGE_CONFIG, payload: item }

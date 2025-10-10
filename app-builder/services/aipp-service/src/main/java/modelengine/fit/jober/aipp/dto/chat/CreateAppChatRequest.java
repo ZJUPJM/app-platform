@@ -73,5 +73,8 @@ public class CreateAppChatRequest {
 
         @Property(description = "产品的id信息", name = "dimension_id")
         private String dimensionId;
+
+        @Property(description = "是否是游客模式访问", name = "is_guest")
+        private boolean isGuest;
     }
 }

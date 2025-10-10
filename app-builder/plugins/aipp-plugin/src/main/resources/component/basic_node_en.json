@@ -55,6 +55,11 @@
     "uniqueName": ""
   },
   {
+    "type": "variableUpdaterNodeState",
+    "name": "Variable Updater",
+    "uniqueName": ""
+  },
+  {
     "type": "fileExtractionNodeState",
     "name": "File Extraction",
     "uniqueName": ""
@@ -72,6 +77,16 @@
   {
     "type": "parallelNodeState",
     "name": "Parallel",
+    "uniqueName": ""
+  },
+  {
+    "type": "textConcatenateNodeState",
+    "name": "Text Joiner",
+    "uniqueName": ""
+  },
+  {
+    "type": "replyNodeState",
+    "name": "Reply",
     "uniqueName": ""
   }
 ]

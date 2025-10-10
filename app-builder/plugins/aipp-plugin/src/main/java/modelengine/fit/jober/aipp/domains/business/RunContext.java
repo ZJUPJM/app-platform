@@ -17,6 +17,8 @@ import static modelengine.fit.jober.aipp.constants.AippConst.BS_AIPP_VERSION_KEY
 import static modelengine.fit.jober.aipp.constants.AippConst.BS_CHAT_ID;
 import static modelengine.fit.jober.aipp.constants.AippConst.BS_HTTP_CONTEXT_KEY;
 import static modelengine.fit.jober.aipp.constants.AippConst.BS_META_VERSION_ID_KEY;
+import static modelengine.fit.jober.aipp.constants.AippConst.CONTEXT_APP_CREATE_BY;
+import static modelengine.fit.jober.aipp.constants.AippConst.CONTEXT_IS_GUEST;
 import static modelengine.fit.jober.aipp.constants.AippConst.CONTEXT_USER_ID;
 import static modelengine.fit.jober.aipp.constants.AippConst.PARENT_CALLBACK_ID;
 import static modelengine.fit.jober.aipp.constants.AippConst.PARENT_INSTANCE_ID;
@@ -107,8 +109,9 @@ public class RunContext {
      */
     public RunContext businessDeepClone() {
         return new RunContext(
-                this.businessData.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
-                this.getOperationContext());
+                new HashMap<>(this.businessData),
+                this.getOperationContext()
+        );
     }
 
     /**
@@ -176,12 +179,30 @@ public class RunContext {
     }
 
     /**
+     * 设置是否是游客模式。
+     *
+     * @param isGuest 表示是否是游客模式。
+     */
+    public void setIsGuest(boolean isGuest) {
+        this.businessData.put(CONTEXT_IS_GUEST, isGuest);
+    }
+
+    /**
+     * 设置应用创建者。
+     *
+     * @param appCreateBy 表示应用创建者
+     */
+    public void setAppCreateBy(String appCreateBy) {
+        this.businessData.put(CONTEXT_APP_CREATE_BY, appCreateBy);
+    }
+
+    /**
      * 获取应用id.
      *
      * @return 应用id.
      */
     public String getAppSuiteId() {
-        return ObjectUtils.cast(this.businessData.get(AippConst.ATTR_AIPP_TYPE_KEY));
+        return ObjectUtils.cast(this.businessData.get(AippConst.BS_AIPP_ID_KEY));
     }
 
     /**
@@ -235,7 +256,7 @@ public class RunContext {
      * @return aipp类型.
      */
     public String getAippType() {
-        return ObjectUtils.cast(this.businessData.get(AippConst.ATTR_AIPP_TYPE_KEY));
+        return ObjectUtils.cast(this.businessData.get(ATTR_AIPP_TYPE_KEY));
     }
 
     /**
@@ -272,7 +293,7 @@ public class RunContext {
      * @param restartMode restart模式.
      */
     public void setRestartMode(String restartMode) {
-        this.businessData.put(AippConst.RESTART_MODE, restartMode);
+        this.businessData.put(RESTART_MODE, restartMode);
     }
 
     /**
@@ -290,7 +311,7 @@ public class RunContext {
      * @param question 问题.
      */
     public void setQuestion(String question) {
-        this.businessData.put(AippConst.BS_AIPP_QUESTION_KEY, question);
+        this.businessData.put(BS_AIPP_QUESTION_KEY, question);
     }
 
     /**
@@ -299,7 +320,7 @@ public class RunContext {
      * @return {@link String} 对象
      */
     public String getRestartMode() {
-        return ObjectUtils.cast(this.businessData.get(AippConst.RESTART_MODE));
+        return ObjectUtils.cast(this.businessData.get(RESTART_MODE));
     }
 
     /**

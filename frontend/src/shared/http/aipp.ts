@@ -172,7 +172,6 @@ export function getLatestChatId(tenantId, params) {
 // 文件上传
 export function uploadChatFile(tenantId, appId = '', data, headers) {
   return post(`${AIPP_URL}/${tenantId}/file?aipp_id=${appId}`, data, { ...headers, 'Content-Type': 'multipart/form-data' });
-
 }
 // 多文件上传
 export function uploadMultipleFile(tenantId, appId, data) {
@@ -235,6 +234,10 @@ export function getApiDocument() {
 // 恢复应用到某个发布版本
 export function resetApp(tenantId, appId, params, headers) {
   return post(`${AIPP_URL}/${tenantId}/app/${appId}/recover`, params, headers);
+}
+// 更新应用是否打开游客模式
+export function updateGuestConfig(tenantId, path, allowGuest) {
+  return put(`${AIPP_URL}/${tenantId}/app/guest/${path}?allow_guest=${allowGuest}`);
 }
 
 // 独立部署使用

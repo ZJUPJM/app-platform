@@ -18,6 +18,7 @@ import static modelengine.fit.jober.aipp.constants.AippConst.ATTR_AIPP_TYPE_KEY;
 import static modelengine.fit.jober.aipp.constants.AippConst.ATTR_APP_IS_UPDATE;
 import static modelengine.fit.jober.aipp.constants.AippConst.ATTR_META_STATUS_KEY;
 import static modelengine.fit.jober.aipp.constants.AippConst.BS_AIPP_QUESTION_KEY;
+import static modelengine.fit.jober.aipp.constants.AippConst.CONTEXT_IS_GUEST;
 import static modelengine.fit.jober.aipp.constants.AippConst.RESTART_MODE;
 import static modelengine.fit.jober.aipp.enums.AippMetaStatusEnum.ACTIVE;
 import static modelengine.fit.jober.aipp.enums.AippTypeEnum.NORMAL;
@@ -604,6 +605,10 @@ public class AppVersion {
         runContext.setUserContext(mergedRestartParams);
         runContext.putAllToBusiness(mergedRestartParams);
         runContext.setQuestion(this.getQuestion(appLog.getLogData()));
+        runContext.setIsGuest(ObjectUtils.cast(restartParams.getOrDefault(CONTEXT_IS_GUEST, false)));
+        AppVersion appVersion = this.appVersionRepository.selectById(mostRecentRsp.getAppId())
+                .orElseThrow(() -> new AippException(APP_NOT_FOUND_WHEN_CHAT));
+        runContext.setAppCreateBy(appVersion.getData().getCreateBy());
         if (chatList.size() == 2) {
             runContext.setAtChatId(chatList.get(1).getChatId());
         }
@@ -697,7 +702,7 @@ public class AppVersion {
      * @return true/false.
      */
     public boolean isUpdated() {
-        return ObjectUtils.cast(this.attributes.getOrDefault(AippConst.ATTR_APP_IS_UPDATE, true));
+        return ObjectUtils.cast(this.attributes.getOrDefault(ATTR_APP_IS_UPDATE, true));
     }
 
     /**
@@ -974,7 +979,7 @@ public class AppVersion {
      */
     public void putAttributes(Map<String, Object> attributes) {
         this.attributes.putAll(attributes);
-        this.attributes.put(AippConst.ATTR_APP_IS_UPDATE, true);
+        this.attributes.put(ATTR_APP_IS_UPDATE, true);
     }
 
     /**

@@ -14,6 +14,7 @@ import {
   SET_READ_ONLY,
   SET_NO_AUTH,
   SET_PLUGIN_LIST,
+  SET_CURRENT_ANSWER,
   SET_KNOWLEDGE_CONFIG,
   SET_SHOW_CHAT_HISTORY
 } from './action-types';
@@ -34,6 +35,7 @@ const initialState = {
   readOnly: false,
   noAuth: false,
   pluginList: [],
+  currentAnswer: '',
   knowledgeConfig: null,
   showChatHistory: false
 }
@@ -70,6 +72,8 @@ const chatReducers = (state = initialState, action) => {
       return { ...state, noAuth: action.payload };
     case SET_PLUGIN_LIST:
       return { ...state, pluginList: action.payload };
+    case SET_CURRENT_ANSWER:
+      return { ...state, currentAnswer: action.payload };
     case SET_KNOWLEDGE_CONFIG:
       return { ...state, knowledgeConfig: action.payload };
     case SET_SHOW_CHAT_HISTORY:

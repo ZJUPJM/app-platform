@@ -231,6 +231,16 @@ public class AippConst {
     public static final String BS_AIPP_ID_KEY = "aipp_id";
 
     /**
+     * context isGuest key
+     */
+    public static final String CONTEXT_IS_GUEST = "isGuest";
+
+    /**
+     * context appCreateBy key
+     */
+    public static final String CONTEXT_APP_CREATE_BY = "appCreateBy";
+
+    /**
      * business dimension key
      */
     public static final String BS_DIMENSION_ID_KEY = "dimension_id";

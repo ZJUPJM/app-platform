@@ -55,6 +55,11 @@
     "uniqueName": ""
   },
   {
+    "type": "variableUpdaterNodeState",
+    "name": "变量更新",
+    "uniqueName": ""
+  },
+  {
     "type": "fileExtractionNodeState",
     "name": "文件提取",
     "uniqueName": ""
@@ -72,6 +77,16 @@
   {
     "type": "parallelNodeState",
     "name": "并行",
+    "uniqueName": ""
+  },
+  {
+    "type": "textConcatenateNodeState",
+    "name": "文本拼接",
+    "uniqueName": ""
+  },
+  {
+    "type": "replyNodeState",
+    "name": "直接回复",
     "uniqueName": ""
   }
 ]

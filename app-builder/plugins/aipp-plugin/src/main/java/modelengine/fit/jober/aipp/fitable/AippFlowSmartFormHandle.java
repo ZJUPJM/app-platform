@@ -7,7 +7,8 @@
 package modelengine.fit.jober.aipp.fitable;
 
 import static modelengine.fit.jober.aipp.constants.AippConst.BS_NODE_ID_KEY;
-import static modelengine.fit.jober.aipp.constants.AippConst.BUSINESS_DATA_INTERNAL_KEY;
+import static modelengine.fit.jober.aipp.constants.AippConst.CONTEXT_IS_GUEST;
+import static modelengine.fit.waterflow.common.Constant.BUSINESS_DATA_INTERNAL_KEY;
 
 import modelengine.fit.jane.common.entity.OperationContext;
 import modelengine.fit.jade.waterflow.FlowInstanceService;
@@ -111,6 +112,7 @@ public class AippFlowSmartFormHandle implements FlowSmartFormService {
             formDataMap.put(BUSINESS_DATA_INTERNAL_KEY, businessData.get(BUSINESS_DATA_INTERNAL_KEY));
         }
         formDataMap.put(BS_NODE_ID_KEY, nodeId);
+        formDataMap.put(CONTEXT_IS_GUEST, businessData.getOrDefault(CONTEXT_IS_GUEST, false));
         String logId = this.insertFormLog(appVersion.getFormProperties(), sheetId, businessData, formDataMap);
         AppChatRsp appChatRsp = AppChatRsp.builder()
                 .chatId(chatId)
@@ -177,7 +179,7 @@ public class AippFlowSmartFormHandle implements FlowSmartFormService {
         Object appearance = formDataMap.get(AippConst.FORM_APPEARANCE_KEY);
         logData.setFormAppearance(ObjectUtils.cast(JsonUtils.toJsonString(appearance)));
         logData.setFormData(ObjectUtils.cast(JsonUtils.toJsonString(formDataMap.get(AippConst.FORM_DATA_KEY))));
-        return this.aippLogService.insertLogWithInterception(AippInstLogType.FORM.name(), logData, businessData);
+        return this.aippLogService.insertLog(AippInstLogType.FORM.name(), logData, businessData);
     }
 
     private void updateInstance(String sheetId, String nodeId, Map<String, Object> businessData) {

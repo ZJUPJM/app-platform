@@ -11,7 +11,7 @@ import static modelengine.fit.jober.aipp.common.exception.AippErrCode.OBTAIN_APP
 import static modelengine.fit.jober.aipp.common.exception.AippErrCode.QUERY_PUBLICATION_HISTORY_FAILED;
 
 import io.opentelemetry.api.trace.Span;
-import lombok.RequiredArgsConstructor;
+import modelengine.fit.jade.aipp.domain.division.service.DomainDivisionService;
 import modelengine.fit.jane.common.entity.OperationContext;
 import modelengine.fit.jane.common.response.Rsp;
 import modelengine.fit.jober.aipp.common.exception.AippErrCode;
@@ -47,6 +47,7 @@ import modelengine.fit.jober.aipp.dto.template.TemplateInfoDto;
 import modelengine.fit.jober.aipp.factory.AppTemplateFactory;
 import modelengine.fit.jober.aipp.factory.CheckerFactory;
 import modelengine.fit.jober.aipp.genericable.entity.AippCreate;
+import modelengine.fit.jober.aipp.repository.AppBuilderAppRepository;
 import modelengine.fit.jober.aipp.service.AppBuilderAppService;
 import modelengine.fit.jober.aipp.service.Checker;
 import modelengine.fit.jober.aipp.service.UploadedFileManageService;
@@ -55,6 +56,7 @@ import modelengine.fit.jober.aipp.util.RandomPathUtils;
 import modelengine.fit.jober.common.RangedResultSet;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.annotation.Fitable;
+import modelengine.fitframework.annotation.Value;
 import modelengine.fitframework.log.Logger;
 import modelengine.fitframework.transaction.Transactional;
 import modelengine.fitframework.util.StringUtils;
@@ -78,7 +80,6 @@ import java.util.stream.Collectors;
  * @since 2024-04-17
  */
 @Component
-@RequiredArgsConstructor
 public class AppBuilderAppServiceImpl
         implements AppBuilderAppService, modelengine.fit.jober.aipp.genericable.AppBuilderAppService {
     private static final Logger log = Logger.get(AppBuilderAppServiceImpl.class);
@@ -93,6 +94,29 @@ public class AppBuilderAppServiceImpl
     private final AppFactory appDomainFactory;
     private final ConverterFactory converterFactory;
     private final KnowledgeCenterService knowledgeCenterService;
+    private final DomainDivisionService domainDivisionService;
+    private final boolean isEnableDomainDivision;
+    private final AppBuilderAppRepository appBuilderAppRepository;
+
+    public AppBuilderAppServiceImpl(AppTemplateFactory templateFactory,
+            UploadedFileManageService uploadedFileManageService, AppTaskService appTaskService,
+            AppVersionService appVersionService, AppDomainService appDomainService, AppFactory appDomainFactory,
+            ConverterFactory converterFactory, KnowledgeCenterService knowledgeCenterService,
+            DomainDivisionService domainDivisionService,
+            @Value("${domain-division.isEnable}") boolean isEnableDomainDivision,
+            AppBuilderAppRepository appBuilderAppRepository) {
+        this.templateFactory = templateFactory;
+        this.uploadedFileManageService = uploadedFileManageService;
+        this.appTaskService = appTaskService;
+        this.appVersionService = appVersionService;
+        this.appDomainService = appDomainService;
+        this.appDomainFactory = appDomainFactory;
+        this.converterFactory = converterFactory;
+        this.knowledgeCenterService = knowledgeCenterService;
+        this.domainDivisionService = domainDivisionService;
+        this.isEnableDomainDivision = isEnableDomainDivision;
+        this.appBuilderAppRepository = appBuilderAppRepository;
+    }
 
     @Override
     @Fitable(id = "default")
@@ -128,6 +152,9 @@ public class AppBuilderAppServiceImpl
         });
         if (appVersion.isPublished()) {
             throw new AippException(AippErrCode.APP_HAS_PUBLISHED);
+        }
+        if (this.isEnableDomainDivision) {
+            appDto.setUserGroupId(this.domainDivisionService.getUserGroupId());
         }
         appVersion.publish(new PublishContext(appDto, contextOf));
         return Rsp.ok(AippCreateDto.builder()
@@ -201,7 +228,9 @@ public class AppBuilderAppServiceImpl
         if (cond == null) {
             cond = new AppQueryCondition();
         }
-        cond.setCreateBy(context.getOperator());
+        if (this.isEnableDomainDivision) {
+            cond.setUserGroupId(this.domainDivisionService.getUserGroupId());
+        }
         RangedResultSet<AppVersion> result =
                 this.appVersionService.pageListByTenantId(cond, context.getTenantId(), offset, limit);
         List<AppBuilderAppMetadataDto> metaDtoList = result.getResults()
@@ -374,5 +403,12 @@ public class AppBuilderAppServiceImpl
         currentApp.cloneVersion(resetApp);
         this.appVersionService.update(currentApp);
         return this.converterFactory.convert(currentApp, AppBuilderAppDto.class);
+    }
+
+    @Override
+    @Transactional
+    @Fitable(id = "default")
+    public void updateGuestMode(String path, Boolean isGuest) {
+        this.appBuilderAppRepository.updateGuestMode(path, isGuest);
     }
 }
