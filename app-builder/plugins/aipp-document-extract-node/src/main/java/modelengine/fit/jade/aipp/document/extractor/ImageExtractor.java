@@ -108,7 +108,7 @@ public class ImageExtractor implements BaseExtractor {
             LOG.error("Chat model response is empty.");
             return StringUtils.EMPTY;
         }
-        String ans = messages.get(0).text();
+        String ans = removeThinkTag(messages.get(0).text());
         LOG.debug("question={} ans={}", ObjectUtils.<String>cast(chatMessages.messages().get(0).text()), ans);
         return ans;
     }
@@ -116,5 +116,29 @@ public class ImageExtractor implements BaseExtractor {
     @Override
     public FileType type() {
         return FileType.IMAGE;
+    }
+
+    private static String removeThinkTag(String content) {
+        if (content == null || content.isEmpty()) {
+            return content;
+        }
+
+        int thinkStart = content.indexOf("<think>");
+        if (thinkStart == -1) {
+            return content;
+        }
+        int thinkEnd = content.lastIndexOf("</think>");
+        if (thinkEnd == -1) {
+            return content;
+        }
+        thinkEnd += "</think>".length();
+        if (thinkStart > thinkEnd) {
+            return content;
+        }
+
+        String beforeThink = content.substring(0, thinkStart);
+        String afterThink = content.substring(thinkEnd);
+
+        return beforeThink + afterThink;
     }
 }
