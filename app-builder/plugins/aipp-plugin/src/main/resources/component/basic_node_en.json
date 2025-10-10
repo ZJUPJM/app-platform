@@ -55,11 +55,6 @@
     "uniqueName": ""
   },
   {
-    "type": "textToImageNodeState",
-    "name": "Image Generation",
-    "uniqueName": ""
-  },
-  {
     "type": "fileExtractionNodeState",
     "name": "File Extraction",
     "uniqueName": ""
