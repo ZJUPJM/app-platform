@@ -109,8 +109,9 @@ public class RunContext {
      */
     public RunContext businessDeepClone() {
         return new RunContext(
-                this.businessData.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
-                this.getOperationContext());
+                new HashMap<>(this.businessData),
+                this.getOperationContext()
+        );
     }
 
     /**
