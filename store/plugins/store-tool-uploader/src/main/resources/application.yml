@@ -9,3 +9,5 @@ store:
       maxPluginNumber: 3000
       maxStorageRatio: 0.9
       toolsPath: '/var/store/tools/'
+domain-division:
+  isEnable: false

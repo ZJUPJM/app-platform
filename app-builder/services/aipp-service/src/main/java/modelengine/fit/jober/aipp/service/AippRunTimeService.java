@@ -74,10 +74,11 @@ public interface AippRunTimeService {
      * @param logId 日志id
      * @param context 操作上下文
      * @param isDebug 是否是调试状态
+     * @param isGuest 是否是游客模式
      * @return SSE流
      */
     Choir<Object> resumeAndUpdateAippInstance(String instanceId, Map<String, Object> formArgs, Long logId,
-            OperationContext context, boolean isDebug);
+            OperationContext context, boolean isDebug, boolean isGuest);
 
     /**
      * 表单的实例终止

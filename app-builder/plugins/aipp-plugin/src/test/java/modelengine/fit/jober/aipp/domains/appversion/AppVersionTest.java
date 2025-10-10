@@ -702,6 +702,8 @@ public class AppVersionTest {
 
             // when.
             AtomicReference<RunContext> contextAtomicReference = new AtomicReference<>();
+            when(AppVersionTest.this.appVersionRepository.selectById(anyString())).thenReturn(
+                    Optional.of(appVersion));
             appVersion.restart(instance, new HashMap<>(), null, new OperationContext(),
                     contextAtomicReference::set);
 
@@ -754,6 +756,7 @@ public class AppVersionTest {
                     .appSuiteId("app_1")
                     .appId("app_version_2")
                     .version("1.0.2")
+                    .createBy("Jade")
                     .build());
 
             doNothing().when(AppVersionTest.this.appChatRepository).saveChat(any(), any());

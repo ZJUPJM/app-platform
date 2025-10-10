@@ -20,10 +20,12 @@ import {
   TextExtractionIcon,
   HttpIcon,
   VariableAggregation,
+  VariableUpdater,
   TextToImageIcon,
   FileExtractionIcon,
   LoopIcon,
   PairingIcon,
+  TextConcatenateIcon,
 } from '@/assets/icon';
 import { handleClickAddBasicNode, handleDragBasicNode } from '../utils'
 
@@ -55,12 +57,14 @@ const BasicItems = (props: any) => {
       'questionClassificationNodeCondition': <ClassificationIcon />,
       'httpNodeState': <HttpIcon />,
       'variableAggregationNodeState': <VariableAggregation />,
+      'variableUpdaterNodeState': <VariableUpdater />,
       'textToImageNodeState': <TextToImageIcon />,
       'fileExtractionNodeState': <FileExtractionIcon />,
       'noteNode': <ClassificationIcon />,
       'loopNodeState': <LoopIcon />,
       'manualCheckNodeState': <ManualCheckIcon />,
-      'parallelNodeState': <PairingIcon />
+      'parallelNodeState': <PairingIcon />,
+      'textConcatenateNodeState':  <TextConcatenateIcon />
     }[type];
   }
   return <>

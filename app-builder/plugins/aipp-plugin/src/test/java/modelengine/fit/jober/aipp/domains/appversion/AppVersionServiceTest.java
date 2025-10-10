@@ -29,6 +29,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import modelengine.fit.jade.aipp.domain.division.service.DomainDivisionService;
 import modelengine.fit.jane.common.entity.OperationContext;
 import modelengine.fit.jober.aipp.common.exception.AippException;
 import modelengine.fit.jober.aipp.common.exception.AippParamException;
@@ -69,17 +70,12 @@ import modelengine.fit.jober.aipp.util.JsonUtils;
 import modelengine.fit.jober.common.RangedResultSet;
 import modelengine.fitframework.flowable.Choir;
 import modelengine.fitframework.util.MapBuilder;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * {@link AppVersionService} 的测试类。
@@ -103,6 +99,7 @@ public class AppVersionServiceTest {
     private AppVersionFactory appVersionFactory;
     private AppBuilderAppMapper appBuilderAppMapper;
     private IconConverter iconConverter;
+    private DomainDivisionService domainDivisionService;
 
 
     @BeforeEach
@@ -120,10 +117,14 @@ public class AppVersionServiceTest {
         this.formPropertyRepository = mock(AppBuilderFormPropertyRepository.class);
         this.configPropertyRepository = mock(AppBuilderConfigPropertyRepository.class);
         this.appTaskService = mock(AppTaskService.class);
+        this.domainDivisionService = mock(DomainDivisionService.class);
         this.appVersionService = new AppVersionServiceImpl(this.appVersionRepository, this.appChatRepository,
                 this.appTaskInstanceService, this.uploadedFileManageService, this.configRepository,
                 this.flowGraphRepository, this.formPropertyRepository, this.configPropertyRepository,
-                this.appTaskService, this.appVersionFactory, AppVersionServiceTest.NAME_LENGTH_MAXIMUM);
+                this.appTaskService,
+                this.appVersionFactory,
+                this.domainDivisionService,
+                AppVersionServiceTest.NAME_LENGTH_MAXIMUM, true);
     }
 
     @Test
@@ -218,8 +219,9 @@ public class AppVersionServiceTest {
         doNothing().when(this.appChatRepository).saveChat(any(), any());
 
         // when.
-        Choir<Object> choir = this.appVersionService.run(
-                CreateAppChatRequest.builder().question("123").appId("app_version_1").build(), new OperationContext());
+        CreateAppChatRequest request = CreateAppChatRequest.builder().context(new CreateAppChatRequest.Context())
+                .question("123").appId("app_version_1").build();
+        Choir<Object> choir = this.appVersionService.run(request, new OperationContext());
         choir.subscribe();
 
         // then.
@@ -242,8 +244,9 @@ public class AppVersionServiceTest {
         doNothing().when(this.appChatRepository).saveChat(any(), any());
 
         // when.
-        Choir<Object> choir = this.appVersionService.debug(
-                CreateAppChatRequest.builder().question("123").appId("app_version_1").build(), new OperationContext());
+        CreateAppChatRequest request = CreateAppChatRequest.builder().context(new CreateAppChatRequest.Context())
+                .question("123").appId("app_version_1").build();
+        Choir<Object> choir = this.appVersionService.debug(request, new OperationContext());
         choir.subscribe((subscription, o) -> {
             // then.
             ArgumentCaptor<RunContext> captor = ArgumentCaptor.forClass(RunContext.class);
@@ -306,6 +309,7 @@ public class AppVersionServiceTest {
         when(config.getConfigProperties()).thenReturn(Collections.emptyList());
         when(this.appVersionFactory.create(any(), any())).thenReturn(result);
         when(this.appBuilderAppMapper.selectWithId(anyString())).thenReturn(data);
+        when(this.domainDivisionService.getUserGroupId()).thenReturn("g1");
         this.mockSave();
 
         // when.
@@ -355,6 +359,7 @@ public class AppVersionServiceTest {
         appTemplate.setFlowGraphId("graph_1");
         appTemplate.setAttributes(new HashMap<>());
         AppVersion res = this.appVersionService.createByTemplate(appTemplate, new OperationContext());
+        when(this.domainDivisionService.getUserGroupId()).thenReturn("g1");
 
         // then.
         assertEquals("config_1", res.getData().getConfigId());

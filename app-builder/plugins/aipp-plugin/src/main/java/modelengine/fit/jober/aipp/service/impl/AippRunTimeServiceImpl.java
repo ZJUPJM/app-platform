@@ -364,7 +364,7 @@ public class AippRunTimeServiceImpl
     @Override
     @Transactional
     public Choir<Object> resumeAndUpdateAippInstance(String instanceId, Map<String, Object> formArgs, Long logId,
-            OperationContext context, boolean isDebug) {
+            OperationContext context, boolean isDebug, boolean isGuest) {
         String taskId = this.appTaskInstanceService.getTaskId(instanceId);
         AppTask appTask = this.appTaskService.getTaskById(taskId, context)
                 .orElseThrow(() -> new JobberException(ErrorCodes.UN_EXCEPTED_ERROR,
@@ -374,7 +374,7 @@ public class AippRunTimeServiceImpl
         return Choir.create(emitter -> {
             this.appChatSessionService.addSession(instanceId,
                     new ChatSession<>(emitter, appTask.getEntity().getAppId(), isDebug, locale));
-            appTask.resume(instanceId, logId, formArgs, context);
+            appTask.resume(instanceId, logId, formArgs, context, isGuest);
         });
     }
 

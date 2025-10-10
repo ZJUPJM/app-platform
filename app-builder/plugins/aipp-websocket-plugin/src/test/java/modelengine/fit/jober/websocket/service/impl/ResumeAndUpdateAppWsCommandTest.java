@@ -49,7 +49,7 @@ public class ResumeAndUpdateAppWsCommandTest {
                 any(),
                 any(),
                 any(),
-                anyBoolean())).thenReturn(Choir.just("111"));
+                anyBoolean(), anyBoolean())).thenReturn(Choir.just("111"));
         UpdateChatParams params = UpdateChatParams.builder()
                 .tenantId("123")
                 .instanceId("456")

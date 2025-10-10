@@ -98,7 +98,7 @@ public class AppRunTimeController extends AbstractController {
                 formArgs,
                 resumeAippDto.getLogId(),
                 this.contextOf(httpRequest, resumeAippDto.getTenantId()),
-                resumeAippDto.isDebug());
+                resumeAippDto.isDebug(), false);
     }
 
     /**

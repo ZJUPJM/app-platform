@@ -29,6 +29,7 @@ import modelengine.fit.jober.aipp.common.exception.AippErrCode;
 import modelengine.fit.jober.aipp.common.exception.AippException;
 import modelengine.fit.jober.aipp.common.exception.AippParamException;
 import modelengine.fit.jober.aipp.common.exception.AippTaskNotFoundException;
+import modelengine.fit.jober.aipp.constants.AippConst;
 import modelengine.fit.jober.aipp.dto.AippCreateDto;
 import modelengine.fit.jober.aipp.dto.AppBuilderAppDto;
 import modelengine.fit.jober.aipp.dto.AppBuilderPromptCategoryDto;
@@ -40,14 +41,10 @@ import modelengine.fit.jober.aipp.dto.chat.CreateAppChatRequest;
 import modelengine.fit.jober.aipp.dto.chat.QueryChatRequest;
 import modelengine.fit.jober.aipp.dto.chat.QueryChatRspDto;
 import modelengine.fit.jober.aipp.genericable.AppBuilderAppService;
-import modelengine.fit.jober.aipp.service.AippChatService;
-import modelengine.fit.jober.aipp.service.AippLogService;
-import modelengine.fit.jober.aipp.service.AippRunTimeService;
-import modelengine.fit.jober.aipp.service.AppBuilderPromptService;
-import modelengine.fit.jober.aipp.service.AppChatService;
-import modelengine.fit.jober.aipp.service.FileService;
+import modelengine.fit.jober.aipp.service.*;
 import modelengine.fit.jober.aipp.util.AippFileUtils;
 import modelengine.fit.jober.aipp.util.ConvertUtils;
+import modelengine.fit.jober.aipp.validation.GuestValidator;
 import modelengine.fit.jober.common.RangedResultSet;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.annotation.Property;
@@ -86,6 +83,7 @@ public class AppBuilderGuestController extends AbstractController {
     private final AppBuilderRecommendService recommendService;
     private final FileService fileService;
     private final AippChatService aippChatService;
+    private final GuestValidator guestValidator;
 
     /**
      * 用限校验认的证器对象 {@link Authenticator}， 应用通用服务 {@link AppBuilderAppService}，对话服务 {@link AppChatService}，实例历史记录服务
@@ -104,12 +102,13 @@ public class AppBuilderGuestController extends AbstractController {
      * @param recommendService 表示猜你想问服务的 {@link AppBuilderRecommendService}。
      * @param fileService 表示文件服务的 {@link FileService}。
      * @param aippChatService 表示应用聊天服务的 {@link AippChatService}。
+     * @param guestValidator 表示游客模式的校验器的 {@link GuestValidator}。
      */
     public AppBuilderGuestController(Authenticator authenticator, AppBuilderAppService appGenericable,
             AppChatService appChatService, AippLogService aippLogService,
             AppBuilderPromptService appBuilderPromptService, AippRunTimeService aippRunTimeService,
             UserFeedbackService userFeedbackService, AppBuilderRecommendService recommendService, FileService fileService,
-            AippChatService aippChatService) {
+            AippChatService aippChatService, GuestValidator guestValidator) {
         super(authenticator);
         this.appGenericable = appGenericable;
         this.appChatService = appChatService;
@@ -120,6 +119,7 @@ public class AppBuilderGuestController extends AbstractController {
         this.recommendService = recommendService;
         this.fileService = fileService;
         this.aippChatService = aippChatService;
+        this.guestValidator = guestValidator;
     }
 
     /**
@@ -160,6 +160,8 @@ public class AppBuilderGuestController extends AbstractController {
     public Choir<Object> chat(HttpClassicServerRequest httpRequest, @PathVariable("tenant_id") String tenantId,
             @RequestBody CreateAppChatRequest body) throws AippTaskNotFoundException {
         this.validateChat(httpRequest, body);
+        this.guestValidator.validateByAppId(body.getAppId());
+        body.getContext().setGuest(true);
         return this.appChatService.chat(body, this.contextOf(httpRequest, tenantId), false);
     }
 
@@ -177,6 +179,7 @@ public class AppBuilderGuestController extends AbstractController {
     public Rsp<List<AippInstLogDataDto>> queryChatRecentChatLog(HttpClassicServerRequest httpRequest,
             @PathVariable("tenant_id") String tenantId, @PathVariable("app_id") String appId,
             @PathVariable("chat_id") String chatId) {
+        this.guestValidator.validateByAppId(appId);
         return Rsp.ok(this.aippLogService.queryChatRecentChatLog(chatId, appId, this.contextOf(httpRequest, tenantId)));
     }
 
@@ -191,6 +194,7 @@ public class AppBuilderGuestController extends AbstractController {
     @GetMapping(path = "/{tenant_id}/app/{app_id}/latest_published", description = "获取 app 最新发布版本信息")
     public Rsp<AippCreateDto> latestPublished(HttpClassicServerRequest httpRequest,
             @PathVariable("tenant_id") String tenantId, @PathVariable("app_id") String appId) {
+        this.guestValidator.validateByAppId(appId);
         return Rsp.ok(ConvertUtils.toAippCreateDto(this.appGenericable.queryLatestPublished(appId,
                 this.contextOf(httpRequest, tenantId))));
     }
@@ -206,6 +210,7 @@ public class AppBuilderGuestController extends AbstractController {
     @GetMapping(value = "/{tenant_id}/{app_id}", description = "查询 app ")
     public Rsp<AppBuilderAppDto> query(HttpClassicServerRequest httpRequest, @PathVariable("tenant_id") String tenantId,
             @PathVariable("app_id") String appId) {
+        this.guestValidator.validateByAppId(appId);
         return Rsp.ok(this.appGenericable.query(appId, this.contextOf(httpRequest, tenantId)));
     }
 
@@ -222,6 +227,7 @@ public class AppBuilderGuestController extends AbstractController {
     public Rsp<List<AppBuilderPromptCategoryDto>> listCategories(HttpClassicServerRequest httpRequest,
             @PathVariable("tenant_id") String tenantId, @PathVariable("app_id") String appId,
             @RequestParam(value = "isDebug", defaultValue = "true", required = false) boolean isDebug) {
+        this.guestValidator.validateByAppId(appId);
         return this.appBuilderPromptService.listPromptCategories(appId, this.contextOf(httpRequest, tenantId), isDebug);
     }
 
@@ -240,6 +246,7 @@ public class AppBuilderGuestController extends AbstractController {
             @PathVariable("tenant_id") String tenantId, @PathVariable("app_id") String appId,
             @PathVariable("category_id") String categoryId,
             @RequestParam(value = "isDebug", defaultValue = "true", required = false) boolean isDebug) {
+        this.guestValidator.validateByAppId(appId);
         return this.appBuilderPromptService.queryInspirations(appId,
                 categoryId,
                 this.contextOf(httpRequest, tenantId),
@@ -261,6 +268,7 @@ public class AppBuilderGuestController extends AbstractController {
     public Rsp<Void> addMyInspiration(HttpClassicServerRequest httpRequest, @PathVariable("tenant_id") String tenantId,
             @PathVariable("parent_id") String parentId, @SpanAttr("app_id") @PathVariable("app_id") String appId,
             @RequestBody AppBuilderPromptDto.AppBuilderInspirationDto inspirationDto) {
+        this.guestValidator.validateByAppId(appId);
         this.appBuilderPromptService.addCustomInspiration(appId,
                 parentId,
                 inspirationDto,
@@ -286,6 +294,7 @@ public class AppBuilderGuestController extends AbstractController {
             @SpanAttr("app_id") @PathVariable("app_id") String appId,
             @SpanAttr("inspiration_id") @PathVariable("inspiration_id") String inspirationId,
             @RequestBody AppBuilderPromptDto.AppBuilderInspirationDto inspirationDto) {
+        this.guestValidator.validateByAppId(appId);
         this.appBuilderPromptService.updateCustomInspiration(appId,
                 categoryId,
                 inspirationId,
@@ -310,6 +319,7 @@ public class AppBuilderGuestController extends AbstractController {
             @PathVariable("tenant_id") String tenantId, @PathVariable("category_id") String categoryId,
             @SpanAttr("app_id") @PathVariable("app_id") String appId,
             @SpanAttr("inspiration_id") @PathVariable("inspiration_id") String inspirationId) {
+        this.guestValidator.validateByAppId(appId);
         this.appBuilderPromptService.deleteCustomInspiration(appId,
                 categoryId,
                 inspirationId,
@@ -332,6 +342,7 @@ public class AppBuilderGuestController extends AbstractController {
             @PathVariable("tenant_id") String tenantId,
             @PathVariable("instance_id") @SpanAttr("instance_id") String instanceId,
             @RequestBody Map<String, Object> msgArgs) {
+        this.guestValidator.validateByInstanceId(instanceId);
         return Rsp.ok(this.aippRunTimeService.terminateInstance(instanceId,
                 msgArgs,
                 this.contextOf(httpRequest, tenantId)));
@@ -354,6 +365,7 @@ public class AppBuilderGuestController extends AbstractController {
             @PathVariable("tenant_id") String tenantId,
             @PathVariable("instance_id") @SpanAttr("instance_id") String instanceId,
             @RequestBody Map<String, Object> msgArgs, @PathVariable("log_id") Long logId) {
+        this.guestValidator.validateByInstanceId(instanceId);
         return Rsp.ok(this.aippRunTimeService.terminateInstance(instanceId,
                 msgArgs,
                 logId,
@@ -368,7 +380,8 @@ public class AppBuilderGuestController extends AbstractController {
      */
     @CarverSpan(value = "operation.aippLog.deleteHistory")
     @DeleteMapping(path = "/{app_id}/log/logs", description = "删除指定的应用对话记录")
-    public Rsp<Void> deleteLogs(@RequestBody List<Long> logIds) {
+    public Rsp<Void> deleteLogs(@RequestBody List<Long> logIds, @PathVariable("app_id") String appId) {
+        this.guestValidator.validateByAppId(appId);
         Span.current().setAttribute("logIds", logIds.toString());
         this.aippLogService.deleteLogs(logIds);
         return Rsp.ok();
@@ -393,6 +406,7 @@ public class AppBuilderGuestController extends AbstractController {
     @PatchMapping("/feedback/{instanceId}")
     public void updateUserFeedback(@PathVariable("instanceId") String instanceId,
             @RequestBody UserFeedbackDto userFeedbackDto) {
+        this.guestValidator.validateByInstanceId(instanceId);
         this.userFeedbackService.updateOne(instanceId, userFeedbackDto);
     }
 
@@ -403,6 +417,7 @@ public class AppBuilderGuestController extends AbstractController {
      */
     @DeleteMapping("/feedback/{instanceId}")
     public void deleteByLogId(@PathVariable("instanceId") String instanceId) {
+        this.guestValidator.validateByInstanceId(instanceId);
         this.userFeedbackService.deleteByLogId(instanceId);
     }
 
@@ -424,6 +439,7 @@ public class AppBuilderGuestController extends AbstractController {
      */
     @GetMapping("/feedback/{instanceId}")
     public UserFeedbackDto getAllAnswerByInstanceId(@PathVariable("instanceId") String instanceId) {
+        this.guestValidator.validateByInstanceId(instanceId);
         return this.userFeedbackService.getUserFeedbackByInstanceId(instanceId);
     }
 
@@ -442,6 +458,8 @@ public class AppBuilderGuestController extends AbstractController {
     public Choir<Object> restartChat(HttpClassicServerRequest httpRequest, @PathVariable("tenant_id") String tenantId,
             @PathVariable("current_instance_id") @SpanAttr("current_instance_id") String currentInstanceId,
             @RequestBody Map<String, Object> additionalContext) {
+        this.guestValidator.validateByInstanceId(currentInstanceId);
+        additionalContext.put(AippConst.CONTEXT_IS_GUEST, true);
         return this.appChatService.restartChat(currentInstanceId,
                 additionalContext,
                 this.contextOf(httpRequest, tenantId));
@@ -474,6 +492,7 @@ public class AppBuilderGuestController extends AbstractController {
     public Rsp<List<FileRspDto>> batchUploadFile(HttpClassicServerRequest httpRequest,
             @PathVariable("tenant_id") String tenantId, @RequestParam(value = "app_id", required = false) String appId,
             PartitionedEntity receivedFiles) {
+        this.guestValidator.validateByAppId(appId);
         OperationContext context = this.contextOf(httpRequest, tenantId);
         List<FileRspDto> fileRspDtos = AippFileUtils.getFileEntity(receivedFiles).stream().map(fileEntity -> {
             try {
@@ -519,6 +538,7 @@ public class AppBuilderGuestController extends AbstractController {
     public Rsp<Void> deleteChat(HttpClassicServerRequest httpRequest, @PathVariable("tenant_id") String tenantId,
             @RequestParam(value = "app_id", required = false) String appId,
             @RequestBody(value = "chat_id", required = false) @SpanAttr("chat_id") String chatIds) {
+        this.guestValidator.validateByAppId(appId);
         this.aippChatService.deleteChat(chatIds, appId, this.contextOf(httpRequest, tenantId));
         return Rsp.ok();
     }
@@ -556,11 +576,12 @@ public class AppBuilderGuestController extends AbstractController {
             @RequestBean ResumeAippDto resumeAippDto,
             @Property(description = "用户填写的表单信息", example = "用户选择的大模型信息") @RequestBody
             Map<String, Object> formArgs) {
+        this.guestValidator.validateByInstanceId(resumeAippDto.getInstanceId());
         return this.aippRunTimeService.resumeAndUpdateAippInstance(resumeAippDto.getInstanceId(),
                 formArgs,
                 resumeAippDto.getLogId(),
                 this.contextOf(httpRequest, resumeAippDto.getTenantId()),
-                resumeAippDto.isDebug());
+                resumeAippDto.isDebug(), true);
     }
 
     /**
@@ -576,6 +597,7 @@ public class AppBuilderGuestController extends AbstractController {
     @DeleteMapping(path = "/{tenant_id}/log/app/{app_id}", description = "清除appId查询实例的全部历史记录")
     public Rsp<Void> deleteInstanceLog(HttpClassicServerRequest httpRequest, @PathVariable("tenant_id") String tenantId,
             @PathVariable("app_id") @SpanAttr("app_id") String appId, @RequestParam("type") String type) {
+        this.guestValidator.validateByAppId(appId);
         this.aippLogService.deleteAippInstLog(appId, type, this.contextOf(httpRequest, tenantId));
         return Rsp.ok();
     }

@@ -60,10 +60,12 @@ const SendIcon = (props) => <Icon component={() => (<BaseIcons.Send />)} {...pro
 const ConfigurationIcon = (props) => <Icon component={() => (<BaseIcons.Configuration />)} {...props} />;
 const HttpIcon = (props) => <Icon component={() => (<BaseIcons.Http />)} {...props} />;
 const VariableAggregation = (props) => <Icon component={() => (<BaseIcons.VariableAggregation />)} {...props} />;
+const VariableUpdater = (props) => <Icon component={() => (<BaseIcons.VariableUpdater />)} {...props} />;
 const TextToImageIcon = (props) => <Icon component={() => (<BaseIcons.TextToImage />)} {...props} />;
 const FileExtractionIcon = (props) => <Icon component={() => (<BaseIcons.FileExtraction />)} {...props} />;
 const LoopIcon = (props) => <Icon component={() => (<BaseIcons.Loop />)} {...props} />;
 const PairingIcon = (props) => <Icon component={() => (<BaseIcons.Pairing />)} {...props} />;
+const TextConcatenateIcon = (props) => <BaseIcons.TextConcatenate {...props} />;
 
 export {
   LeftArrowIcon,
@@ -118,9 +120,11 @@ export {
   ConfigurationIcon,
   HttpIcon,
   VariableAggregation,
+  VariableUpdater,
   TextToImageIcon,
   FileExtractionIcon,
   LoopIcon,
-  PairingIcon
+  PairingIcon,
+  TextConcatenateIcon
 }
 

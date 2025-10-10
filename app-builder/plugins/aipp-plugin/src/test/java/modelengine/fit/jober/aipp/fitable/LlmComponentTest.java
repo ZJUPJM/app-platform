@@ -243,7 +243,7 @@ public class LlmComponentTest {
                 this.promptBuilderChain,
                 this.appTaskInstanceService,
                 this.formatterChain,
-                this.mcpClientFactory);
+                this.mcpClientFactory, null);
 
         // mock
         CountDownLatch countDownLatch = mockFailAsyncJob(flowInstanceService);
@@ -409,7 +409,7 @@ public class LlmComponentTest {
                 this.promptBuilderChain,
                 this.appTaskInstanceService,
                 this.formatterChain,
-                this.mcpClientFactory);
+                this.mcpClientFactory, null);
     }
 
     private void prepareModel() {

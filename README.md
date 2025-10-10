@@ -180,13 +180,15 @@ app-engine:
 
 **启动命令**
 
+在框架输出目录的 `bin` 目录下执行启动命令
+
 ```
 fit start
 ```
 
 > 这里直接使用了 `fit` 命令，该命令请参考 `fit-framework` 项目的[指导手册](https://github.com/ModelEngine-Group/fit-framework/blob/main/docs/framework/fit/java/quick-start-guide/03.%20%E4%BD%BF%E7%94%A8%E6%8F%92%E4%BB%B6%E7%9A%84%E7%83%AD%E6%8F%92%E6%8B%94%E8%83%BD%E5%8A%9B.md)。
 > 
-> 当前，`app-platform` 使用了 `fit` 的 3.5.1 版本，因此，如果采用手动编译，需要在 `fit-framework` 仓库中切换到 `v3.5.1` 标签处进行编译构建操作。
+> 当前，`app-platform` 使用了 `fit` 的 3.5.3 版本，因此，如果采用手动编译，需要在 `fit-framework` 仓库中切换到 `v3.5.3` 标签处进行编译构建操作。
 
 **调试命令**
 
@@ -208,7 +210,7 @@ fit debug
 
 **修改 ELSA 依赖地址**
 
-进入目录 `app-engine\frontend` ，搜索 `package.json` 文件的 ELSA 依赖地址：
+进入目录 `app-platform/frontend` ，搜索 `package.json` 文件的 ELSA 依赖地址：
 
 ```
 "dependencies": {
@@ -220,12 +222,12 @@ fit debug
 
 **修改代理文件**
 
-修改 `AppPlatform/frontend` 目录下的 `proxy.config.json` 文件，可以修改需要访问的后端地址。如本地后端地址是 `http://127.0.0.1:8080` 。可以按照如下示例配置：
+修改 `app-platform/frontend` 目录下的 `proxy.config.json` 文件，可以修改需要访问的后端地址。如本地后端地址是 `http://127.0.0.1:8080` 。可以按照如下示例配置：
 
 ```json
 {
     "/api": {
-       "target": "http://127.0.0.1:5520",
+       "target": "http://127.0.0.1:8080",
        "secure": false,
        "changeOrigin": true,
        "pathRewrite": {
@@ -238,14 +240,16 @@ fit debug
 **依赖安装**
 
 ```
-cd app-engine/frontend/
+cd app-platform/frontend/
 npm install
 ```
 
 **打包构建**
 
+在 `package.json` 中定义了多种打包脚本，这里以 `build:single` 为例：
+
 ```
-npm run build
+npm run build:single
 ```
 
 **启动命令**
@@ -260,15 +264,15 @@ npm run start
 
 在对话中使用大模型功能，需要对模型进行配置，包括大模型的地址和鉴权信息。
 首先在首页的`应用市场`一栏中找到 `模型配置应用`，并点击该应用。点击右上角`创意灵感` 的`开始配置`，如下图所示：
-![image_config_model](doc/images/readme/model_config_inspiration.png)
+![model_config_inspiration](docs/images/readme/model_config_inspiration.png)
 然后点击回答的 `添加模型` 按钮，输入模型名称、API Key 和模型地址，并点击确认。此时模型添加成功。
 
 **应用创建**
 
 在首页的`应用开发`一栏中点击`创建空白应用`。如下所示：
-![image_create_app](doc/images/readme/app_create.png)
+![app_create](docs/images/readme/app_create.png)
 输入所要创建的应用名称和简介，并点击 `创建`按钮，即可创建 AI 应用。接着在跳转后的应用配置页面上，在 `大模型` 一栏中选择自定义配置的模型。此时即可在对话框进行对话。如下所示：
-![image_app_chat](doc/images/readme/app_chat.png)
+![app_chat](docs/images/readme/app_chat.png)
 
 ## 文档
 
