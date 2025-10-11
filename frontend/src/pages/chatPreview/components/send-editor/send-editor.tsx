@@ -480,7 +480,7 @@ const SendEditor = (props: any) => {
         {/* 隐藏的 EditorBtnHome 组件，仅用于设置上传功能 */}
         <div style={{ display: 'none' }}>
           <EditorBtnHome
-            display={display}
+            display={false}
             setOpenHistory={setOpenHistory}
             clear={onClear}
             fileList={fileList}
