@@ -796,7 +796,14 @@ const ChatPreview = (props) => {
               setEditorShow={setEditorShow}
               inspirationOpen={inspirationOpen}
               checkMutipleInput={checkMutipleInput}
-              updateUserContext={(val) => setUserContext(val)}
+              updateUserContext={(val) => {
+                if (typeof val === 'function') {
+                  setUserContext(val);
+                } else {
+                  setUserContext(val);
+                }
+              }}
+              userContext={userContext}
               setChatFileList={handleUpdateFileList}
               checkFileSuccess={checkFileSuccess}
             />

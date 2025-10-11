@@ -383,6 +383,14 @@ const SendEditor = (props: any) => {
     setMultiFileConfig(findConfigValue(appInfo, 'multimodal') || {});
   }, [appInfo]);
 
+  // 同步userContext中的think和search状态到本地状态
+  useEffect(() => {
+    if (props.userContext) {
+      setThinkActive(!!props.userContext.think);
+      setSearchActive(!!props.userContext.search);
+    }
+  }, [props.userContext]);
+
   // 深度思考按钮点击事件
   const handleThinkClick = () => {
     if (isChatRunning()) {
@@ -391,14 +399,13 @@ const SendEditor = (props: any) => {
     }
     const newThinkActive = !thinkActive;
     setThinkActive(newThinkActive);
-
-    // 更新user_context
+    
+    // 更新user_context - 只更新think字段，保留其他字段
     if (props.updateUserContext) {
-      const currentContext = props.updateUserContext() || {};
-      props.updateUserContext({
-        ...currentContext,
+      props.updateUserContext((prevContext: any) => ({
+        ...prevContext,
         think: newThinkActive
-      });
+      }));
     }
   };
 
@@ -410,14 +417,13 @@ const SendEditor = (props: any) => {
     }
     const newSearchActive = !searchActive;
     setSearchActive(newSearchActive);
-
-    // 更新user_context
+    
+    // 更新user_context - 只更新search字段，保留其他字段
     if (props.updateUserContext) {
-      const currentContext = props.updateUserContext() || {};
-      props.updateUserContext({
-        ...currentContext,
+      props.updateUserContext((prevContext: any) => ({
+        ...prevContext,
         search: newSearchActive
-      });
+      }));
     }
   };
 
