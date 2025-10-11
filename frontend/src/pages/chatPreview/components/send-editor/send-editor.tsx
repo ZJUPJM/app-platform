@@ -22,6 +22,7 @@ import EditorBtnHome from './components/editor-btn-home';
 import EditorSelect from './components/editor-selet';
 import FileList from './components/file-list';
 import ConversationConfiguration from './components/conversation-configuration';
+import ReferencingApp from './components/referencing-app';
 import stopImg from '@/assets/images/ai/stop.png';
 import '@/shared/utils/rendos';
 import '../../styles/send-editor.scss';
@@ -87,6 +88,8 @@ const SendEditor = (props: any) => {
   const [multiFileConfig, setMultiFileConfig] = useState<any>({});
   const [thinkActive, setThinkActive] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
+  const [showAt, setShowAt] = useState(false);
+  const [searchKey, setSearchKey] = useState('');
   const chatRunning = useAppSelector((state) => state.chatCommonStore.chatRunning);
   const loginStatus = useAppSelector((state) => state.chatCommonStore.loginStatus);
   const showMulti = useAppSelector((state) => state.commonStore.historySwitch);
@@ -113,6 +116,15 @@ const SendEditor = (props: any) => {
     setShowClear(() => {
       return editorRef.current.innerText.length > 0
     });
+    
+    // 检测@输入
+    if (chatContent.startsWith('@')) {
+      const contentAfterAt = chatContent.slice(1);
+      setSearchKey(contentAfterAt ? contentAfterAt : '');
+      setShowAt(true);
+    } else {
+      setShowAt(false);
+    }
   }
   // 清除内容
   function clearContent() {
@@ -187,6 +199,23 @@ const SendEditor = (props: any) => {
       document.body.removeEventListener('click', bindEvents);
     }
   }, []);
+
+  // 点击外部区域关闭@选择框
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (showAt && !event.target.closest('.at-content')) {
+        setShowAt(false);
+      }
+    };
+    
+    if (showAt) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showAt]);
   // 更新文件
   function updateFileList(paramFileList: any, autoSend: any) {
     if (isAlreadySent.current) {
@@ -213,7 +242,7 @@ const SendEditor = (props: any) => {
     }
     if (!recording.current) {
       recorderInstanceId++; // 每次创建新实例时递增
-      (window as any).HZRecorder.get((rec) => {
+      (window as any).HZRecorder.get((rec: any) => {
         recorderHome.current = rec;
         // 为 recorderHome 添加唯一标识
         recorderHome.current._instanceId = recorderInstanceId;
@@ -263,16 +292,18 @@ const SendEditor = (props: any) => {
         let res: any = await voiceToText(tenantId, `${result.data.file_path}`, fileOfBlob.name);
         if (res.data && res.data.trim().length) {
           const editorDom = document.getElementById('ctrl-promet');
-          const textNode = document.createTextNode(res.data.trim());
-          editorDom.appendChild(textNode);
-          setTextLenth(editorDom.innerText.length);
-          setShowClear(true);
+          if (editorDom) {
+            const textNode = document.createTextNode(res.data.trim());
+            editorDom.appendChild(textNode);
+            setTextLenth(editorDom.innerText.length);
+            setShowClear(true);
+          }
         }
       }
     }
   }
 
-  function handleEditorClick(e) {
+  function handleEditorClick(e: any) {
     if (!audioDomRef.current?.contains(e.target)) {
       recording.current
     }
@@ -321,6 +352,10 @@ const SendEditor = (props: any) => {
 
   // 动态设置聊天信息列表高度
   const resetEditorHeight = (list: any) => {
+    // 在主页时不执行任何操作，避免影响布局
+    if (isHomepage) {
+      return;
+    }
     let listChatDom: any = document.getElementById('chat-list-dom');
     let top = recommondRef.current.scrollHeight + editorRef.current.scrollHeight;
     if (list.length > 0) {
@@ -385,6 +420,25 @@ const SendEditor = (props: any) => {
       });
     }
   };
+
+  // @应用选择回调
+  const handleAtItemClick = (item: any) => {
+    // 这里可以处理@应用选择的逻辑
+    // 例如：更新编辑器内容，设置选中的应用等
+    const editorDom = document.getElementById('ctrl-promet');
+    if (editorDom) {
+      editorDom.innerText = `@${item.name} `;
+      setShowAt(false);
+      setTextLenth(editorDom.innerText.length);
+      setShowClear(true);
+    }
+  };
+
+  // 显示更多应用
+  const handleShowMoreApps = () => {
+    setShowAt(false);
+    // 这里可以打开应用选择抽屉
+  };
   return <>{(
     <div className={`${setSpaClassName('send-editor-container')} ${isHomepage && !chatList.length ? 'send-editor-home' : ''}`}
          style={{display: display ? 'block' : 'none'}}>
@@ -404,8 +458,8 @@ const SendEditor = (props: any) => {
         </div>
       }
       {
-        !showMask && <div className='recommends-inner' style={{ top: `-${recommondTop}px` }} ref={recommondRef}>
-          <Recommends resetEditorHeight={resetEditorHeight} onSend={onSend} />
+        !isHomepage && <div className='recommends-inner' style={{ top: `-${recommondTop}px` }} ref={recommondRef}>
+          <Recommends resetEditorHeight={resetEditorHeight} onSend={onSend} isHomepage={isHomepage} />
         </div>
       }
       <div className='editor-inner' >
@@ -528,6 +582,14 @@ const SendEditor = (props: any) => {
           chatSelectItem={selectItem}
           positionConfig={positionConfig}
           clearMove={() => setShowSelect(false)} />
+      )}
+      {showAt && (
+        <ReferencingApp
+          atItemClick={handleAtItemClick}
+          atClick={handleShowMoreApps}
+          searchKey={searchKey}
+          setSearchKey={setSearchKey}
+        />
       )}
     </div>
   )}</>
