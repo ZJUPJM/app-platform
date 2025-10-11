@@ -140,7 +140,7 @@ const AppLayout: React.FC = () => {
     navigate(e.key);
   };
 
-  const colorBgContainer = '#F0F2F4';
+  const colorBgContainer = '#ffffff';
   const setClassName = () => {
     if (location.pathname.includes('home')) {
       return `${setSpaClassName('home-chat')} layout-container`
