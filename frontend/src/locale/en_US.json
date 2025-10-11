@@ -428,6 +428,7 @@
   "arrangeType": "Arrangement",
   "generatedTip": "Name and description cannot be empty",
   "askTip": "Ask a question or @ another assistant",
+  "askTipArrangement": "Ask a question",
   "serchParamsSetting": "Search Parameter Configuration",
   "searchMode": "Search Mode",
   "quoteCap": "Max. Number of References",

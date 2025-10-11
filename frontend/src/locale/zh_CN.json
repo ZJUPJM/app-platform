@@ -647,6 +647,7 @@
   "branch": " 分支",
   "passElseCondition": "进入Else分支",
   "askTip": "输入问题或@其他智能体",
+  "askTipArrangement": "输入问题",
   "codeInputPopover": "输入需要添加到代码的变量，代码中可以直接引用此处添加的变量",
   "codeInputErrorMsg": "输入格式错误：",
   "codeExecuteErrorMsg": "系统运行异常，请联系系统管理员",
