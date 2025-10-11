@@ -104,7 +104,10 @@ const ChatPreview = (props) => {
   const [groupType, setGroupType] = useState('share');
   const [showCheck, setShowCheck] = useState(false);
   const [showInspiration, setShowInspiration] = useState(false);
-  const [userContext, setUserContext] = useState({});
+  const [userContext, setUserContext] = useState({
+    think: false,
+    search: false
+  });
   const [chatFileList, setChatFileList] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewProps, setPreviewProps] = useState({ pictureList: [], curPicturePath: '' });
@@ -798,9 +801,20 @@ const ChatPreview = (props) => {
               checkMutipleInput={checkMutipleInput}
               updateUserContext={(val) => {
                 if (typeof val === 'function') {
-                  setUserContext(val);
+                  setUserContext((prev) => {
+                    const newContext = val(prev);
+                    return {
+                      think: false,
+                      search: false,
+                      ...newContext
+                    };
+                  });
                 } else {
-                  setUserContext(val);
+                  setUserContext({
+                    think: false,
+                    search: false,
+                    ...val
+                  });
                 }
               }}
               userContext={userContext}

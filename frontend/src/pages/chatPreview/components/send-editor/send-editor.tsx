@@ -386,8 +386,8 @@ const SendEditor = (props: any) => {
   // 同步userContext中的think和search状态到本地状态
   useEffect(() => {
     if (props.userContext) {
-      setThinkActive(!!props.userContext.think);
-      setSearchActive(!!props.userContext.search);
+      setThinkActive(props.userContext.think === true);
+      setSearchActive(props.userContext.search === true);
     }
   }, [props.userContext]);
 
