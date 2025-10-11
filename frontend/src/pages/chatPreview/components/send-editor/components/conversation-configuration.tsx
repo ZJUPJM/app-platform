@@ -286,9 +286,19 @@ const ConversationConfiguration = ({ appInfo, updateUserContext, chatRunning, is
     </>
   );
 
+  // 定义需要隐藏配置按钮的应用ID列表
+  const hiddenConfigAppIds: string[] = [
+    // 在这里添加需要隐藏配置按钮的应用ID
+    // 'app-id-1',
+    '4ef2c47cfd6b4b61b7f6f19ad92b1421',
+  ];
+
+  // 判断当前应用是否需要隐藏配置按钮
+  const shouldHideConfigButton = hiddenConfigAppIds.includes((configAppInfo as any)?.id);
+
   return <>
     {
-      configurationList.length > 0 &&
+      configurationList.length > 0 && !shouldHideConfigButton &&
       <Popover
         placement="topLeft"
         arrowPointAtCenter
