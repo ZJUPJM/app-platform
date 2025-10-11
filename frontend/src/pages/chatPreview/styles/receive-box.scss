@@ -10,7 +10,7 @@
     background-color: #fff;
     word-break: break-all;
     position: relative;
-    padding: 15px;
+    padding: 15px 15px 15px 0;
     box-sizing: border-box;
     &:hover {
       .message-tip-box-send {
@@ -244,10 +244,10 @@
 }
 .receive-loading {
   position: relative;
-  text-align: center;
+  text-align: left;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 6px 12px;
 }
 .receive-loading > div {

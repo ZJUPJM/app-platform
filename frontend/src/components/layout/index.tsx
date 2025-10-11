@@ -7,7 +7,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import type { MenuProps } from 'antd';
 import { Layout, Menu, Avatar } from 'antd';
-import { MenuFoldOutlined, UserOutlined } from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons';
 import {
   Route,
   useHistory,
@@ -24,6 +24,7 @@ import {
 import { Provider } from 'react-redux';
 import { KnowledgeIcons } from '../icons/index';
 import AidoIcon from '../../assets/images/aido-icon.png';
+import CollapseIcon from '../../assets/svg/collapse-icon.svg';
 import { store } from '@/store';
 import { setSpaClassName, updateChatId } from '@/shared/utils/common';
 import { getUser, getOmsUser, getRole, getChatPluginList } from '../../pages/helper';
@@ -215,9 +216,11 @@ const AppLayout: React.FC = () => {
                     }}
                   />
                 </div>
-                <MenuFoldOutlined
+                <img
+                  src={CollapseIcon}
+                  alt="Collapse"
                   className={`collapse-icon ${isCollapsed ? 'collapsed' : ''}`}
-                  style={{ color: '#6d6e72' }}
+                  style={{ width: '24px', height: '24px' }}
                   onClick={() => {
                     if (isCollapsed) {
                       setIsCollapsed(false);

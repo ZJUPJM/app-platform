@@ -26,7 +26,7 @@ import { isChatRunning } from '@/shared/utils/chat';
  */
 const Recommends = (props) => {
   const { t } = useTranslation();
-  const { onSend, resetEditorHeight } = props;
+  const { onSend, resetEditorHeight, isHomepage } = props;
   const [recommendList, setRecommendList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showRecommend, setShowRecommend] = useState(false);
@@ -135,6 +135,11 @@ const Recommends = (props) => {
   useEffect(() => {
     resetEditorHeight(recommendList);
   }, [recommendList]);
+
+  // 在主页时不渲染任何内容
+  if (isHomepage) {
+    return null;
+  }
 
   return <>
     {

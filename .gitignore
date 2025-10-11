@@ -16,3 +16,4 @@ docker/sql/init/data/tr_init_models.sql
 
 # Claude Code settings
 .claude/
+frontend/proxy.conf.json
