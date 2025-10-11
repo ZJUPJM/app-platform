@@ -156,12 +156,27 @@ const AppLayout: React.FC = () => {
     if (location.pathname.includes('/chat/') && !location.pathname.includes('/app/')){
       return false;
     }
+    // 去除工作流编排相关页面的左侧边栏显示
+    if (location.pathname.includes('/add-flow/') || 
+        location.pathname.includes('/flow-detail/') ||
+        location.pathname.includes('/app-detail/')) {
+      return false;
+    }
     return true;
   }
 
   // 判断是否显示历史记录侧边栏
   const shouldShowHistorySidebar = () => {
-    return location.pathname.includes('/chat/') || location.pathname.includes('/home');
+    return location.pathname.includes('/chat/') || 
+           location.pathname.includes('/home');
+  }
+
+  // 判断是否显示用户信息栏
+  const shouldShowUserInfo = () => {
+    return location.pathname.includes('/chat/') || 
+           location.pathname.includes('/home') ||
+           location.pathname.includes('/app') ||
+           location.pathname.includes('/app-develop');
   }
   const isSpaMode = () => {
     return  (process.env.NODE_ENV !== 'development' && process.env.PACKAGE_MODE !== 'common')
@@ -230,25 +245,31 @@ const AppLayout: React.FC = () => {
                   }}
                 />
               </div>
-              <Menu
-                className={`menu ${isCollapsed ? 'collapsed' : ''}`}
-                theme='light'
-                selectedKeys={defaultActive}
-                mode='inline'
-                items={items}
-                onClick={menuClick}
-              />
-              {shouldShowHistorySidebar() && (
-                <div className='layout-sider-history'>
-                  {!isCollapsed && (
-                    <HistorySidebarWithContext />
-                  )}
-                  <div className='layout-sider-user'>
-                    <Avatar size={28} icon={<UserOutlined />} />
-                    <span className='layout-sider-user-name'>User</span>
+              <div className='layout-sider-content-wrapper'>
+                <Menu
+                  className={`menu ${isCollapsed ? 'collapsed' : ''}`}
+                  theme='light'
+                  selectedKeys={defaultActive}
+                  mode='inline'
+                  items={items}
+                  onClick={menuClick}
+                />
+                {shouldShowHistorySidebar() && (
+                  <div className='layout-sider-history'>
+                    {!isCollapsed && (
+                      <HistorySidebarWithContext />
+                    )}
                   </div>
+                )}
+              </div>
+              {/* 暂时隐藏用户信息栏
+              {shouldShowUserInfo() && (
+                <div className='layout-sider-user'>
+                  <Avatar size={28} icon={<UserOutlined />} />
+                  <span className='layout-sider-user-name'>User</span>
                 </div>
               )}
+              */}
             </Sider>
             <div className='layout-sider-folder'>
               <KnowledgeIcons.menuFolder onClick={() => {

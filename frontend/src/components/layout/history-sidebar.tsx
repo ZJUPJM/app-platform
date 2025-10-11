@@ -168,6 +168,23 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ setListCurrentList }) =
     }
   }, [appId, aippId]);
 
+  // 如果历史记录为空且不在加载中，则不显示整个历史记录模块
+  if (data.length === 0 && !loading) {
+    return (
+      <Modal
+        title={t('alert')}
+        open={isDeleteOpen}
+        onOk={confirmDelete}
+        onCancel={() => {
+          setDeleteOpen(false);
+          setDeleteChatId(null);
+        }}
+      >
+        <p>确认是否删除此条记录？</p>
+      </Modal>
+    );
+  }
+
   return (
     <div className="history-sidebar">
       <div className="history-sidebar-header">
@@ -199,10 +216,6 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ setListCurrentList }) =
             ))}
           </div>
           }
-          {data.length === 0 && <div
-            className='history-wrapper flex-box'>
-            <Empty description={t('noData')} />
-          </div>}
         </Spin>
       </div>
       

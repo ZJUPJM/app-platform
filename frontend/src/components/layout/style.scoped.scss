@@ -4,6 +4,10 @@
   padding: 0 10px !important; // 左右内边距10px
   transition: width 0.3s ease !important;
   border-right: 1px solid #dadde1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
 
   &.collapsed {
     padding: 0 8px !important; // 折叠状态下减少内边距
@@ -53,35 +57,46 @@
     cursor: pointer;
   }
 
+  &-content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    padding-bottom: 60px; // 为底部用户信息栏留出空间
+  }
+
   &-history {
     margin-top: 16px;
     padding-top: 16px;
-    height: calc(100vh - 210px);
     overflow: hidden;
     display: flex;
     flex-direction: column;
+  }
 
-    // 用户信息模块容器放在底部
-    .layout-sider-user {
-      margin-top: auto;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 0px 12px 0px;
-      border-top: 1px solid #e6e9ee;
-      color: #333;
-      flex-shrink: 0;
-      min-height: 40px;
-    }
+  // 用户信息模块独立样式
+  &-user {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 10px;
+    border-top: 1px solid #e6e9ee;
+    color: #333;
+    min-height: 40px;
+    background: #f0f4f9;
+    z-index: 10;
 
     // 展开态：为用户信息增加左侧内边距
     .layout-sider:not(.collapsed) & {
-      .layout-sider-user {
-        padding-left: 8px;
-      }
+      padding-left: 18px;
     }
 
-    .layout-sider-user-name {
+    &-name {
       font-size: 14px;
       font-weight: 400;
       color: #333;
@@ -90,13 +105,11 @@
 
     // 折叠态：仅显示头像，不显示用户名
     .layout-sider.collapsed & {
-      .layout-sider-user-name {
+      &-name {
         display: none;
       }
-      .layout-sider-user {
-        justify-content: center; // 居中，保持头像位置稳定
-        padding-left: 0; // 折叠态不增加左侧间距
-      }
+      justify-content: center; // 居中，保持头像位置稳定
+      padding-left: 8px; // 折叠态保持基本内边距
     }
   }
 }
@@ -173,6 +186,9 @@
 
 .menu {
   background: transparent !important;
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
 
   .ant-menu-item {
     display: flex;
