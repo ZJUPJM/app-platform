@@ -133,6 +133,48 @@ const ChatPreview = (props) => {
   useEffect(() => {
     currentInfo.current = appInfo;
     window.addEventListener('previewPicture', handlePreview);
+    
+    // 重置聊天状态的函数
+  const resetChatState = () => {
+    console.log('执行重置聊天状态');
+    // 重置输入栏内容
+    setTimeout(() => {
+      const editorDom = document.getElementById('ctrl-promet');
+      if (editorDom) {
+        console.log('清空输入栏内容');
+        editorDom.innerText = '';
+      } else {
+        console.log('未找到输入栏元素');
+      }
+    }, 100);
+    
+    // 重置think和search按钮状态
+    console.log('重置按钮状态');
+    setUserContext({
+      think: false,
+      search: false
+    });
+  };
+
+  // 监听localStorage中的重置消息
+  const handleStorageMessage = () => {
+    const storageMessage = localStorage.getItem('storageMessage');
+    if (storageMessage) {
+      try {
+        const data = JSON.parse(storageMessage);
+        if (data.type === 'deleteChat' && (data.resetInput || data.resetButtons)) {
+          resetChatState();
+        }
+      } catch (e) {
+        console.error('解析storageMessage失败:', e);
+      }
+    }
+  };
+  
+  // 监听storage变化和自定义事件
+  window.addEventListener('storage', handleStorageMessage);
+  window.addEventListener('resetChatState', resetChatState);
+    
     return () => {
       closeConnected();
       dispatch(setAppId(null));
@@ -142,6 +184,8 @@ const ChatPreview = (props) => {
       dispatch(setReference(false));
       dispatch(setReferenceList({}));
       window.removeEventListener('previewPicture', handlePreview);
+      window.removeEventListener('storage', handleStorageMessage);
+      window.removeEventListener('resetChatState', resetChatState);
     };
   }, []);
   useEffect(() => {
@@ -745,6 +789,26 @@ const ChatPreview = (props) => {
   useEffect(() => {
     setConfigAppInfo(atAppInfo || appInfo || {});
   }, [atAppInfo, appInfo]);
+
+  // 监听路由变化，当进入home页面时重置状态
+  useEffect(() => {
+    if (location.pathname === '/home') {
+      // 延迟执行以确保DOM已更新
+      setTimeout(() => {
+        // 重置输入栏内容
+        const editorDom = document.getElementById('ctrl-promet');
+        if (editorDom) {
+          editorDom.innerText = '';
+        }
+        
+        // 重置think和search按钮状态
+        setUserContext({
+          think: false,
+          search: false
+        });
+      }, 200);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!chatRunning) {

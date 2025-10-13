@@ -126,10 +126,17 @@ const AppLayout: React.FC = () => {
       const storageParams = {
         deleteAppId: null,
         refreshChat: true,
+        resetInput: true, // 新增：标识需要重置输入栏
+        resetButtons: true, // 新增：标识需要重置按钮状态
         key: Date.now().toString(),
         type: 'deleteChat'
       };
       localStorage.setItem('storageMessage', JSON.stringify(storageParams));
+      
+      // 触发自定义事件来通知页面重置状态
+      console.log('触发新对话重置事件');
+      const resetEvent = new CustomEvent('resetChatState');
+      window.dispatchEvent(resetEvent);
 
       // 清空菜单选中状态
       setDefaultActive([]);

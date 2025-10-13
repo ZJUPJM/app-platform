@@ -396,8 +396,26 @@ const SendEditor = (props: any) => {
     if (props.userContext) {
       setThinkActive(props.userContext.think === true);
       setSearchActive(props.userContext.search === true);
+    } else {
+      // 如果userContext为空，重置按钮状态
+      setThinkActive(false);
+      setSearchActive(false);
     }
   }, [props.userContext]);
+
+  // 监听路由变化，重置本地状态
+  useEffect(() => {
+    if (location.pathname === '/home') {
+      // 重置所有本地状态
+      setShowClear(false);
+      setTextLenth(0);
+      setShowAt(false);
+      setSearchKey('');
+      setFileList([]);
+      setThinkActive(false);
+      setSearchActive(false);
+    }
+  }, [location.pathname]);
 
   // 深度思考按钮点击事件
   const handleThinkClick = () => {
