@@ -471,8 +471,10 @@ const SendEditor = (props: any) => {
     setShowAt(false);
     // 这里可以打开应用选择抽屉
   };
+  const containerRef = useRef<HTMLDivElement>(null);
+
   return <>{(
-    <div className={`${setSpaClassName('send-editor-container')} ${isHomepage && !chatList.length ? 'send-editor-home' : ''}`}
+    <div ref={containerRef} className={`${setSpaClassName('send-editor-container')} ${isHomepage && !chatList.length ? 'send-editor-home' : ''} ${!isHomepage && !chatList.length ? 'send-editor-center' : ''}`}
          style={{display: display ? 'block' : 'none'}}>
       {
         showMask && <div className='send-editor-mask'>

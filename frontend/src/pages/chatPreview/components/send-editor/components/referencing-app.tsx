@@ -14,17 +14,26 @@ import { useTranslation } from 'react-i18next';
 import knowledgeBase from '@/assets/images/knowledge/knowledge-base.png';
 import '../styles/referencing-app.scss';
 
+interface ReferencingAppProps {
+  atItemClick: (item: any) => void;
+  atClick: () => void;
+  searchKey: string;
+  setSearchKey: (value: string) => void;
+}
 
-const ReferencingApp = (props) => {
+const ReferencingApp = (props: ReferencingAppProps) => {
   const { t } = useTranslation();
   const { atItemClick, atClick, searchKey, setSearchKey } = props;
-  const [appArr, setAppArr] = useState([]);
+  const [appArr, setAppArr] = useState<any[]>([]);
   const [tableLoading, setTableLoading] = useState(false);
   const tenantId = useAppSelector((state) => state.appStore.tenantId);
   const pageNo = useRef(1);
+  const atRef = useRef<HTMLDivElement>(null);
+  const [placement, setPlacement] = useState<'at-below' | 'at-above'>('at-below');
+  const [topStyle, setTopStyle] = useState<number | undefined>(undefined);
 
   // 应用点击回调
-  const itemClick = (item) => {
+  const itemClick = (item: any) => {
     atItemClick(item);
   }
 
@@ -39,10 +48,10 @@ const ReferencingApp = (props) => {
         name: searchKey,
         excludeTags: 'BUILTIN'
       }
-      const res = await queryAppsApi(tenantId, params);
+      const res: any = await queryAppsApi(tenantId, params);
       if (res.code === 0) {
-        const { data, total } = res;
-        setAppArr(data);
+        const { data } = res as any;
+        setAppArr(data as any[]);
       }
     } finally {
       setTableLoading(false);
@@ -51,8 +60,50 @@ const ReferencingApp = (props) => {
   useEffect(() => {
     getAppList();
   }, [searchKey]);
+
+  // 本地动态定位：根据 editor 在视口中的位置决定在其上/下方
+  useEffect(() => {
+    const updatePlacement = () => {
+      const panelEl = atRef.current as unknown as HTMLElement | null;
+      if (!panelEl) return;
+      const containerEl = panelEl.parentElement as HTMLElement | null; // send-editor-container
+      if (!containerEl) return;
+      // 优先以输入栏容器作为定位锚点，找不到再回退到 editor-inner
+      const inputEl = containerEl.querySelector('.editor-input') as HTMLElement | null;
+      const editorEl = (inputEl || containerEl.querySelector('.editor-inner')) as HTMLElement | null;
+      if (!editorEl) return;
+
+      const containerRect = containerEl.getBoundingClientRect();
+      const editorRect = editorEl.getBoundingClientRect();
+      const panelHeight = panelEl.offsetHeight || 170;
+      const gap = 8; // 弹窗与输入框间距
+
+      const spaceBelow = window.innerHeight - editorRect.bottom;
+      const placeBelow = spaceBelow >= panelHeight + gap;
+
+      const top = placeBelow
+        ? (editorRect.bottom - containerRect.top + gap)
+        : (editorRect.top - containerRect.top - panelHeight - gap);
+
+      setPlacement(placeBelow ? 'at-below' : 'at-above');
+      setTopStyle(top);
+    };
+
+    updatePlacement();
+    window.addEventListener('resize', updatePlacement);
+    window.addEventListener('scroll', updatePlacement, true);
+    return () => {
+      window.removeEventListener('resize', updatePlacement);
+      window.removeEventListener('scroll', updatePlacement, true);
+    };
+  }, []);
   return <>{(
-    <div className='at-content' onClick={(e) => e.stopPropagation()}>
+    <div
+      ref={atRef}
+      className={`at-content ${placement}`}
+      style={{ top: topStyle }}
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className='at-head'>
         <div className='at-app-search'>
           <Input
@@ -81,13 +132,19 @@ const ReferencingApp = (props) => {
   )}</>
 };
 
-const ListItem = (props) => {
+interface ListItemProps {
+  itemClick: (item: any) => void;
+  item: any;
+  icon?: string;
+}
+
+const ListItem = (props: ListItemProps) => {
   const { itemClick, item, icon } = props;
   const [imgPath, setImgPath] = useState('');
   useEffect(() => {
     if (icon) {
       convertImgPath(icon).then(res => {
-        setImgPath(res);
+        setImgPath(res as string);
       });
     }
   }, [icon])

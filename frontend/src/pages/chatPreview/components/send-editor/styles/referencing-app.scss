@@ -1,15 +1,20 @@
 .at-content {
   position: absolute;
-  top: -246px;
+  top: -170px;
   left: 0;
   background-color: #ffffff;
-  border-radius: 24px;
-  width: 660px;
-  height: 238px;
+  border: 1px solid #dedee1;
+  box-shadow: 4px 0 9px rgba(26, 26, 26, 0.08),
+              0 4px 9px rgba(26, 26, 26, 0.08);
+  border-radius: 12px;
+  width: 200px;
+  height: 170px;
   z-index: 200;
   display: block !important;
-  padding: 24px;
+  padding: 10px 8px 10px 8px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   .at-head {
     display: flex;
     justify-content: space-between;
@@ -17,9 +22,14 @@
     color: #4D4D4D;
     .at-app-search {
       width: 100%;
+      margin: 0; // 缩小外边距
+      .ant-input-affix-wrapper {
+        border-radius: 9px;
+        height: 32px;
+      }
     }
     .left {
-      font-size: 16px;
+      font-size: 14px;
       color: #777777;
     }
     .right {
@@ -32,42 +42,53 @@
     }
   }
   .at-content-inner {
-    margin-top: 16px;
-    height: calc(100% - 30px);
-    overflow: auto;
+    margin-top: 6px; // 收紧与搜索框间距
+    flex: 1;
+    overflow-y: auto;
     .at-list-item {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 16px;
+      // margin-bottom: 8px;
       cursor: pointer;
+      align-items: center;
+      padding: 6px 8px;
+      border-radius: 6px;
+      transition: background-color 0.15s ease;
+      &:hover {
+        background-color: #DEE4EC;
+      }
+      &:active {
+        background-color: #DEE4EC;
+      }
       .left {
         display: flex;
         align-items: center;
-        font-size: 12px;
+        font-size: 11px;
         color: #808080;
         font-weight: 400;
-        height: 40px;
+        height: 24px;
         img {
-          width: 40px;
-          height: 40px;
-          margin-right: 12px;
+          width: 24px;
+          height: 24px;
+          margin-right: 8px;
         }
         .name {
           color: #233046;
-          font-size: 16px;
-          margin: 0 8px;
-          max-width: 200px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          line-height: 24px;
-        }
-        .description {
-          max-width: 400px;
+          font-size: 14px;
+          margin: 0 6px;
+          max-width: 150px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
           line-height: 18px;
+        }
+        .description {
+          max-width: 240px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          line-height: 14px;
+          font-size: 10.5px;
         }
       }
       .right {

@@ -470,10 +470,15 @@
   }
 }
 .send-editor-home {
-  top: -40%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   height: auto; /* 主页无推荐时，容器自适应内容，避免顶部空白 */
+  z-index: 100; /* 确保输入栏在最上层，可以点击 */
   .editor-inner {
-    bottom: 0; /* 贴底布局，移除因 40px 底部间距导致的上方空白 */
+    position: relative;
+    bottom: auto; /* 移除绝对定位，使用相对定位 */
   }
 }
 .chat-focus {
