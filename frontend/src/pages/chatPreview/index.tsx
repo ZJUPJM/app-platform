@@ -62,6 +62,8 @@ import Inspiration from './components/inspiration';
 import PreviewPicture from './components/receive-box/preview-picture';
 import { HistoryContext } from '@/components/layout';
 import './styles/chat-preview.scss';
+import store from '@/store/store';
+import {setIsCurrentAnswer} from "@/store/chatStore/chatStore";
 
 /**
  * 应用聊天对话页面
@@ -95,6 +97,7 @@ const ChatPreview = (props) => {
   const isDebug = useAppSelector((state) => state.commonStore.isDebug);
   const isGuest = useAppSelector((state) => state.appStore.isGuest);
   const currentAnswer = useAppSelector((state) => state.chatCommonStore.currentAnswer);
+  const isCurrentAnswer = useAppSelector((state) => state.chatCommonStore.isCurrentAnswer);
   const aippContext = useContext(AippContext);
   const { showElsa } = aippContext || {};
   const [checkedList, setCheckedList] = useState([]);
@@ -637,6 +640,7 @@ const ChatPreview = (props) => {
       let { content } = currentChatItem;
       str = content + msg;
       item.content = str;
+      store.dispatch(setIsCurrentAnswer(true));
       if (status === 'ARCHIVED') {
         item.finished = true;
       }
@@ -723,7 +727,9 @@ const ChatPreview = (props) => {
   }
 
   function parseCurrentAnswer(currentAnswer) {
-    if (currentAnswer && currentAnswer.props && currentAnswer.props.dangerouslySetInnerHTML) {
+    if (currentAnswer && currentAnswer.props && currentAnswer.props.dangerouslySetInnerHTML
+      && isCurrentAnswer == true) {
+      store.dispatch(setIsCurrentAnswer(false));
       return currentAnswer.props.dangerouslySetInnerHTML.__html;
     }
   }
