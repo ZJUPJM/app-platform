@@ -697,8 +697,8 @@ const ChatPreview = (props) => {
   // 终止进行中的对话
   async function chatRunningStop(params) {
     let terminateParams: any = {};
-    terminateParams.content = params.content ? params.content : currentAnswer ? currentAnswer :
-      t('conversationTerminated');
+    terminateParams.content = params.content ? params.content : currentAnswer ?
+    parseCurrentAnswer(currentAnswer) : t('conversationTerminated');
     if (params.logId) {
       terminateParams.logId = params.logId;
     }
@@ -719,6 +719,12 @@ const ChatPreview = (props) => {
       }
     } finally {
       setStopLoading(false);
+    }
+  }
+
+  function parseCurrentAnswer(currentAnswer) {
+    if (currentAnswer && currentAnswer.props && currentAnswer.props.dangerouslySetInnerHTML) {
+      return currentAnswer.props.dangerouslySetInnerHTML.__html;
     }
   }
 
