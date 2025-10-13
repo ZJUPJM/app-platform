@@ -2,7 +2,7 @@
   margin: 0 auto;
   position: relative;
   flex-shrink: 0;
-  height: 200px;
+  height: 180px;
   .editor-stop {
     position: absolute;
     top: -40px;
@@ -471,6 +471,10 @@
 }
 .send-editor-home {
   top: -40%;
+  height: auto; /* 主页无推荐时，容器自适应内容，避免顶部空白 */
+  .editor-inner {
+    bottom: 0; /* 贴底布局，移除因 40px 底部间距导致的上方空白 */
+  }
 }
 .chat-focus {
   display: inline-block !important;

@@ -103,7 +103,7 @@ const SendEditor = (props: any) => {
   const isAlreadySent = useRef<any>(false);
   const isAutoSend = useRef<any>(false);
   const recommondListRef = useRef<any>([]);
-  const isHomepage = location.hash.includes('home');
+  const isHomepage = location.pathname === '/home' || location.hash.includes('home');
   // 判断是否为应用编排页面
   const isAppArrangementPage = location.pathname.includes('/app-develop/') && 
                                (location.pathname.includes('/app-detail/') || 
@@ -365,7 +365,7 @@ const SendEditor = (props: any) => {
       return;
     }
     let listChatDom: any = document.getElementById('chat-list-dom');
-    let top = recommondRef.current.scrollHeight + editorRef.current.scrollHeight;
+    let top = (recommondRef.current?.scrollHeight || 0) + (editorRef.current?.scrollHeight || 0);
     if (list.length > 0) {
       setRecommondTop(top - 140);
       listChatDom.style.marginBottom = `${top - 120}px`;
@@ -490,9 +490,11 @@ const SendEditor = (props: any) => {
         </div>
       }
       {
-        !isHomepage && <div className='recommends-inner' style={{ top: `-${recommondTop}px` }} ref={recommondRef}>
-          <Recommends resetEditorHeight={resetEditorHeight} onSend={onSend} isHomepage={isHomepage} />
-        </div>
+        !isHomepage && (
+          <div className='recommends-inner' style={{ top: `-${recommondTop}px` }} ref={recommondRef}>
+            <Recommends resetEditorHeight={resetEditorHeight} onSend={onSend} isHomepage={isHomepage} />
+          </div>
+        )
       }
       <div className='editor-inner' >
         {
