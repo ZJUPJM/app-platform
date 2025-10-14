@@ -5,9 +5,11 @@ fit:
 
 oauth:
   client:
-    id: ${OAUTH_CLIENT_ID:app-platform}
-    secret: ${OAUTH_CLIENT_SECRET:app-platform-secret}
-    redirect-uri: ${OAUTH_REDIRECT_URI:http://oauth.client.local/v1/api/auth/callback}
-  token-endpoint: ${OAUTH_TOKEN_ENDPOINT:http://oauth.server.local/token}
-  auth-url: ${OAUTH_AUTH_URL:http://oauth.server.local/#/login?response_type=code&client_id=app-platform&redirect_uri=http://oauth.client.local/v1/api/auth/callback&scope=read}
-  home-url: ${OAUTH_HOME_URL:http://oauth.client.local/#/home}
+    id: your-client-id
+    secret: your-client-secret
+    redirect-uri: http://oauth.client.local/callback
+  login-endpoint: http://oauth.server.local/login
+  token-endpoint: http://oauth.server.local/oauth2/token
+  auth-endpoint: http://oauth.server.local/oauth2/authorize
+  api-endpoint: http://oauth.client.local/api
+  state-secret: change_this_to_a_very_long_random_secret_32bytes_min

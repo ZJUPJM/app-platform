@@ -131,6 +131,7 @@ public class OAuthJwtFilterTest {
         assertThat(filter.mismatchPatterns()).containsExactlyInAnyOrder("/api/app/v1/**",
                 "/fit/check/**",
                 "/v1/api/auth/callback",
-                "/v1/api/auth/login");
+                "/v1/api/auth/login",
+                "/v1/api/auth/redirect");
     }
 }

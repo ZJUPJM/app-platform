@@ -32,6 +32,10 @@
             <groupId>modelengine.fit.jane</groupId>
             <artifactId>jane-common-component</artifactId>
         </dependency>
+        <dependency>
+            <groupId>modelengine.fit.jade.service</groupId>
+            <artifactId>authentication-service</artifactId>
+        </dependency>
 
         <!-- OAuth2 -->
         <dependency>
@@ -51,6 +55,11 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -61,7 +70,7 @@
                 <version>${fit.version}</version>
                 <configuration>
                     <category>user</category>
-                    <level>5</level>
+                    <level>7</level>
                 </configuration>
                 <executions>
                     <execution>

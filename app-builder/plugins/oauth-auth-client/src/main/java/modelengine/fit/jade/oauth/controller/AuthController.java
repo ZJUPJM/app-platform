@@ -6,23 +6,37 @@
 
 package modelengine.fit.jade.oauth.controller;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
+import com.nimbusds.oauth2.sdk.AuthorizationRequest;
 import com.nimbusds.oauth2.sdk.AuthorizationResponse;
 import com.nimbusds.oauth2.sdk.AuthorizationSuccessResponse;
+import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.Tokens;
 
 import modelengine.fit.http.Cookie;
 import modelengine.fit.http.annotation.GetMapping;
 import modelengine.fit.http.annotation.PostMapping;
 import modelengine.fit.http.annotation.RequestMapping;
+import modelengine.fit.http.annotation.RequestParam;
+import modelengine.fit.http.annotation.ResponseStatus;
+import modelengine.fit.http.protocol.HttpResponseStatus;
 import modelengine.fit.http.server.HttpClassicServerRequest;
 import modelengine.fit.http.server.HttpClassicServerResponse;
 import modelengine.fit.jane.common.response.Rsp;
@@ -34,7 +48,10 @@ import modelengine.jade.authentication.context.UserContextHolder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * 用户认证控制器（OAuth2）。
@@ -57,14 +74,20 @@ public class AuthController {
     @Value("${oauth.client.redirect-uri}")
     private String redirectUri;
 
+    @Value("${oauth.login-endpoint}")
+    private String loginEndpoint;
+
     @Value("${oauth.token-endpoint}")
     private String tokenEndpoint;
 
-    @Value("${oauth.auth-url}")
-    private String authUrl;
+    @Value("${oauth.auth-endpoint}")
+    private String authEndpoint;
 
-    @Value("${oauth.home-url}")
-    private String homeUrl;
+    @Value("${oauth.api-endpoint}")
+    private String apiEndpoint;
+
+    @Value("${oauth.state-secret}")
+    private String stateSecret;
 
     /**
      * 处理 OAuth2 回调请求。
@@ -78,6 +101,7 @@ public class AuthController {
      * @throws Exception 解析 URI、发送 Token 请求或处理响应时可能抛出的异常
      */
     @GetMapping("/callback")
+    @ResponseStatus(HttpResponseStatus.MOVED_PERMANENTLY)
     public void handleCallback(HttpClassicServerRequest request, HttpClassicServerResponse response) throws Exception {
         String scheme = request.isSecure() ? "https" : "http";
         String host = request.host();
@@ -127,18 +151,37 @@ public class AuthController {
             sb.append("; Secure");
         }
 
-        // response 内写 cookie 框架还暂时不会把他改为 Set-Cookie, 因此暂时先手动写入响应头
+        // response 内写 cookie 框架还暂时不会把他改为 Set-Cookie, 因此暂时先手动写入响应头，等新版fit-framework后修改
         response.headers().add("Set-Cookie", sb.toString());
 
-        response.statusCode(301);
-        response.headers().set("Location", homeUrl);
-        response.send();
+        try {
+            String redirectUrl = decryptState(authResp.getState().toString());
+            response.headers().set("Location", redirectUrl);
+        } catch (JOSEException e) {
+            response.headers().set("Location", "/");
+        }
+    }
+
+    @GetMapping("/redirect")
+    @ResponseStatus(HttpResponseStatus.FOUND)
+    public void handleRedirect(HttpClassicServerResponse response, @RequestParam("redirect_uri") String url)
+            throws Exception {
+        String state = encryptState(url);
+        AuthorizationRequest authRequest = new AuthorizationRequest.Builder(new ResponseType(ResponseType.Value.CODE),
+                new ClientID(clientId)).scope(new Scope("read"))
+                .state(new State(state))
+                .redirectionURI(new URI(redirectUri))
+                .endpointURI(new URI(loginEndpoint))
+                .build();
+
+        response.headers().add("Location", authRequest.toURI().toString());
     }
 
     /**
      * 获取用户名信息
      */
     @PostMapping("/username")
+    @ResponseStatus(HttpResponseStatus.OK)
     public Rsp<String> handleUsername() {
         String username = Optional.ofNullable(UserContextHolder.get())
                 .map(UserContext::getName)
@@ -155,10 +198,9 @@ public class AuthController {
      * @param response 当前的 HTTP 响应对象，用于写入状态码和自定义跳转头
      */
     @PostMapping("/login")
+    @ResponseStatus(HttpResponseStatus.UNAUTHORIZED)
     public void handleLogin(HttpClassicServerResponse response) {
-        response.statusCode(401);
-        response.headers().add("fit-redirect-to-prefix", authUrl + "&useless=");
-        response.send();
+        response.headers().add("fit-redirect-to-prefix", apiEndpoint + "/v1/api/auth/redirect?redirect_uri=");
     }
 
     /**
@@ -169,6 +211,7 @@ public class AuthController {
      * @param response 当前的 HTTP 响应对象，用于写入 Set-Cookie 头
      */
     @PostMapping("/logout")
+    @ResponseStatus(HttpResponseStatus.OK)
     public void handleLogout(HttpClassicServerResponse response) {
         Cookie cookie = Cookie.builder().name("access-token").value("").httpOnly(true)
                 // .secure(true)
@@ -180,7 +223,7 @@ public class AuthController {
         if (cookie.path() != null) {
             sb.append("; Path=").append(cookie.path());
         }
-        if (cookie.httpOnly()) {
+          if (cookie.httpOnly()) {
             sb.append("; HttpOnly");
         }
         if (cookie.secure()) {
@@ -188,10 +231,7 @@ public class AuthController {
         }
         sb.append("; Max-Age=").append(cookie.maxAge());
 
-        // 写入响应头
-        response.statusCode(200);
         response.headers().add("Set-Cookie", sb.toString());
-        response.send();
     }
 
     /**
@@ -217,4 +257,32 @@ public class AuthController {
 
         return new TokenRequest.Builder(tokenEndpoint, clientAuth, codeGrant).build();
     }
+
+    private String encryptState(String redirectUrl) throws JOSEException {
+        JWTClaimsSet claims = new JWTClaimsSet.Builder().claim("redirect_uri", redirectUrl)
+                .claim("nonce", UUID.randomUUID().toString())
+                .expirationTime(Date.from(Instant.now().plusSeconds(300))) // 5分钟有效
+                .build();
+
+        SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims);
+        signedJWT.sign(new MACSigner(stateSecret.getBytes()));
+
+        return signedJWT.serialize();
+    }
+
+    public String decryptState(String state) throws Exception {
+        SignedJWT signedJWT = SignedJWT.parse(state);
+
+        if (!signedJWT.verify(new MACVerifier(stateSecret.getBytes()))) {
+            throw new IllegalArgumentException("Invalid state signature");
+        }
+
+        Date exp = signedJWT.getJWTClaimsSet().getExpirationTime();
+        if (exp.before(new Date())) {
+            throw new IllegalArgumentException("State expired");
+        }
+
+        return signedJWT.getJWTClaimsSet().getStringClaim("redirect_uri");
+    }
+
 }

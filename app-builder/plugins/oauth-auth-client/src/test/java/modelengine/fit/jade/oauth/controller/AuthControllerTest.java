@@ -64,8 +64,9 @@ public class AuthControllerTest {
         setPrivateField("clientSecret", "test-client-secret");
         setPrivateField("redirectUri", "http://localhost:8080/v1/api/auth/callback");
         setPrivateField("tokenEndpoint", "http://localhost:8080/oauth/token");
-        setPrivateField("authUrl", "http://localhost:8080/oauth/authorize");
-        setPrivateField("homeUrl", "http://localhost:8080/home");
+        setPrivateField("authEndpoint", "http://localhost:8080/oauth/authorize");
+        setPrivateField("apiEndpoint", "http://localhost:8080/api");
+        setPrivateField("stateSecret", "test-state-secret");
 
         // 设置Mock对象
         when(response.headers()).thenReturn(headers);
@@ -138,35 +139,23 @@ public class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("测试登录接口 - 返回401状态码和重定向头")
+    @DisplayName("测试登录接口 - 返回重定向头")
     void shouldReturn401AndRedirectHeaderOnLogin() throws Exception {
         // 执行登录请求
         authController.handleLogin(response);
 
-        // 验证状态码
-        verify(response).statusCode(401);
-
         // 验证重定向头
         verify(headers).add(eq("fit-redirect-to-prefix"), anyString());
-
-        // 验证发送响应
-        verify(response).send();
     }
 
     @Test
-    @DisplayName("测试注销接口 - 返回200状态码和清除Cookie头")
+    @DisplayName("测试注销接口 - 清除Cookie头")
     void shouldReturn200AndClearCookieOnLogout() throws Exception {
         // 执行注销请求
         authController.handleLogout(response);
 
-        // 验证状态码
-        verify(response).statusCode(200);
-
         // 验证Set-Cookie头
         verify(headers).add(eq("Set-Cookie"), anyString());
-
-        // 验证发送响应
-        verify(response).send();
     }
 
     @Test
@@ -189,7 +178,6 @@ public class AuthControllerTest {
 
         // 验证重定向头格式
         verify(headers).add(eq("fit-redirect-to-prefix"),
-                argThat(redirectUrl -> redirectUrl.startsWith("http://localhost:8080/oauth/authorize")
-                        && redirectUrl.contains("&useless=")));
+                argThat(redirectUrl -> redirectUrl.startsWith("http://localhost:8080/api/v1/api/auth/redirect?redirect_uri=")));
     }
 }

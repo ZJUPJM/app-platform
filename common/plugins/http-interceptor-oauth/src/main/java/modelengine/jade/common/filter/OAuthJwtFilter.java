@@ -6,12 +6,12 @@
 
 package modelengine.jade.common.filter;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.jose.JOSEException;
 
 import modelengine.fit.http.Cookie;
 import modelengine.fit.http.server.HttpClassicServerRequest;
@@ -31,9 +31,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 /**
  * 全局 HTTP 过滤器，用于验证请求中的 JWT，并根据结果执行后续请求或返回 401。
@@ -48,11 +50,11 @@ public class OAuthJwtFilter implements HttpServerFilter {
 
     private static final String TOKEN_KEY = "access-token";
 
-    @Value("${authorization-server.jwks-url}")
-    private String jwksUrl;
+    @Value("${authorization-server.jwk-endpoint}")
+    private String jwkEndpoint;
 
-    @Value("${authorization-server.auth-url}")
-    private String authUrl;
+    @Value("${authorization-server.api-endpoint}")
+    private String apiEndpoint;
 
     // 缓存 JWK 集合
     private final CopyOnWriteArrayList<CachedJwk> cachedJwks = new CopyOnWriteArrayList<>();
@@ -89,12 +91,11 @@ public class OAuthJwtFilter implements HttpServerFilter {
 
     @Override
     public List<String> mismatchPatterns() {
-        return Arrays.asList(
-                "/api/app/v1/**",
+        return Arrays.asList("/api/app/v1/**",
                 "/fit/check/**",
                 "/v1/api/auth/callback",
-                "/v1/api/auth/login"
-        );
+                "/v1/api/auth/login",
+                "/v1/api/auth/redirect");
     }
 
     @Override
@@ -141,7 +142,9 @@ public class OAuthJwtFilter implements HttpServerFilter {
         try {
             SignedJWT signedJWT = SignedJWT.parse(jwtString);
             Date exp = signedJWT.getJWTClaimsSet().getExpirationTime();
-            if (exp == null || exp.before(new Date())) return null;
+            if (exp == null || exp.before(new Date())) {
+                return null;
+            }
 
             String kid = signedJWT.getHeader().getKeyID();
 
@@ -172,18 +175,22 @@ public class OAuthJwtFilter implements HttpServerFilter {
      */
     boolean verifyWithCachedJwks(SignedJWT signedJWT, String kid) throws JOSEException {
         long now = System.currentTimeMillis();
-        List<CachedJwk> activeKeys = cachedJwks.stream()
-                .filter(c -> now - c.loadTime <= JWKS_KEY_MAX_AGE)
-                .collect(Collectors.toList());
+        List<CachedJwk> activeKeys = cachedJwks.stream().filter(c -> now - c.loadTime <= JWKS_KEY_MAX_AGE).toList();
 
         for (CachedJwk cached : activeKeys) {
             JWK jwk = cached.jwk;
-            if (!"RSA".equals(jwk.getKeyType().getValue())) continue;
-            if (kid != null && !kid.equals(jwk.getKeyID())) continue;
+            if (!"RSA".equals(jwk.getKeyType().getValue())) {
+                continue;
+            }
+            if (kid != null && !kid.equals(jwk.getKeyID())) {
+                continue;
+            }
 
             RSAPublicKey publicKey = jwk.toRSAKey().toRSAPublicKey();
             JWSVerifier verifier = new RSASSAVerifier(publicKey);
-            if (signedJWT.verify(verifier)) return true;
+            if (signedJWT.verify(verifier)) {
+                return true;
+            }
         }
         return false;
     }
@@ -193,7 +200,7 @@ public class OAuthJwtFilter implements HttpServerFilter {
      */
     private synchronized void refreshJwkSet() {
         try {
-            JWKSet newSet = JWKSet.load(new URL(jwksUrl));
+            JWKSet newSet = JWKSet.load(new URL(jwkEndpoint));
             long now = System.currentTimeMillis();
 
             // 清理过期旧密钥
@@ -202,7 +209,9 @@ public class OAuthJwtFilter implements HttpServerFilter {
             // 添加新密钥（去重 kid）
             for (JWK jwk : newSet.getKeys()) {
                 boolean exists = cachedJwks.stream().anyMatch(c -> c.jwk.getKeyID().equals(jwk.getKeyID()));
-                if (!exists) cachedJwks.add(new CachedJwk(jwk, now));
+                if (!exists) {
+                    cachedJwks.add(new CachedJwk(jwk, now));
+                }
             }
 
             lastJwkLoadTime = now;
@@ -219,7 +228,7 @@ public class OAuthJwtFilter implements HttpServerFilter {
      */
     void sendUnAuthResponse(HttpClassicServerResponse response) {
         response.statusCode(401);
-        response.headers().add("fit-redirect-to-prefix", authUrl + "&useless=");
+        response.headers().add("fit-redirect-to-prefix", apiEndpoint + "/v1/api/auth/redirect?redirect_uri=");
         response.send();
     }
 }

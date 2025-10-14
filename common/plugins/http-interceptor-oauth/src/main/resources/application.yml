@@ -7,5 +7,5 @@ filter:
   static-resource-filter: 'enable'
 
 authorization-server:
-  jwks-url: ${OAUTH_JWK_ENDPOINT:http://oauth.server.local/oauth2/jwks}
-  auth-url: ${OAUTH_AUTH_URL:http://oauth.server.local/#/login?response_type=code&client_id=app-platform&redirect_uri=http://oauth.client.local/v1/api/auth/callback&scope=read}
+  jwk-endpoint: http://oauth.server.local/oauth2/jwks
+  api-endpoint: http://oauth.client.local/api
