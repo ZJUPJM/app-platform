@@ -267,7 +267,7 @@ const EditModal = (props) => {
   };
   const handleCancel = () => {
     if (!loading) {
-      setAppBuiltType(APP_BUILT_TYPE.BASIC);
+      setAppBuiltType(APP_BUILT_TYPE.WORK_FLOW);
       setApplicationType(APP_BUILT_CLASSIFICATION.ASSISTANT);
       setIsModalOpen(false);
     }
@@ -315,7 +315,7 @@ const EditModal = (props) => {
   // 应用类型切换方法
   const applicationOnChange = (e: RadioChangeEvent) => {
     setApplicationType(e.target.value);
-    setAppBuiltType(APP_BUILT_TYPE.BASIC);
+    setAppBuiltType(APP_BUILT_TYPE.WORK_FLOW);
     form.resetFields(['name', 'description']);
   };
   useImperativeHandle(modalRef, () => {
