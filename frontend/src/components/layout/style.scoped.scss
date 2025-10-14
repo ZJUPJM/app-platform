@@ -84,16 +84,32 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 10px;
+    padding: 10px 8px;
     border-top: 1px solid #e6e9ee;
     color: #333;
     min-height: 40px;
     background: #f0f4f9;
     z-index: 10;
 
-    // 展开态：为用户信息增加左侧内边距
-    .layout-sider:not(.collapsed) & {
-      padding-left: 18px;
+    &-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: background-color 0.2s ease;
+      width: 100%;
+      min-height: 40px;
+      box-sizing: border-box;
+
+      &:hover {
+        background-color: #e6e9ee;
+      }
+
+      &:active {
+        background-color: #dee4ec;
+      }
     }
 
     &-name {
@@ -101,6 +117,12 @@
       font-weight: 400;
       color: #333;
       margin-left: 2px;
+      padding-bottom: 4px;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
     }
 
     // 折叠态：仅显示头像，不显示用户名
@@ -110,6 +132,13 @@
       }
       justify-content: center; // 居中，保持头像位置稳定
       padding-left: 8px; // 折叠态保持基本内边距
+
+      &-info {
+        padding: 8px;
+        width: auto;
+        min-width: 40px;
+        justify-content: center;
+      }
     }
   }
 }

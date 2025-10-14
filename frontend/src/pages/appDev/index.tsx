@@ -9,7 +9,6 @@ import { Input, Dropdown, Modal, Spin, Tabs } from 'antd';
 import { QuestionCircleOutlined, DownOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
 import { Icons } from '@/components/icons';
-import UserAuthButton from '@/components/userAuthButton';
 import { exportApp } from '@/shared/http/aipp';
 import { deleteAppApi, queryAppDevApi } from '@/shared/http/appDev';
 import { debounce, setSpaClassName, queryAppCategories, getCookie } from '@/shared/utils/common';
@@ -263,7 +262,6 @@ const AppDev: React.FC = () => {
         <div className='apps_title'>{t('appDevelopment')}</div>
         <div className='apps_header_right'>
           { process.env.PACKAGE_MODE === 'spa' && <QuestionCircleOutlined onClick={onlineHelp} />}
-          <UserAuthButton />
         </div>
       </div>
       <div className='apps_main'>

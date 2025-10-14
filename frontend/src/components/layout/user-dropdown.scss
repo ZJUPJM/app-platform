@@ -1,0 +1,57 @@
+/* 用户信息下拉菜单样式 */
+.user-info-dropdown .ant-dropdown-menu {
+  border-radius: 12px !important;
+  border: 1px solid #DEE4EC !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  padding: 4px !important;
+  min-width: 120px !important;
+}
+
+.user-info-dropdown .ant-dropdown-menu-item {
+  border-radius: 8px !important;
+  margin: 2px 2px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.user-info-dropdown .ant-dropdown-menu-item:hover {
+  background-color: #f0f4f9 !important;
+}
+
+.user-info-dropdown .ant-dropdown-menu-item:active {
+  background-color: #f0f4f9 !important;
+}
+
+/* 用户菜单项样式 */
+.user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.user-menu-item .user-menu-icon {
+  flex-shrink: 0;
+  color: #666;
+  margin-left: 6px;
+  transition: color 0.2s ease;
+}
+
+.user-menu-item .user-menu-text {
+  flex: 1;
+  color: #333;
+  font-size: 14px;
+  font-weight: 400;
+  transition: color 0.2s ease;
+  margin-left: 2px;
+}
+
+/* 菜单项悬停和激活状态 */
+.user-info-dropdown .ant-dropdown-menu-item:hover .user-menu-item .user-menu-icon,
+.user-info-dropdown .ant-dropdown-menu-item:active .user-menu-item .user-menu-icon {
+  color: #333;
+}
+
+.user-info-dropdown .ant-dropdown-menu-item:hover .user-menu-item .user-menu-text,
+.user-info-dropdown .ant-dropdown-menu-item:active .user-menu-item .user-menu-text {
+  color: #333;
+}

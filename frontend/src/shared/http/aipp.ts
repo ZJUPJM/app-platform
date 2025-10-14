@@ -249,3 +249,8 @@ export function oauthLogout() {
 export function oauthLogin() {
   return post(`${AIPP_URL}/auth/login`, {});
 }
+
+// 获取用户名
+export function getUsername() {
+  return get(`${AIPP_URL}/auth/username`, {});
+}

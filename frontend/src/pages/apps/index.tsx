@@ -8,7 +8,6 @@ import React, { useState, useEffect } from 'react';
 import { Input, Spin } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Icons } from '@/components/icons';
-import UserAuthButton from '@/components/userAuthButton';
 import { queryAppsApi } from '@/shared/http/apps';
 import AppCard from '@/components/appCard';
 import { debounce, getCookie, setSpaClassName } from '@/shared/utils/common';
@@ -114,7 +113,6 @@ const Apps: React.FC = () => {
         <div className='apps_title'>{t('applicationMarket')}</div>
         <div className='apps_header_right'>
           { process.env.PACKAGE_MODE === 'spa' && <QuestionCircleOutlined onClick={onlineHelp} />}
-          <UserAuthButton />
         </div>
       </div>
       <div className='apps_main_market'>

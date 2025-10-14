@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import type { MenuProps } from 'antd';
-import { Layout, Menu, Avatar } from 'antd';
+import { Layout, Menu, Avatar, Dropdown } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import {
   Route,
@@ -31,8 +31,13 @@ import { getUser, getOmsUser, getRole, getChatPluginList } from '../../pages/hel
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { setChatId, setChatList, setChatRunning, setAtChatId } from '@/store/chatStore/chatStore';
 import { setAtAppInfo, setAtAppId } from '@/store/appInfo/appInfo';
+import { useTranslation } from 'react-i18next';
+import { useGuestName } from '@/shared/hooks/useGuestName';
+import { handleLogout } from '@/components/userAuthButton';
+import { getUsername } from '@/shared/http/aipp';
 import HistorySidebar from './history-sidebar';
 import './style.scoped.scss';
+import './user-dropdown.scss';
 
 const { Content, Sider } = Layout;
 type MenuItem = Required<MenuProps>['items'][number];
@@ -73,10 +78,75 @@ const AppLayout: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [defaultActive, setDefaultActive] = useState<string[]>([])
+  const [loading, setLoading] = useState(false);
+  const [apiUsername, setApiUsername] = useState<string>(() => {
+    // 初始化时从localStorage加载缓存的用户名
+    return localStorage.getItem('apiUsername') || '';
+  });
   const navigate = useHistory().push;
   const location = useLocation();
   const dispatch = useAppDispatch();
   const appId = useAppSelector((state) => state.appStore.appId);
+  const isGuest = useAppSelector((state) => state.appStore.isGuest);
+  const { t } = useTranslation();
+  const guestName = useGuestName();
+  const currentUser = localStorage.getItem('currentUser') || '';
+
+  // 获取用户名信息
+  const fetchUsername = async () => {
+    // 如果已经有缓存的用户名，直接使用
+    if (apiUsername) {
+      return;
+    }
+
+    try {
+      const response: any = await getUsername();
+      if (response && (response.code === 0 || response.code === 200) && response.data) {
+        setApiUsername(response.data);
+        // 缓存到localStorage
+        localStorage.setItem('apiUsername', response.data);
+      }
+    } catch (error) {
+      console.error('获取用户名失败:', error);
+      // 失败时使用localStorage中的缓存或默认值
+      const cachedUsername = localStorage.getItem('apiUsername');
+      if (cachedUsername) {
+        setApiUsername(cachedUsername);
+      }
+    }
+  };
+
+  // 退出登录处理 - 直接复用现有逻辑
+
+  // 用户信息下拉菜单项
+  const userMenuItems = [
+    {
+      key: 'logout',
+      label: (
+        <div className="user-menu-item">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="16" 
+            height="16" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            aria-hidden="true"
+            className="user-menu-icon"
+          >
+            <title>Logout</title>
+            <path d="M14 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"></path>
+            <path d="M16 17l5-5-5-5"></path>
+            <path d="M21 12H9"></path>
+          </svg>
+          <span className="user-menu-text">{t('logout')}</span>
+        </div>
+      ),
+    },
+  ];
 
   /**
    * @description 从后往前遍历路由 父子路由，子路由前缀需要是父路由
@@ -210,7 +280,17 @@ const AppLayout: React.FC = () => {
       getRole();
     }
     getChatPluginList();
+    
+    // 获取用户名信息
+    fetchUsername();
   }, [])
+
+  // 当显示用户信息时，确保获取用户名
+  useEffect(() => {
+    if (shouldShowUserInfo() && !apiUsername) {
+      fetchUsername();
+    }
+  }, [location.pathname, shouldShowUserInfo, apiUsername])
   return (
     <HistoryProvider>
       <Layout>
@@ -269,14 +349,32 @@ const AppLayout: React.FC = () => {
                   </div>
                 )}
               </div>
-              {/* 暂时隐藏用户信息栏
               {shouldShowUserInfo() && (
                 <div className='layout-sider-user'>
-                  <Avatar size={28} icon={<UserOutlined />} />
-                  <span className='layout-sider-user-name'>User</span>
+                  <Dropdown
+                    menu={{ 
+                      items: userMenuItems, 
+                      onClick: ({ key }) => {
+                        if (key === 'logout') {
+                          handleLogout(setLoading);
+                        }
+                      }
+                    }}
+                    placement="topRight"
+                    trigger={['click']}
+                    overlayClassName="user-info-dropdown"
+                  >
+                    <div className='layout-sider-user-info'>
+                      <Avatar size={28} icon={<UserOutlined />} />
+                       {!isCollapsed && (
+                         <span className='layout-sider-user-name'>
+                           {isGuest ? guestName : (apiUsername || currentUser || 'Unknown User')}
+                         </span>
+                       )}
+                    </div>
+                  </Dropdown>
                 </div>
               )}
-              */}
             </Sider>
             <div className='layout-sider-folder'>
               <KnowledgeIcons.menuFolder onClick={() => {

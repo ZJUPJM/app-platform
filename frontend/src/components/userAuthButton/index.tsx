@@ -10,6 +10,22 @@ import { useTranslation } from 'react-i18next';
 import { oauthLogout, oauthLogin } from '@/shared/http/aipp';
 import './index.scss';
 
+// 导出退出登录处理函数，供其他组件复用
+export const handleLogout = async (setLoading: (loading: boolean) => void) => {
+  setLoading(true);
+  try {
+    await oauthLogout();
+    localStorage.removeItem('__account_name__');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('apiUsername'); // 清除缓存的API用户名
+    await oauthLogin();
+  } catch (error) {
+    console.error('登出失败:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 /**
  * 用户登入登出按钮组件
  *
@@ -20,27 +36,12 @@ const UserAuthButton: React.FC = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
-  // 退出登录处理
-  const handleLogout = async () => {
-    setLoading(true);
-    try {
-      await oauthLogout();
-      localStorage.removeItem('__account_name__');
-      localStorage.removeItem('currentUser');
-      await oauthLogin();
-    } catch (error) {
-      console.error('登出失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="user-auth-button">
       <Button
         type="primary"
         loading={loading}
-        onClick={handleLogout}
+        onClick={() => handleLogout(setLoading)}
         className="auth-btn"
       >
         {t('logout')}
