@@ -180,13 +180,15 @@ public class AuthController {
     /**
      * 获取用户名信息
      */
-    @PostMapping("/username")
+    @GetMapping("/username")
     @ResponseStatus(HttpResponseStatus.OK)
     public Rsp<String> handleUsername() {
         String username = Optional.ofNullable(UserContextHolder.get())
                 .map(UserContext::getName)
                 .orElseThrow(() -> new IllegalArgumentException("The user name cannot be null."));
-        return Rsp.ok(username);
+        Rsp<String> res = Rsp.ok(username);
+        res.setCode(200);
+        return res;
     }
 
     /**
