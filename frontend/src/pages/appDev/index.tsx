@@ -31,7 +31,7 @@ import ImportImg from '@/assets/images/ai/import.png';
 import './index.scoped.scss';
 
 /**
- * 应用开发页面
+ * 工作台页面
  *
  * @return {JSX.Element}
  * @constructor
@@ -298,7 +298,7 @@ const AppDev: React.FC = () => {
           items={tabs}
           activeKey={typeKey}
           onChange={(key: string) => handleTypeChange(key)}
-          style={{ width: '100%', textAlign: 'center' }}
+          style={{ width: '100%', textAlign: 'center', margin: '16px 0' }}
           centered={true}
         />
         {/* 应用卡片列表 */}
