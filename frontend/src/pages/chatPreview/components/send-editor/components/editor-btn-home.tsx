@@ -114,6 +114,13 @@ const EditorBtnHome = (props) => {
       }
       const value = editorRef.current.innerText;
       if (value.startsWith('@')) {
+        // 检查是否已经有智能体tag（用DOM检查）
+        const agentTag = editorRef.current.querySelector('.agent-tag');
+        if (agentTag) {
+          setShowAt(false);
+          return;
+        }
+        
         const contentAfterAt = value.slice(1);
         // 如果@后面包含空格，说明已经选择了应用，不再弹出at列表
         if (contentAfterAt.includes(' ')) {

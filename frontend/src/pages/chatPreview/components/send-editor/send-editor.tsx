@@ -92,6 +92,11 @@ const SendEditor = (props: any) => {
   const [searchActive, setSearchActive] = useState(false);
   const [showAt, setShowAt] = useState(false);
   const [searchKey, setSearchKey] = useState('');
+  const [selectedAgent, setSelectedAgent] = useState<any>(null);
+  const [showAgentDeleteBtn, setShowAgentDeleteBtn] = useState(false);
+  const [agentTagPosition, setAgentTagPosition] = useState({ top: 0, left: 0 });
+  const [isAgentTagClicked, setIsAgentTagClicked] = useState(false);
+  const hideTimeoutRef = useRef<any>(null);
   const chatRunning = useAppSelector((state) => state.chatCommonStore.chatRunning);
   const loginStatus = useAppSelector((state) => state.chatCommonStore.loginStatus);
   const showMulti = useAppSelector((state) => state.commonStore.historySwitch);
@@ -127,6 +132,13 @@ const SendEditor = (props: any) => {
     
     // 检测@输入 - 只在非应用编排页面启用
     if (chatContent.startsWith('@') && !isAppArrangementPage) {
+      // 检查是否已经有智能体tag（通过DOM检查，更准确）
+      const agentTag = editorDom?.querySelector('.agent-tag');
+      if (agentTag) {
+        setShowAt(false);
+        return;
+      }
+      
       const contentAfterAt = chatContent.slice(1);
       // 如果@后面包含空格，说明已经选择了应用，不再弹出at列表
       if (contentAfterAt.includes(' ')) {
@@ -141,8 +153,18 @@ const SendEditor = (props: any) => {
   }
   // 清除内容
   function clearContent() {
-    editorRef.current.innerText = '';
+    if (selectedAgent) {
+      // 如果有智能体tag，重新创建tag
+      const editorDom = document.getElementById('ctrl-promet');
+      if (editorDom) {
+        editorDom.innerHTML = '';
+        createAgentTag(selectedAgent);
+      }
+    } else {
+      editorRef.current.innerText = '';
+    }
     setShowClear(false);
+    // 不清空selectedAgent状态
   }
   // 快捷发送
   function messageKeyDown(e: any) {
@@ -152,6 +174,22 @@ const SendEditor = (props: any) => {
     } else if (e.keyCode === 13) {
       e.preventDefault();
       sendMessage();
+    } else if (e.keyCode === 8) { // Backspace键
+      // 检查光标是否在智能体tag后面
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const container = range.startContainer;
+        
+        // 如果光标在智能体tag后面，删除整个tag
+        if (container.nodeType === Node.TEXT_NODE && container.textContent === '\u00A0') {
+          const agentTag = container.previousSibling as HTMLElement;
+          if (agentTag && agentTag.classList && agentTag.classList.contains('agent-tag')) {
+            e.preventDefault();
+            removeAgentTag();
+          }
+        }
+      }
     }
   }
   // 发送消息
@@ -163,14 +201,34 @@ const SendEditor = (props: any) => {
     if (!checkMutipleInput() || !checkFileSuccess()) {
       return;
     }
-    let chatContent = document.getElementById('ctrl-promet')?.innerText;
-    if (chatContent?.trim()) {
-      if (fileList.length) {
-        clearFileList();
+    
+    // 获取纯文本内容，排除智能体tag
+    const editorDom = document.getElementById('ctrl-promet');
+    if (editorDom) {
+      // 克隆DOM节点，移除智能体tag
+      const clonedDom = editorDom.cloneNode(true) as HTMLElement;
+      const agentTags = clonedDom.querySelectorAll('.agent-tag');
+      agentTags.forEach(tag => tag.remove());
+      
+      let chatContent = clonedDom.innerText?.trim();
+      
+      if (chatContent) {
+        if (fileList.length) {
+          clearFileList();
+        }
+        onSend(chatContent);
+        
+        // 清空输入框内容但保留智能体tag
+        if (selectedAgent) {
+          // 如果有智能体tag，重新创建tag
+          editorDom.innerHTML = '';
+          createAgentTag(selectedAgent);
+        } else {
+          editorRef.current.innerText = '';
+        }
+        setShowClear(false);
+        // 不清空selectedAgent状态
       }
-      onSend(chatContent);
-      editorRef.current.innerText = '';
-      setShowClear(false);
     }
   }
   // 清空上传文件列表
@@ -213,22 +271,31 @@ const SendEditor = (props: any) => {
     }
   }, []);
 
-  // 点击外部区域关闭@选择框
+  // 点击外部区域关闭@选择框和智能体删除按钮
   useEffect(() => {
     const handleClickOutside = (event: any) => {
       if (showAt && !event.target.closest('.at-content')) {
         setShowAt(false);
       }
+      if (showAgentDeleteBtn && !event.target.closest('.agent-tag') && !event.target.closest('.agent-tag-delete-external')) {
+        setShowAgentDeleteBtn(false);
+        setIsAgentTagClicked(false);
+        // 清除隐藏定时器
+        if (hideTimeoutRef.current) {
+          clearTimeout(hideTimeoutRef.current);
+          hideTimeoutRef.current = null;
+        }
+      }
     };
     
-    if (showAt) {
+    if (showAt || showAgentDeleteBtn) {
       document.addEventListener('click', handleClickOutside);
     }
     
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [showAt]);
+  }, [showAt, showAgentDeleteBtn]);
   // 更新文件
   function updateFileList(paramFileList: any, autoSend: any) {
     if (isAlreadySent.current) {
@@ -328,6 +395,11 @@ const SendEditor = (props: any) => {
       recorderHome.current?.stop();
       audioBtnRef.current?.setActive(false);
       intervalData.current && clearInterval(intervalData.current);
+      // 清理隐藏定时器
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+        hideTimeoutRef.current = null;
+      }
     }
   }, []);
 
@@ -458,17 +530,133 @@ const SendEditor = (props: any) => {
     }
   };
 
-  // @应用选择回调
-  const handleAtItemClick = (item: any) => {
-    // 这里可以处理@应用选择的逻辑
-    // 例如：更新编辑器内容，设置选中的应用等
+  // 创建智能体tag的通用函数
+  const createAgentTag = (item: any) => {
     const editorDom = document.getElementById('ctrl-promet');
     if (editorDom) {
-      editorDom.innerText = `@${item.name} `;
-      setShowAt(false);
+      // 创建智能体tag
+      const agentTag = document.createElement('span');
+      agentTag.className = 'agent-tag';
+      agentTag.contentEditable = 'false';
+      agentTag.innerHTML = `@${item.name}`;
+      
+      // 添加悬停和点击事件
+      const updateDeleteBtnPosition = () => {
+        const rect = agentTag.getBoundingClientRect();
+        const containerRect = containerRef.current?.getBoundingClientRect();
+        if (containerRect) {
+          setAgentTagPosition({
+            top: rect.top - containerRect.top - 30,
+            left: rect.left - containerRect.left
+          });
+        }
+      };
+
+      const showDeleteBtn = () => {
+        updateDeleteBtnPosition();
+        setShowAgentDeleteBtn(true);
+        // 清除之前的隐藏定时器
+        if (hideTimeoutRef.current) {
+          clearTimeout(hideTimeoutRef.current);
+          hideTimeoutRef.current = null;
+        }
+      };
+
+      const hideDeleteBtn = () => {
+        // 只有在未点击状态下才隐藏删除按钮
+        if (!isAgentTagClicked) {
+          // 延迟隐藏，给用户时间移动到删除按钮
+          hideTimeoutRef.current = setTimeout(() => {
+            setShowAgentDeleteBtn(false);
+          }, 1000);
+        }
+      };
+
+      agentTag.onmouseenter = () => {
+        showDeleteBtn();
+      };
+      
+      agentTag.onmouseleave = () => {
+        // 只有在未点击状态下才延迟隐藏
+        if (!isAgentTagClicked) {
+          hideDeleteBtn();
+        }
+      };
+      
+      // 添加点击事件
+      agentTag.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // console.log('智能体tag被点击，设置5秒显示');
+        updateDeleteBtnPosition();
+        setIsAgentTagClicked(true);
+        setShowAgentDeleteBtn(true);
+        // 清除隐藏定时器
+        if (hideTimeoutRef.current) {
+          clearTimeout(hideTimeoutRef.current);
+          hideTimeoutRef.current = null;
+        }
+        // 5秒后自动隐藏删除按钮
+        hideTimeoutRef.current = setTimeout(() => {
+          // console.log('5秒定时器触发，隐藏删除按钮');
+          setShowAgentDeleteBtn(false);
+          setIsAgentTagClicked(false);
+        }, 5000);
+      };
+      
+      editorDom.appendChild(agentTag);
+      
+      // 添加一个不可见的空格，用于光标定位
+      const space = document.createTextNode('\u00A0');
+      editorDom.appendChild(space);
+      
+      // 设置光标位置
+      const range = document.createRange();
+      range.setStartAfter(space);
+      range.collapse(true);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      
       setTextLenth(editorDom.innerText.length);
       setShowClear(true);
     }
+  };
+
+  // @应用选择回调
+  const handleAtItemClick = (item: any) => {
+    // 设置选中的智能体
+    setSelectedAgent(item);
+    setShowAt(false);
+    
+    // 清空当前内容并创建智能体tag
+    const editorDom = document.getElementById('ctrl-promet');
+    if (editorDom) {
+      editorDom.innerHTML = '';
+      createAgentTag(item);
+    }
+  };
+
+  // 删除智能体tag
+  const removeAgentTag = () => {
+    // 先清除隐藏定时器
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    
+    // 清空编辑器内容
+    const editorDom = document.getElementById('ctrl-promet');
+    if (editorDom) {
+      editorDom.innerHTML = '';
+      setTextLenth(0);
+      setShowClear(false);
+    }
+    
+    // 最后更新状态
+    setSelectedAgent(null);
+    setIsAgentTagClicked(false);
+    setShowAgentDeleteBtn(false);
   };
 
   // 显示更多应用
@@ -635,6 +823,44 @@ const SendEditor = (props: any) => {
           searchKey={searchKey}
           setSearchKey={setSearchKey}
         />
+      )}
+      
+      {/* 智能体tag删除按钮 - 独立渲染在容器外部 */}
+      {showAgentDeleteBtn && selectedAgent && (
+        <div 
+          className="agent-tag-delete-external"
+          style={{
+            position: 'absolute',
+            top: `${agentTagPosition.top}px`,
+            left: `${agentTagPosition.left}px`,
+            zIndex: 99999
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            removeAgentTag();
+          }}
+          onMouseEnter={() => {
+            setShowAgentDeleteBtn(true);
+            // 清除隐藏定时器
+            if (hideTimeoutRef.current) {
+              clearTimeout(hideTimeoutRef.current);
+              hideTimeoutRef.current = null;
+            }
+          }}
+          onMouseLeave={() => {
+            // 只有在未点击状态下才延迟隐藏删除按钮
+            if (!isAgentTagClicked) {
+              // 延迟隐藏，给用户时间移动回tag
+              hideTimeoutRef.current = setTimeout(() => {
+                setShowAgentDeleteBtn(false);
+              }, 1000);
+            }
+            // 如果已点击，不设置任何隐藏定时器，让5秒定时器自然生效
+          }}
+        >
+          退出智能体
+        </div>
       )}
     </div>
   )}</>

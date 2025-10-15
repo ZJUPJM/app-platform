@@ -3,6 +3,23 @@
   position: relative;
   flex-shrink: 0;
   height: 180px;
+  
+  // 智能体tag删除按钮 - 独立渲染在容器外部
+  .agent-tag-delete-external {
+    cursor: pointer;
+    font-weight: normal;
+    background-color: #000;
+    color: #fff;
+    border-radius: 4px;
+    padding: 4px 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 99999;
+    
+    &:hover {
+      background-color: #333;
+    }
+  }
   .editor-stop {
     position: absolute;
     top: -40px;
@@ -167,14 +184,16 @@
             padding: 2px 8px;
             background-color: #e9edfa;
             border-radius: 5px;
-            &:hover {
-              background-color: #fff;
-              border: 1px solid #0478fc;
-            }
-            &:focus {
-              background-color: #fff;
-              border: 1px solid #0478fc;
-            }
+          }
+          // 智能体tag样式
+          .agent-tag {
+            display: inline-block;
+            background-color: #f0f6ff;
+            border-radius: 4px;
+            color: #1677FF;
+            font-weight: bold;
+            position: relative;
+            user-select: none;
           }
           .important-text.focus-text {
             background-color: #fff;
