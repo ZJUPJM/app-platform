@@ -115,8 +115,13 @@ const EditorBtnHome = (props) => {
       const value = editorRef.current.innerText;
       if (value.startsWith('@')) {
         const contentAfterAt = value.slice(1);
-        setSearchKey(contentAfterAt ? contentAfterAt : '');
-        setShowAt(true);
+        // 如果@后面包含空格，说明已经选择了应用，不再弹出at列表
+        if (contentAfterAt.includes(' ')) {
+          setShowAt(false);
+        } else {
+          setSearchKey(contentAfterAt ? contentAfterAt : '');
+          setShowAt(true);
+        }
       } else {
         setShowAt(false);
       }
