@@ -99,7 +99,10 @@ public class CustomAippModelCenter implements AippModelCenterExtension {
         }
         ModelAccessPo accessInfo = this.userModelRepo.getModelAccessInfo(customTag.userId, customTag.tag, modelName);
         if (accessInfo == null) {
-            return null;
+            accessInfo = this.userModelRepo.getModelAccessInfo(jadeContext.getOperator(), customTag.tag, modelName);
+            if (accessInfo == null) {
+                return null;
+            }
         }
         return ModelAccessInfo.builder()
                 .serviceName(accessInfo.getModelPO().getName())
