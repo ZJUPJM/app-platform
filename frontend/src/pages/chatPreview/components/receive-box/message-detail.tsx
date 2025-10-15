@@ -69,6 +69,7 @@ const MessageBox = (props: any) => {
 
     // 从内容中提取使用的引用键
     if (content) {
+      // 1. 提取 <ref>ID</ref> 格式的引用
       const refMatches = content.match(/<ref>(.*?)<\/ref>/g) || [];
       refMatches.forEach((match: string) => {
         const keyContent = match.replace(/<ref>|<\/ref>/g, '');
@@ -78,6 +79,15 @@ const MessageBox = (props: any) => {
             usedKeys.add(key);
           }
         });
+      });
+
+      // 2. 提取 [ID] 格式的引用（常见于思考内容中）
+      const bracketMatches = content.match(/\[([a-f0-9]{6})\]/gi) || [];
+      bracketMatches.forEach((match: string) => {
+        const key = match.replace(/\[|\]/g, '').toLowerCase();
+        if (allRefKeys.includes(key)) {
+          usedKeys.add(key);
+        }
       });
     }
 
@@ -97,6 +107,7 @@ const MessageBox = (props: any) => {
 
     // 从内容中提取使用的引用键（保持出现顺序）
     if (content) {
+      // 1. 提取 <ref>ID</ref> 格式的引用
       const refMatches = content.match(/<ref>(.*?)<\/ref>/g) || [];
       refMatches.forEach((match: string) => {
         const keyContent = match.replace(/<ref>|<\/ref>/g, '');
@@ -107,6 +118,16 @@ const MessageBox = (props: any) => {
             usedRefKeysInOrder.push(key);
           }
         });
+      });
+
+      // 2. 提取 [ID] 格式的引用（常见于思考内容中）
+      const bracketMatches = content.match(/\[([a-f0-9]{6})\]/gi) || [];
+      bracketMatches.forEach((match: string) => {
+        const key = match.replace(/\[|\]/g, '').toLowerCase();
+        if (allRefKeys.includes(key) && !tempUsedKeys.has(key)) {
+          tempUsedKeys.add(key);
+          usedRefKeysInOrder.push(key);
+        }
       });
     }
 
@@ -150,6 +171,7 @@ const MessageBox = (props: any) => {
     const tempUsedKeys = new Set<string>();
     
     if (content) {
+      // 1. 提取 <ref>ID</ref> 格式的引用
       const refMatches = content.match(/<ref>(.*?)<\/ref>/g) || [];
       refMatches.forEach((match: string) => {
         const keyContent = match.replace(/<ref>|<\/ref>/g, '');
@@ -161,6 +183,16 @@ const MessageBox = (props: any) => {
           }
         });
       });
+
+      // 2. 提取 [ID] 格式的引用（常见于思考内容中）
+      const bracketMatches = content.match(/\[([a-f0-9]{6})\]/gi) || [];
+      bracketMatches.forEach((match: string) => {
+        const key = match.replace(/\[|\]/g, '').toLowerCase();
+        if (allRefKeys.includes(key) && !tempUsedKeys.has(key)) {
+          tempUsedKeys.add(key);
+          usedRefKeysInOrder.push(key);
+        }
+      });
     }
     
     // 根据编号获取对应的引用数据
@@ -170,6 +202,70 @@ const MessageBox = (props: any) => {
       return refData;
     }
     return null;
+  };
+
+  /**
+   * 将引用ID替换为可点击的序号标签（用于思考内容）
+   * 处理两种格式：<ref>ID</ref> 和 [ID]
+   */
+  const replaceReferenceIdsWithNumbers = (content: string) => {
+    if (!content || !reference || !Array.isArray(reference) || reference.length === 0) {
+      return content;
+    }
+
+    // 构建引用键到新编号的映射
+    const refKeyToNewNumber = new Map<string, number>();
+    usedReferences.forEach(ref => {
+      refKeyToNewNumber.set(ref.id, ref.number);
+    });
+
+    // 更安全的转义函数
+    const escapeAttribute = (str: string) => {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    };
+    
+    // 创建引用标签的辅助函数
+    const createReferenceTag = (num: number) => {
+      const ref = usedReferences.find(r => r.number === num);
+      const title = ref?.data?.metadata?.fileName || ref?.data?.source || '未知来源';
+      const summary = ref?.data?.txt || ref?.data?.text || '无摘要';
+      const url = ref?.data?.metadata?.url || ref?.data?.source || '';
+      
+      const escapedTitle = escapeAttribute(title);
+      const escapedSummary = escapeAttribute(summary);
+      const escapedUrl = escapeAttribute(url);
+      
+      return `<span class="reference-circle think-reference" data-ref-number="${num}" data-ref-url="${escapedUrl}" data-ref-title="${escapedTitle}" data-ref-summary="${escapedSummary}">${num}</span>`;
+    };
+
+    let processedContent = content;
+    
+    // 1. 处理 <ref>ID</ref> 格式（合并相邻的引用标签）
+    processedContent = processedContent.replace(/<\/ref><ref>/g, '_');
+    processedContent = processedContent.replace(/<ref>(.*?)<\/ref>/g, (match, keyContent) => {
+      const keys = keyContent.split('_').filter((k: string) => refKeyToNewNumber.has(k));
+      if (keys.length === 0) return match;
+      
+      const refNumbers = keys.map((k: string) => refKeyToNewNumber.get(k)!).sort((a: number, b: number) => a - b);
+      return refNumbers.map(createReferenceTag).join('');
+    });
+    
+    // 2. 处理 [ID] 格式（方括号格式，常见于思考内容中）
+    // 匹配 [6位字母数字组合] 这种格式
+    processedContent = processedContent.replace(/\[([a-f0-9]{6})\]/gi, (match, keyContent) => {
+      if (refKeyToNewNumber.has(keyContent)) {
+        const num = refKeyToNewNumber.get(keyContent)!;
+        return createReferenceTag(num);
+      }
+      return match; // 如果不是引用ID，保持原样
+    });
+
+    return processedContent;
   };
 
   /**
@@ -365,13 +461,15 @@ const MessageBox = (props: any) => {
       thinkEndIdx = thinkEndIdx + '</think>'.length;
     }
     if (thinkStartIdx > -1) {
-      const thinkContent = content.slice(thinkStartIdx, thinkEndIdx);
+      let thinkContent = content.slice(thinkStartIdx, thinkEndIdx);
+      // 将思考内容中的引用ID替换为序号
+      thinkContent = replaceReferenceIdsWithNumbers(thinkContent);
       setThinkContent(thinkContent);
       setAnswerContent(content.slice(thinkEndIdx));
     } else {
       setAnswerContent(content);
     }
-  }, [content]);
+  }, [content, usedReferences]);
 
   // 接受消息点击事件
   useEffect(() => {

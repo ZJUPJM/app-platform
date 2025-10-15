@@ -393,6 +393,16 @@
   }
 }
 
+/* 思考内容中的引用样式 */
+.think-reference {
+  background-color: rgba(235, 238, 242, 0.7);
+  color: #61666b;
+  
+  &:hover {
+    background-color: rgba(219, 226, 232, 0.9);
+  }
+}
+
 /* 悬停显示引用信息样式 */
 .reference-hover-tooltip {
   position: fixed;
