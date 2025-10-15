@@ -150,6 +150,7 @@ public class AuthController {
         if (cookie.secure()) {
             sb.append("; Secure");
         }
+        sb.append("; SameSite=None");
 
         // response 内写 cookie 框架还暂时不会把他改为 Set-Cookie, 因此暂时先手动写入响应头，等新版fit-framework后修改
         response.headers().add("Set-Cookie", sb.toString());
