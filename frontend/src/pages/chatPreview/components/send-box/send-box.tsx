@@ -13,15 +13,16 @@ import SendBtn from './send-btn';
 import FileList from '../send-editor/components/file-list';
 import '../../styles/send-box.scss';
 
-const SendBox = (props) => {
-  const { content, checked, logId, sendType, shareUser, fileList } = props.chatItem;
+const SendBox = (props: any) => {
+  const { content, checked, logId, sendType, shareUser, fileList, isRecieve, formConfig } = props.chatItem;
   const { checkCallBack, showCheck } = useContext(ChatContext);
   const [showIcon, setShowIcon] = useState(true);
+  const [showButtons, setShowButtons] = useState(false);
   const currentUser = localStorage.getItem('currentUser') || '';
   const location = useLocation();
 
   // 选中回调
-  function onChange(e) {
+  function onChange(e: any) {
     props.chatItem.checked = e.target.checked;
     checkCallBack();
   }
@@ -43,10 +44,10 @@ const SendBox = (props) => {
         </span>
       }
       {
-        content && <div className='send-info'>
+        content && <div className='send-info' onMouseEnter={() => setShowButtons(true)} onMouseLeave={() => setShowButtons(false)}>
           <span className='send-info-inner'>
             {sendType === 'text' && (<div>{content}</div>)}
-            {showIcon && <SendBtn content={content} sendType={sendType} />}
+            {showIcon && <SendBtn content={content} sendType={sendType} isRecieve={isRecieve} formConfig={formConfig} showButtons={showButtons} setShowButtons={setShowButtons} />}
           </span>
         </div>
       }

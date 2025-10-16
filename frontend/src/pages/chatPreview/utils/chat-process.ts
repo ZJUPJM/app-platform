@@ -288,6 +288,7 @@ export const messageProcessNormal = (log, atAppInfo, messageData) => {
     recieveType: 'msg',
     instanceId: messageData.instance_id,
     feedbackStatus: -1,
+    finished: true, // 添加finished属性，确保智能体消息显示feed-footer
   };
   if (pictureList.length) {
     recieveChatItem.pictureList = pictureList;

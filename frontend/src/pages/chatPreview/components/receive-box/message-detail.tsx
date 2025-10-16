@@ -10,11 +10,11 @@ import { useTranslation } from 'react-i18next';
 import { Message } from '@/shared/utils/message';
 import { isChatRunning } from '@/shared/utils/chat';
 import { useAppSelector } from '@/store/hook';
-import Feedbacks from './feedbacks';
 import PictureList from './picture-list';
 import ThinkBlock from './think-block';
 import StepBlock from './step-block';
 import ReferenceOverviewDrawer from './reference-overview-drawer';
+import ActionButtons from './action-buttons';
 import { Tooltip } from 'antd';
 import 'highlight.js/styles/monokai-sublime.min.css';
 import './styles/message-detail.scss';
@@ -574,11 +574,18 @@ const MessageBox = (props: any) => {
         {getMessageContent()}
         { finished &&
         <div className='feed-footer'>
-          <Feedbacks
-            instanceId={instanceId}
-            feedbackStatus={feedbackStatus}
-            refreshFeedbackStatus={props.refreshFeedbackStatus}
-          />
+          <div className='feed-inner'>
+            <div className='feed-left'>{t('receiveTips')}</div>
+            <div className='feed-right'>
+              <ActionButtons
+                content={content}
+                formConfig={props.formConfig}
+                instanceId={instanceId}
+                feedbackStatus={feedbackStatus}
+                refreshFeedbackStatus={props.refreshFeedbackStatus}
+              />
+            </div>
+          </div>
         </div> }
 
         {/* 引用总览按钮 - 只在有实际使用的引用时显示 */}

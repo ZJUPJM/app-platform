@@ -1,10 +1,10 @@
 $blue: #2673E5;
 
-.hover-blue-icon {
-  &:hover {
-    fill: $blue;
-    path {
-      fill: $blue;
-    }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

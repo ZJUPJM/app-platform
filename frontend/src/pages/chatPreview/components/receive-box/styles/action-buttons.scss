@@ -1,0 +1,54 @@
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    border-radius: 6px;
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+    
+    svg {
+      width: 14px;
+      height: 14px;
+      
+      path {
+        fill: transparent;
+        stroke: #71757f;
+        stroke-width: 1.5;
+      }
+    }
+    
+    // 复制和删除按钮使用填充样式
+    &:nth-child(1), &:nth-child(2) {
+      svg path {
+        fill: #71757f !important;
+        stroke: none !important;
+      }
+    }
+    
+    &:hover {
+      background-color: #f0f4f9;
+    }
+    
+    &:active {
+      background-color: #f0f4f9;
+    }
+    
+    // 激活状态（点赞/点踩后）
+    &.action-btn-active {
+      background-color: transparent;
+      
+      svg path {
+        fill: #71757f;
+        stroke: #ffffff;
+      }
+    }
+  }
+}

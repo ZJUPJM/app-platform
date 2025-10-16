@@ -12,7 +12,6 @@ import { useAppSelector } from '@/store/hook';
 import { convertImgPath } from '@/common/util';
 import { scrollBottom } from '../../utils/chat-process';
 import MessageDetail from './message-detail';
-import SendBtn from '../send-box/send-btn';
 import RemoteForm from './render';
 import knowledgeBase from '@/assets/images/knowledge/knowledge-base.png';
 import '../../styles/receive-box.scss';
@@ -24,7 +23,7 @@ import '../../styles/receive-box.scss';
  * @param formConfig 表单配置.
  * @constructor
  */
-const ReceiveBox = (props) => {
+const ReceiveBox = (props: any) => {
   const appInfo = useAppSelector((state) => state.appStore.appInfo);
   const chatRunning = useAppSelector((state) => state.chatCommonStore.chatRunning);
   const { checkCallBack, showCheck } = useContext(ChatContext);
@@ -68,13 +67,13 @@ const ReceiveBox = (props) => {
       }, 300);
     }
   }, [props.chatItem]);
-  function onChange(e) {
+  function onChange(e: any) {
     props.chatItem.checked = e.target.checked;
     checkCallBack();
   }
 
   // 设置显示类型
-  function setReceiveDom(type) {
+  function setReceiveDom(type: any) {
     if (type === 'form') {
       return <RemoteForm uniqueId={logId} path={path} formConfig={formConfig} />
     }
@@ -100,7 +99,6 @@ const ReceiveBox = (props) => {
       {showCheck && <Checkbox className='check-box' checked={checked} onChange={onChange}></Checkbox>}
       <span className={recieveType !== 'form' ? 'receive-info-inner' : 'receive-info-inner receive-info-remote'}>
         {loading ? <Loading /> : setReceiveDom(recieveType)}
-        {showIcon && <SendBtn content={content} sendType={recieveType} isRecieve={true} />}
       </span>
     </div>
   )}</>
@@ -117,13 +115,13 @@ const Loading = () => {
     </>
   )
 }
-const Img = (props) => {
+const Img = (props: any) => {
   const { iconPath } = props;
   const [imgPath, setImgPath] = useState('');
   const isGuest = useAppSelector((state) => state.appStore.isGuest);
   useEffect(() => {
     if (iconPath) {
-      convertImgPath(iconPath, isGuest).then(res => {
+      convertImgPath(iconPath, isGuest).then((res: any) => {
         setImgPath(res);
       });
     }
