@@ -1,3 +1,63 @@
+// 工具页面布局样式，参考工作台页面
+.apps_root {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  .apps_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    .apps_title {
+      font-size: 20px;
+      color: #1a1a1a;
+      line-height: 1.5;
+      font-weight: normal;
+    }
+    .apps_header_right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+  }
+  .apps_main {
+    height: calc(100% - 50px);
+    min-width: 1400px;
+    padding: 24px;
+    background: #fff;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    .apps-haeader-content {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      .app-card-tab {
+        margin-right: 24px;
+        cursor: pointer;
+        padding-bottom: 2px;
+        border-bottom: 1px solid transparent;
+      }
+      .tab-active {
+        color: rgb(38, 115, 229);
+        font-weight: 700;
+        border-color: rgb(38, 115, 229);
+      }
+    }
+    .operatorArea {
+      display: flex;
+      align-items: center;
+      .status-dropdown {
+        display: flex;
+        align-items: center;
+        span {
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+}
+
 .detail-header {
   display: flex;
   gap: 16px;
@@ -5,6 +65,82 @@
   >img {
     width: 64px;
     height: 64px;
+  }
+}
+
+// 创建卡片样式
+.card_box_add {
+  width: calc(25% - 16px);
+  height: 220px;
+  background-color: rgb(247, 247, 247);
+  border-radius: 8px;
+  padding: 24px;
+  padding-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid #ebebeb;
+  margin-bottom: 10px;
+  .add_title {
+    color: rgb(128, 128, 128);
+  }
+  img {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+  }
+  .split-line {
+    height: 1px;
+    background-color: rgb(230, 230, 230);
+  }
+  >div {
+    display: flex;
+    align-items: center;
+    span {
+      cursor: pointer;
+    }
+  }
+  
+  // 新的创建卡片样式
+  &.create-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 200px;
+    border: 2px dashed #d9d9d9;
+    background: #fafafa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      border-color: #1890ff;
+      background: #f0f8ff;
+      
+      .create-plus {
+        color: #1890ff;
+        transform: scale(1.1);
+      }
+      
+      .create-text {
+        color: #1890ff;
+      }
+    }
+    
+    .create-plus {
+      font-size: 48px;
+      color: #1890ff;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+      line-height: 1;
+    }
+    
+    .create-text {
+      font-size: 16px;
+      color: #666;
+      transition: all 0.3s ease;
+    }
   }
 }
 

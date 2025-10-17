@@ -5,7 +5,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useEffect, useState } from 'react';
-import { Drawer, Button, Spin } from 'antd';
+import { Drawer, Spin } from 'antd';
 import { setSpaClassName, getCookie } from '@/shared/utils/common';
 import { CloseOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { getPluginDetail } from '@/shared/http/plugin';
@@ -66,7 +66,6 @@ const PliginList = (props) => {
             {t('pluginManagement')}
             { process.env.PACKAGE_MODE === 'spa' && <QuestionCircleOutlined onClick={onlineHelp} style={{ marginLeft: '8px', fontSize: '18px' }} />}
           </div>
-          { !readOnly && <Button type='primary' onClick={() => setOpen(true)}>{t('deploying')}</Button> }
         </div>
         <div className='plugin-detail-list'>
           <div className='list-head'>

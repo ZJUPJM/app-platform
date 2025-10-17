@@ -21,11 +21,46 @@ export function getPluginTools(data: {
 export function getPlugins(data: {
   pageNum: number;
   pageSize: number;
-  includeTags: string;
+  includeTags?: string;
+  excludeTags?: string;
   name: string;
-}, excludeTags: string = '') {
-  const url = `${PLUGIN_URL}/store/apps/search?${excludeTags}`;
-  return get(url, { ...data });
+  creator?: string;
+  isBuiltin?: boolean;
+}, excludeTagsParam: string = '') {
+  let url = `${PLUGIN_URL}/store/plugins/search`;
+  const queryParams = [];
+
+  // 处理data中的参数
+  if (data.includeTags) {
+    queryParams.push(`includeTags=${data.includeTags}`);
+  }
+  if (data.excludeTags) {
+    queryParams.push(`excludeTags=${data.excludeTags}`);
+  }
+  if (data.creator) {
+    queryParams.push(`creator=${data.creator}`);
+  }
+  if (data.isBuiltin !== undefined) {
+    queryParams.push(`isBuiltin=${data.isBuiltin}`);
+  }
+
+  // 处理第二个参数excludeTagsParam
+  if (excludeTagsParam) {
+    queryParams.push(excludeTagsParam);
+  }
+
+  // 添加基本参数
+  queryParams.push(`pageNum=${data.pageNum}`);
+  queryParams.push(`pageSize=${data.pageSize}`);
+  if (data.name) {
+    queryParams.push(`name=${data.name}`);
+  }
+
+  if (queryParams.length > 0) {
+    url += `?${queryParams.join('&')}`;
+  }
+
+  return get(url);
 }
 // 删除插件
 export function deletePluginAPI(plugin_id: string) {

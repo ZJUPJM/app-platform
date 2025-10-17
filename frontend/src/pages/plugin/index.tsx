@@ -5,13 +5,17 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useState } from 'react';
-import { Drawer, Button } from 'antd';
+import { Drawer, Button, Dropdown } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
 import { setSpaClassName, getCookie } from '@/shared/utils/common';
 import { QuestionCircleOutlined, CloseOutlined } from '@ant-design/icons';
 import { useAppSelector } from '@/store/hook';
 import { useTranslation } from 'react-i18next';
 import MarketItems from './market';
+import { Input, Tabs } from 'antd';
+import { Icons } from '@/components/icons';
 import DeployMent from './deployment';
+import { sourceTabs } from './helper';
 
 /**
  * 应用插件页面
@@ -19,11 +23,42 @@ import DeployMent from './deployment';
  * @return {JSX.Element}
  * @constructor
  */
-const Plugin = () => {
+const Plugin = ({ compactInAppDev = false }: { compactInAppDev?: boolean }) => {
   const { t } = useTranslation();
   const readOnly = useAppSelector((state) => state.chatCommonStore.readOnly);
   const [open, setOpen] = useState(false);
   const [reload, setReload] = useState(false);
+  const [searchKey, setSearchKey] = useState('');
+  const [uploadSignal, setUploadSignal] = useState(0);
+  const [workflowSignal, setWorkflowSignal] = useState(0);
+  const [selectedSource, setSelectedSource] = useState('ALL');
+  const [statusKey, setStatusKey] = useState('all');
+  const [statusLabel, setStatusLabel] = useState(t('all'));
+
+  // 下拉菜单选项
+  const items = [
+    {
+      label: t('all'),
+      key: 'all',
+    },
+    {
+      label: t('active'),
+      key: 'active',
+    },
+    {
+      label: t('inactive'),
+      key: 'inactive',
+    },
+  ];
+
+  // 下拉菜单点击处理
+  const clickItem = (e: any) => {
+    const { key } = e;
+    const label = items.find(item => item.key === key)?.label || t('all');
+    setStatusKey(key);
+    setStatusLabel(label);
+  };
+
   const onClose = () => {
     setOpen(false);
   };
@@ -41,16 +76,58 @@ const Plugin = () => {
     window.open(`${window.parent.location.origin}/help${getCookie('locale').toLocaleLowerCase() === 'en-us' ? '/en' : '/zh'}/application_plug-in.html`, '_blank');
   }
   return (
-    <div className={setSpaClassName('app-fullpage')} style={{ display: 'flex', flexDirection: 'column' }}>
-      <div className='aui-header-1 '>
-        <div className='aui-title-1'>
-          {t('pluginManagement')}
-          { process.env.PACKAGE_MODE === 'spa' && <QuestionCircleOutlined onClick={onlineHelp} style={{ marginLeft: '8px', fontSize: '18px' }} /> }
+    <div className={setSpaClassName('apps_root')}>
+      <div className='apps_header'>
+        <div className='apps_title'>{t('pluginManagement')}</div>
+        <div className='apps_header_right'>
+          { process.env.PACKAGE_MODE === 'spa' && <QuestionCircleOutlined onClick={onlineHelp} />}
         </div>
-        { !readOnly && <Button type='primary' onClick={setDeployOpen}>{t('deploying')}</Button> }
       </div>
-      <div>
-        <MarketItems reload={reload} readOnly={readOnly}/>
+      <div className='apps_main'>
+        <div className='apps-haeader-content'>
+        <div className='tabs'>
+          {sourceTabs.map((item) => {
+            return (
+              <span
+                className={selectedSource === item.key ? 'tab-active app-card-tab' : 'app-card-tab'}
+                key={item.key}
+                onClick={() => setSelectedSource(item.key)}>
+                {item.label}
+              </span>
+            )
+          })}
+        </div>
+        <div className='operatorArea'>
+          <Dropdown menu={{ items, activeKey: statusKey, onClick: (e) => clickItem(e) }}>
+            <div className='status-dropdown'>
+              <span>{statusLabel}</span>
+              <DownOutlined />
+            </div>
+          </Dropdown>
+          <Input
+            maxLength={64}
+            placeholder={t('search')}
+            style={{ width: '368px', height: '32px', marginLeft: '16px' }}
+            prefix={<Icons.search color={'rgb(230, 230, 230)'} />}
+            value={searchKey}
+            onChange={(e: any) => setSearchKey(e.target.value)}
+            onPressEnter={() => setReload(!reload)}
+          />
+        </div>
+        </div>
+        <div>
+          <MarketItems
+            reload={reload}
+            readOnly={readOnly}
+            hideHeader={compactInAppDev}
+            keyword={searchKey}
+            externalUploadTrigger={uploadSignal}
+            externalWorkflowTrigger={workflowSignal}
+            selectedSource={selectedSource}
+            onChangeSelected={(key: string) => setSelectedSource(key)}
+            onDeploy={setDeployOpen}
+          />
+        </div>
       </div>
       <Drawer
         title={t('pluginDeploying')}

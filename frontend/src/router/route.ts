@@ -108,19 +108,10 @@ export const routeList: MenuItem[] = [
     ],
   },
   {
-    key: '/intelligent-form',
+    key: '/tools',
     icon: Icons.app({}),
-    label: i18n.t('intelligentForm'),
-    component: IntelligentForm,
-    hidden:true,
-    children: [],
-  },
-  {
-    key: '/plugin',
-    icon: Icons.app({}),
-    label: i18n.t('plugin'),
+    label: i18n.t('tools'), // 工具
     component: Plugin,
-    hidden:true,
     children: [
       {
         key: '/plugin/detail/:pluginId',
@@ -144,7 +135,15 @@ export const routeList: MenuItem[] = [
         hidden: true,
       }
     ],
-  }
+  },
+  {
+    key: '/intelligent-form',
+    icon: Icons.app({}),
+    label: i18n.t('intelligentForm'),
+    component: IntelligentForm,
+    hidden:true,
+    children: [],
+  },
 ];
 
 // 生成菜单

@@ -32,13 +32,10 @@ export const IconMap = {
 };
 
 export const sourceTabs = [
-  { key: 'APP', label: i18n.t('all') },
+  { key: 'ALL', label: i18n.t('all') },
   { key: 'HTTP', label: 'Http' },
-  { key: 'HUGGINGFACE', label: 'HuggingFace' },
-  { key: 'LANGCHAIN', label: 'LangChain' },
-  { key: 'LLAMAINDEX', label: 'LlamaIndex' },
-  { key: 'WATERFLOW', label: i18n.t('workflow') },
-  { key: 'MINE', label: i18n.t('mine') },
+  // { key: 'MCP', label: 'MCP' },
+  { key: 'CUSTOM', label: i18n.t('customPlugin') },
 ];
 
 export const paramsColumns = [

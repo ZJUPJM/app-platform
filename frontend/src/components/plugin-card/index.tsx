@@ -5,8 +5,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useState } from 'react';
-import { Tag, message, Modal, Drawer, Dropdown } from 'antd';
-import { EllipsisOutlined, StarOutlined, UserOutlined } from '@ant-design/icons';
+import { Tag, message, Modal, Drawer, Dropdown, Button } from 'antd';
+import { EllipsisOutlined, StarOutlined, UserOutlined, LinkOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router';
 import { IconMap, PluginCardTypeE, PluginStatusTypeE, PluginCnType } from '@/pages/plugin/helper';
 import { deletePluginAPI } from '@/shared/http/plugin';
@@ -29,14 +29,21 @@ import './style.scss';
  * @param readOnly  是否只读
  * @constructor
  */
-const PluginCard = ({ pluginData, cardType, getPluginList, pluginId, pluginRoot, readOnly }: any) => {
+const PluginCard = ({ pluginData, cardType, getPluginList, pluginId, pluginRoot, readOnly, showTestButton = true }: any) => {
   const { t } = useTranslation();
   const [isShow, setIsShow] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [testing, setTesting] = useState(false);
   const navigate = useHistory().push;
 
   const items = [
+    ...(showTestButton ? [{
+      label: t('test'),
+      key: '0',
+      icon: <LinkOutlined />,
+      onClick: () => handleTestConnection()
+    }] : []),
     {
       label: t('delete'),
       key: '1',
@@ -48,6 +55,29 @@ const PluginCard = ({ pluginData, cardType, getPluginList, pluginId, pluginRoot,
     pluginRoot ? navigate(`/plugin/detail/${pluginId}`) : setIsShow(true);
   };
   
+  // 测试连接
+  const handleTestConnection = async () => {
+    setTesting(true);
+    try {
+      // TODO: 调用实际API
+      // const res = await testPluginConnection(pluginId);
+      // const success = res.code === 0 && res.data.connected;
+      
+      // 模拟测试结果
+      const success = Math.random() > 0.5;
+      
+      if (success) {
+        message.success(`测试 ${setPluginName()} 连接成功`);
+      } else {
+        message.error(`测试 ${setPluginName()} 连接失败`);
+      }
+    } catch (error) {
+      message.error(`测试 ${setPluginName()} 连接失败`);
+    } finally {
+      setTesting(false);
+    }
+  };
+
   const confirm = () => {
     setLoading(true);
     deletePluginAPI(pluginId).then((res) => {

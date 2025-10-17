@@ -5,7 +5,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useState, useEffect } from 'react';
-import { Tabs, Input, Tag, Button, Spin, Dropdown } from 'antd';
+import { Tabs, Input, Tag, Button, Spin } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import Pagination from '@/components/pagination/index';
 import PluginCard from '@/components/plugin-card';
 import WorkflowCard from '@/components/plugin-card/workFlowCard';
@@ -16,20 +17,23 @@ import { debounce } from '@/shared/utils/common';
 import { Message } from '@/shared/utils/message';
 import UploadToolDrawer from './upload/uploadTool';
 import EmptyItem from '@/components/empty/empty-item';
+import MCPServiceManager from './components/MCPServiceManager';
 import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '@/store/hook';
 import { useHistory } from 'react-router-dom';
 import CreateWorkfowDrawer from './upload/createWorkflow';
-import type { MenuProps } from 'antd';
+import CreateImg from '@/assets/images/ai/create.png';
+import TemplateImg from '@/assets/images/ai/create2.png';
+import ImportImg from '@/assets/images/ai/import.png';
 import './styles/market.scss';
 
-const MarketItems = ({ reload, readOnly }) => {
+const MarketItems = ({ reload, readOnly, hideHeader = false, keyword, externalUploadTrigger, externalWorkflowTrigger, selectedSource: selectedSourceProp, onChangeSelected, onDeploy }: { reload: any, readOnly: boolean, hideHeader?: boolean, keyword?: string, externalUploadTrigger?: number, externalWorkflowTrigger?: number, selectedSource?: string, onChangeSelected?: (key: string) => void, onDeploy?: () => void }) => {
   const { t } = useTranslation();
   const [total, setTotal] = useState(0);
   const [pageNum, setPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(8);
   const [name, setName] = useState('');
-  const [selectedSource, setSelectedSource] = useState(sourceTabs?.[0]?.key);
+  const [selectedSource, setSelectedSource] = useState(selectedSourceProp || sourceTabs?.[0]?.key);
   const [pluginData, setPluginData] = useState([]);
   const [isOpenPlugin, setIsOpenPlugin] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -40,12 +44,26 @@ const MarketItems = ({ reload, readOnly }) => {
   const currentUser = localStorage.getItem('currentUser') || '';
 
   useEffect(() => {
+    if (selectedSourceProp && selectedSourceProp !== selectedSource) {
+      setSelectedSource(selectedSourceProp);
+    }
+  }, [selectedSourceProp]);
+
+  useEffect(() => {
     if (selectedSource === 'WATERFLOW') {
       getWaterFlowList();
       return
     }
     getPluginList();
   }, [selectedSource, name, pageNum, pageSize, reload]);
+
+  // 外部搜索关键字联动
+  useEffect(() => {
+    if (typeof keyword === 'string' && keyword !== name) {
+      setPageNum(1);
+      setName(keyword);
+    }
+  }, [keyword]);
 
   // 获取插件列表
   const getPluginList = () => {
@@ -61,16 +79,22 @@ const MarketItems = ({ reload, readOnly }) => {
       pageNum: pageNum,
       pageSize
     }
-    if (selectedSource === 'APP') {
+    if (selectedSource === 'ALL') {
+      // 全部：不设置任何筛选条件，显示所有插件
+    } else if (selectedSource === 'APP') {
       params.excludeTags = selectedSource;
     } else if (selectedSource === 'MINE') {
       params.creator = currentUser;
       params.isBuiltin = true;
+    } else if (selectedSource === 'CUSTOM') {
+      // 自定义插件：在全部基础上过滤掉Http和MCP
+      params.excludeTags = 'HTTP';
     } else {
       params.includeTags = selectedSource;
     }
     setLoading(true);
-    getPlugins(params).then(({ data, total }) => {
+    const excludeTags = selectedSource === 'CUSTOM' ? 'excludeTags=HTTP&excludeTags=MCP' : '';
+    getPlugins(params, excludeTags).then(({ data, total }) => {
       setTotal(total);
       setPluginData(data || []);
       setLoading(false);
@@ -115,75 +139,141 @@ const MarketItems = ({ reload, readOnly }) => {
     }
   };
   const handleSearch = debounce(filterByName, 1000);
-  const uploadAdd = (e) => {
-    if (total >= 3000) {
-      Message({ type: 'warning', content: t('uploadOptions') });
-      return;
-    }
-    setIsOpenPlugin(e.timeStamp);
-  }
-  const workFlow = (e) => {
-    setOpenCreateDrawer(e.timeStamp);
-  };
   // 下拉
-  const items: MenuProps['items'] = [
-    {
-      key: '1',
-      label: <div onClick={(e) => uploadAdd(e)}>{t('customPlugin')}</div>,
-    },
-    {
-      key: '2',
-      label: <div onClick={() => history({ pathname: '/http' })}>{t('httpPlugin')}</div>,
-    },
-    {
-      key: '3',
-      label: <div onClick={(e) => workFlow(e)}>{t('workflow')}</div>,
-    },
-  ];
 
   useEffect(() => {
     if (isAutoOpen) {
-      uploadAdd({ timeStamp: Date.now() });
+      setIsOpenPlugin(Date.now());
     }
   }, [isAutoOpen]);
 
+  // 外部触发上传抽屉
+  useEffect(() => {
+    if (externalUploadTrigger) {
+      setIsOpenPlugin(externalUploadTrigger);
+    }
+  }, [externalUploadTrigger]);
+
   // tabs切换回调
   const tabsOnChange = (key:string) =>{
-    setSelectedSource(key);
+    onChangeSelected ? onChangeSelected(key) : setSelectedSource(key);
     setPageNum(1);
   }
+
+  // 创建Http工具
+  const createHttpTool = () => {
+    history({ pathname: '/http' });
+  };
+
+  // 创建MCP工具
+  const createMCPTool = () => {
+    // 切换到MCP标签页
+    tabsOnChange('MCP');
+  };
+
+  // 创建自定义插件
+  const createCustomPlugin = () => {
+    setIsOpenPlugin(Date.now());
+  };
+
+
+  // 部署插件
+  const deployPlugins = () => {
+    if (onDeploy) {
+      onDeploy();
+    } else {
+      Message({ type: 'info', content: '部署功能未配置' });
+    }
+  };
   
   return (
     <div className='aui-block market-block'>
-      <div className='market-search'>
-        <Input
-          showCount
-          maxLength={20}
-          placeholder={t('search')}
-          className='market-input'
-          onChange={(e) => handleSearch(e.target.value)}
-          prefix={<Icons.search color={'rgb(230, 230, 230)'} />}
-          defaultValue={name}
+      {!hideHeader && (
+        <div className='market-search'>
+          <Input
+            showCount
+            maxLength={20}
+            placeholder={t('search')}
+            className='market-input'
+            onChange={(e) => handleSearch(e.target.value)}
+            prefix={<Icons.search color={'rgb(230, 230, 230)'} />}
+            defaultValue={name}
+          />
+        </div>
+      )}
+      <UploadToolDrawer openSignal={isOpenPlugin} refreshPluginList={getPluginList} />
+      {!hideHeader && (
+        <Tabs
+          items={sourceTabs}
+          activeKey={selectedSource}
+          onChange={(key: string) => tabsOnChange(key)}
+          style={{ width: '100%', textAlign: 'center', display: 'none'}}
+          centered={true}
         />
-        { !readOnly &&  <Dropdown menu={{ items }}>
-          <Button type='primary' className='market-button'>
-            {t('upload')}
-          </Button>
-        </Dropdown> }
-        <UploadToolDrawer openSignal={isOpenPlugin} refreshPluginList={getPluginList} />
-      </div>
-      <Tabs
-        items={sourceTabs}
-        activeKey={selectedSource}
-        onChange={(key: string) => tabsOnChange(key)}
-        style={{ width: '100%', textAlign: 'center' }}
-        centered={true}
-      />
+      )}
       <Spin spinning={loading}>
-        {pluginData && pluginData.length > 0 ?
+        {/* 统一的卡片列表管理 */}
+        {selectedSource === 'MCP' ? (
+          /* MCP标签页 - 使用MCPServiceManager组件 */
+          <MCPServiceManager />
+        ) : (selectedSource === 'HTTP' || selectedSource === 'CUSTOM') ? (
           <>
+            {/* 操作栏 - 只在自定义插件时显示部署按钮 */}
+            {selectedSource === 'CUSTOM' && !readOnly && (
+              <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                <Button type='primary' onClick={deployPlugins}>{t('deploying')}</Button>
+              </div>
+            )}
+            
+            {/* 统一的卡片列表 */}
             <div className='market-card' >
-              {pluginData.map((card: any) => (
+              {/* 添加按钮弱卡片形式 - 整张卡片可点击 */}
+              {!readOnly && (
+                <div 
+                  className='card_box card_box_add create-card' 
+                  onClick={selectedSource === 'HTTP' ? createHttpTool : createCustomPlugin}
+                >
+                  <div className='create-plus'>+</div>
+                  <div className='create-text'>
+                    {selectedSource === 'HTTP' ? '添加Http工具' : '添加自定义插件'}
+                  </div>
+                </div>
+              )}
+              
+              {pluginData && pluginData.length > 0 && pluginData.map((card: any) => (
+                card.mapType === 'waterFlow' ?
+                  <WorkflowCard key={card.uniqueName} pluginData={card} type='plugin' getWaterFlowList={getWaterFlowList} /> :
+                  <PluginCard
+                    key={card.pluginId}
+                    getPluginList={getPluginList}
+                    pluginData={card}
+                    cardType={PluginCardTypeE.MARKET}
+                    pluginId={card.pluginId}
+                    readOnly={readOnly}
+                    pluginRoot={true}
+                    showTestButton={false} // 不显示测试按钮
+                  />
+              ))}
+            </div>
+            {(!pluginData || pluginData.length === 0) && readOnly && (
+              <div className='market-empty'>
+                <EmptyItem />
+              </div>
+            )}
+            <div className='market-page'>
+              <Pagination
+                total={total}
+                current={pageNum}
+                onChange={selectPage}
+                pageSizeOptions={[8, 16, 32, 60]}
+                pageSize={pageSize} />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* 全部Tab页 - 保持原有的卡片展示 */}
+            <div className='market-card' >
+              {pluginData && pluginData.length > 0 && pluginData.map((card: any) => (
                 card.mapType === 'waterFlow' ?
                   <WorkflowCard key={card.uniqueName} pluginData={card} type='plugin' getWaterFlowList={getWaterFlowList} /> :
                   <PluginCard
@@ -197,20 +287,21 @@ const MarketItems = ({ reload, readOnly }) => {
                   />
               ))}
             </div>
+            {(!pluginData || pluginData.length === 0) && readOnly && (
+              <div className='market-empty'>
+                <EmptyItem />
+              </div>
+            )}
+            <div className='market-page'>
+              <Pagination
+                total={total}
+                current={pageNum}
+                onChange={selectPage}
+                pageSizeOptions={[8, 16, 32, 60]}
+                pageSize={pageSize} />
+            </div>
           </>
-          :
-          <div className='market-empty'>
-            <EmptyItem />
-          </div>
-        }
-        <div className='market-page'>
-          <Pagination
-            total={total}
-            current={pageNum}
-            onChange={selectPage}
-            pageSizeOptions={[8, 16, 32, 60]}
-            pageSize={pageSize} />
-        </div>
+        )}
       </Spin>
       <CreateWorkfowDrawer openSignal={openCreateDrawer} />
     </div>
