@@ -109,11 +109,12 @@ const SendEditor = (props: any) => {
   const isAutoSend = useRef<any>(false);
   const recommondListRef = useRef<any>([]);
   const isHomepage = location.pathname === '/home' || location.hash.includes('home');
-  // 判断是否为应用编排页面
-  const isAppArrangementPage = location.pathname.includes('/app-develop/') && 
-                               (location.pathname.includes('/app-detail/') || 
+  // 判断是否为应用编排页面或发布后的公开页面
+  const isAppArrangementPage = location.pathname.includes('/app-develop/') ||
+                                location.pathname.includes('/app-detail/') ||
                                 location.pathname.includes('/add-flow/') || 
-                                location.pathname.includes('/flow-detail/'));
+                                location.pathname.includes('/flow-detail/') ||
+                                location.pathname.includes('/chat/');
   
   const enableVoiceInput = false;
   const recording = useRef(false);
