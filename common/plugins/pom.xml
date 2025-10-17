@@ -19,7 +19,7 @@
         <module>http-interceptor</module>
         <module>schema-generator</module>
         <module>schema-validator-everit-h1</module>
-        <module>http-interceptor-oauth</module>
+        <module>authentication-oauth2-client</module>
     </modules>
 
     <build>

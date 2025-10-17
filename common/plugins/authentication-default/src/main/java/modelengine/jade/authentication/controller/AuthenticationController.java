@@ -12,9 +12,13 @@ import modelengine.fit.http.annotation.PostMapping;
 import modelengine.fit.http.annotation.RequestBody;
 import modelengine.fitframework.annotation.Component;
 import modelengine.jade.authentication.AuthenticationService;
+import modelengine.jade.authentication.User;
 import modelengine.jade.authentication.UserGroup;
+import modelengine.jade.authentication.context.UserContext;
+import modelengine.jade.authentication.context.UserContextHolder;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 用户组接口
@@ -38,5 +42,11 @@ public class AuthenticationController {
     @PostMapping(path = "/rpc/v1/{userName}/user-resource-groups")
     public void setUserResource(@PathVariable("userName") String userName, @RequestBody List<UserGroup> userGroups) {
         this.authenticationService.setUserGroups(userName, userGroups);
+    }
+
+    @GetMapping(path = "v1/api/auth/username")
+    public User handleUsername() {
+        String username = Optional.ofNullable(UserContextHolder.get()).map(UserContext::getName).orElse("Guest");
+        return User.builder().username(username).build();
     }
 }

@@ -58,6 +58,5 @@
         <module>waterflow-biz-common</module>
         <module>waterflow-graph</module>
         <module>waterflow-task-event-handler</module>
-        <module>oauth-auth-client</module>
     </modules>
 </project>

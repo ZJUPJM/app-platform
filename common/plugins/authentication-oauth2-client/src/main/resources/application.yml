@@ -1,0 +1,18 @@
+fit:
+  beans:
+    packages:
+    - 'modelengine.jade.common.filter'
+    - 'modelengine.jade.common.controller'
+
+filter:
+  oauth2-filter: 'enable'
+
+oauth:
+  client:
+    id: app-platform
+    secret: app-platform-secret
+    redirect-uri: http://client.local/v1/api/auth/callback
+  login-endpoint: http://server.local/#/login
+  oauth-endpoint: http://server.local
+  client-api-endpoint: http://client.local
+  state-secret: change_this_to_a_very_long_random_secret_32bytes_min

@@ -11,6 +11,7 @@ import { Message } from '../utils/message';
 import { getCookie } from "@/shared/utils/common";
 import { ERROR_CODES } from './httpError'
 import { setLoginStatus, setNoAuth } from '@/store/chatStore/chatStore';
+import { getRefreshToken } from '@/shared/http/aipp';
 
 let baseAxios = axios.create({
   headers: {
@@ -41,12 +42,29 @@ baseAxios.interceptors.response.use(
   },
   (error) => {
     if (error.response.status === 401) {
-      store.dispatch(setLoginStatus(false));
-      if (error.response.headers["fit-redirect-to-prefix"]) {
-        window.location.href = error.response.headers["fit-redirect-to-prefix"] + encodeURIComponent(window.location.href);
-      } else {
-        Message({ type: 'error', content: '登录失效且headers里面没有跳转登录的url' });
-      }
+      // 尝试刷新 token
+      getRefreshToken().then((refreshResponse: any) => {
+        // 如果刷新成功（状态码为 200），刷新页面
+        if (refreshResponse.code === 200 || refreshResponse.code === 0 || refreshResponse.code === undefined) {
+          window.location.reload();
+        } else {
+          // 刷新失败，执行原逻辑
+          store.dispatch(setLoginStatus(false));
+          if (error.response.headers["fit-redirect-to-prefix"]) {
+            window.location.href = error.response.headers["fit-redirect-to-prefix"] + encodeURIComponent(window.location.href);
+          } else {
+            Message({ type: 'error', content: '登录失效且headers里面没有跳转登录的url' });
+          }
+        }
+      }).catch((refreshError: any) => {
+        // 刷新 token 请求失败，执行原逻辑
+        store.dispatch(setLoginStatus(false));
+        if (error.response.headers["fit-redirect-to-prefix"]) {
+          window.location.href = error.response.headers["fit-redirect-to-prefix"] + encodeURIComponent(window.location.href);
+        } else {
+          Message({ type: 'error', content: '登录失效且headers里面没有跳转登录的url' });
+        }
+      });
     } else if (error.response.status === 403) {
       if (location.pathname.includes('/chat/') && !location.pathname.includes('/app/') && error.config.url.indexOf('/chat/') !== -1){
         store.dispatch(setNoAuth(true));

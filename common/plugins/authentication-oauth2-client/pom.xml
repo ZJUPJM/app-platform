@@ -9,7 +9,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>http-interceptor-oauth</artifactId>
+    <artifactId>authentication-oauth2-client</artifactId>
 
     <dependencies>
         <!-- FIT core -->
@@ -20,6 +20,10 @@
         <dependency>
             <groupId>org.fitframework.service</groupId>
             <artifactId>fit-http-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.fitframework.service</groupId>
+            <artifactId>fit-http-protocol</artifactId>
         </dependency>
 
         <!-- Services -->
@@ -33,6 +37,11 @@
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
             <version>10.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>oauth2-oidc-sdk</artifactId>
+            <version>11.28</version>
         </dependency>
 
         <!-- Test -->
@@ -50,6 +59,10 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>modelengine.fit.jane</groupId>
+            <artifactId>jane-common-component</artifactId>
         </dependency>
     </dependencies>
 

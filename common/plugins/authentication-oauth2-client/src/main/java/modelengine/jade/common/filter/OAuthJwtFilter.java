@@ -23,11 +23,13 @@ import modelengine.fitframework.annotation.Order;
 import modelengine.fitframework.annotation.Scope;
 import modelengine.fitframework.annotation.Value;
 import modelengine.fitframework.log.Logger;
+import modelengine.fitframework.util.StringUtils;
 import modelengine.jade.authentication.context.HttpRequestUtils;
 import modelengine.jade.authentication.context.UserContext;
 import modelengine.jade.authentication.context.UserContextHolder;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
@@ -49,29 +51,35 @@ public class OAuthJwtFilter implements HttpServerFilter {
     private static final Logger log = Logger.get(OAuthJwtFilter.class);
 
     private static final String TOKEN_KEY = "access-token";
+    private static final String FILTER_ENABLE_VALUE = "enable";
 
-    @Value("${authorization-server.jwk-endpoint}")
-    private String jwkEndpoint;
+    private static final String JWKS_PATH = "/oauth2/jwks";
+    private final static String REDIRECT_PATH = "/v1/api/auth/redirect?redirect_uri=";
 
-    @Value("${authorization-server.api-endpoint}")
-    private String apiEndpoint;
+    private static final long JWKS_CACHE_MS = 24 * 60 * 60 * 1000L; // 24小时刷新
+    private static final long JWKS_KEY_MAX_AGE = 2L * 24 * 60 * 60 * 1000; // 2天旧密钥保留
+
+    private final URL jwksURL;
+    private final String loginBridgeUrlPrefix;
+    private final boolean enableFilter;
 
     // 缓存 JWK 集合
     private final CopyOnWriteArrayList<CachedJwk> cachedJwks = new CopyOnWriteArrayList<>();
     private volatile long lastJwkLoadTime = 0;
 
-    // 缓存/轮换策略
-    private static final long JWKS_CACHE_MS = 24 * 60 * 60 * 1000L; // 24小时刷新
-    private static final long JWKS_KEY_MAX_AGE = 2L * 24 * 60 * 60 * 1000; // 2天旧密钥保留
+    private record CachedJwk(JWK jwk, long loadTime) {}
 
-    private static class CachedJwk {
-        final JWK jwk;
-        final long loadTime;
-
-        CachedJwk(JWK jwk, long loadTime) {
-            this.jwk = jwk;
-            this.loadTime = loadTime;
+    OAuthJwtFilter(@Value("${oauth.oauth-endpoint}") String oauthEndpoint,
+            @Value("${oauth.client-api-endpoint}") String apiEndpoint,
+            @Value("${filter.oauth2-filter}") String oauthFilterEnabled){
+        this.enableFilter = StringUtils.equals(oauthFilterEnabled, FILTER_ENABLE_VALUE);
+        this.loginBridgeUrlPrefix = apiEndpoint + REDIRECT_PATH;
+        try {
+            this.jwksURL = new URL(oauthEndpoint + JWKS_PATH);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
         }
+
     }
 
     @Override
@@ -95,12 +103,17 @@ public class OAuthJwtFilter implements HttpServerFilter {
                 "/fit/check/**",
                 "/v1/api/auth/callback",
                 "/v1/api/auth/login",
-                "/v1/api/auth/redirect");
+                "/v1/api/auth/redirect",
+                "/v1/api/auth/refresh-token");
     }
 
     @Override
     public void doFilter(HttpClassicServerRequest request, HttpClassicServerResponse response,
             HttpServerFilterChain chain) {
+        if (!this.enableFilter){
+            chain.doFilter(request, response);
+            return;
+        }
 
         String accessToken = request.cookies()
                 .all()
@@ -200,7 +213,7 @@ public class OAuthJwtFilter implements HttpServerFilter {
      */
     private synchronized void refreshJwkSet() {
         try {
-            JWKSet newSet = JWKSet.load(new URL(jwkEndpoint));
+            JWKSet newSet = JWKSet.load(jwksURL);
             long now = System.currentTimeMillis();
 
             // 清理过期旧密钥
@@ -228,7 +241,7 @@ public class OAuthJwtFilter implements HttpServerFilter {
      */
     void sendUnAuthResponse(HttpClassicServerResponse response) {
         response.statusCode(401);
-        response.headers().add("fit-redirect-to-prefix", apiEndpoint + "/v1/api/auth/redirect?redirect_uri=");
+        response.headers().add("fit-redirect-to-prefix", this.loginBridgeUrlPrefix);
         response.send();
     }
 }

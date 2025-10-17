@@ -254,3 +254,8 @@ export function oauthLogin() {
 export function getUsername() {
   return get(`${AIPP_URL}/auth/username`, {});
 }
+
+// 刷新token
+export function getRefreshToken() {
+  return get(`${AIPP_URL}/auth/refresh-token`, {});
+}

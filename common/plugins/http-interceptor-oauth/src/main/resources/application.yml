@@ -1,8 +1,0 @@
-fit:
-  beans:
-    packages:
-    - 'modelengine.jade.common.filter'
-
-authorization-server:
-  jwk-endpoint: http://oauth.server.local/oauth2/jwks
-  api-endpoint: http://oauth.client.local/api
