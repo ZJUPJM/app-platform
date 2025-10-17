@@ -196,7 +196,7 @@ export function getVersion(tenantId, appId, type, offset, limit) {
 }
 // 获取插件接口
 export function getToolList(params) {
-  return get(`${AIPP_URL}/store/plugins/search`, params);
+  return get(`${AIPP_URL}/store/apps/search`, params);
 }
 
 // AI生成提示词

@@ -22,6 +22,7 @@ import PlugeFlowDetail from '../pages/plugin/detail/plugin-flow-detail';
 import ViewReport from '../pages/appDetail/evaluate/task/viewReport';
 import HttpTool from '../pages/httpTool';
 import i18n from '../locale/i18n';
+import WelcomePage from '../pages/welcome';
 
 export type MenuItem = Required<MenuProps>['items'][number] & {
   component?: (() => ReactElement) | React.FC<any>;

@@ -24,7 +24,7 @@ export function getPlugins(data: {
   includeTags: string;
   name: string;
 }, excludeTags: string = '') {
-  const url = `${PLUGIN_URL}/store/plugins/search?${excludeTags}`;
+  const url = `${PLUGIN_URL}/store/apps/search?${excludeTags}`;
   return get(url, { ...data });
 }
 // 删除插件

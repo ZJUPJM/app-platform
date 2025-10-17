@@ -13,6 +13,11 @@ import { getCookie } from '@/shared/utils/common';
 export function queryAppsApi(tenantId, params) {
   return get(`${APP_URL}/store/apps/search`, params);
 }
+
+// 获取工具列表（使用不同的API端点）
+export function queryToolsApi(tenantId, params) {
+  return get(`${APP_URL}/store/plugins/search`, params);
+}
 export function getEvalTaskList(requestBody) {
   return post(`${APP_URL}/evalTask/list`, requestBody);
 }

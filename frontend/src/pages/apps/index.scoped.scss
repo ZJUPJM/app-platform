@@ -1,7 +1,8 @@
 .apps_root {
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
   .apps_header {
     display: flex;
     align-items: center;
@@ -26,39 +27,270 @@
     }
   }
   .apps_main_market {
-    height: calc(100% - 50px);
-    min-width: 1400px;
-    padding: 24px;
+    flex: 1;
+    padding: 0 24px;
     background: #fff;
-    border-radius: 8px;
+    border-radius: 0.75rem;
     display: flex;
     flex-direction: column;
-    .operatorArea {
+    position: relative;
+    overflow: hidden; // 防止整体滚动
+    
+    .searchAndCategoryArea {
+      background: #fff;
+      padding: 16px 0;
+      border-radius: 0.75rem;
       display: flex;
       align-items: center;
-      .apps-search-input {
-        width: calc(25% - 16px);
-        height: 35px;
+      justify-content: space-between;
+      width: 100%;
+      margin: 0 auto;
+      gap: 24px;
+      
+      // 左侧：分类标签
+      .categoryArea {
+        flex-shrink: 0;
+        
+        .category-tabs {
+          display: flex;
+          gap: 8px;
+          
+          .category-tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 12px;
+            color: #666666;
+            background: transparent;
+            border: none;
+            
+            .anticon {
+              font-size: 16px;
+            }
+            
+            &:hover {
+              background-color: #f0f4f9;
+              color: #333333;
+            }
+            
+            &.active {
+              background-color: #f0f4f9;
+              color: #333;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+      
+      // 右侧：标签筛选器和搜索框
+      .filterAndSearchArea {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        
+        .tagFilter {
+          display: none;
+          .tag-select {
+            min-width: 120px;
+            height: 36px;
+            
+            .ant-select-selector {
+              border-radius: 6px;
+              border: 1px solid #d9d9d9;
+              background: #fff;
+              
+              &:hover {
+                border-color: #40a9ff;
+              }
+            }
+            
+            &.ant-select-focused .ant-select-selector {
+              border-color: #40a9ff;
+              box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+            }
+          }
+        }
+        
+         .searchArea {
+           .apps-search-input {
+             width: 200px;
+             height: 32px;
+             border-radius: 6px;
+             border: 1px solid #d9d9d9;
+             background: #fafafa;
+             transition: all 0.3s ease;
+             
+             &:hover {
+               border-color: #40a9ff;
+               background: #fff;
+             }
+             
+             &:focus {
+               border-color: #40a9ff;
+               box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+               background: #fff;
+             }
+             
+             // 搜索加载动画
+             .search-loading {
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               
+               .search-spinner {
+                 width: 14px;
+                 height: 14px;
+                 border: 2px solid #f3f3f3;
+                 border-top: 2px solid #1890ff;
+                 border-radius: 50%;
+                 animation: search-spin 1s linear infinite;
+               }
+             }
+           }
+         }
+      }
+      
+      // 响应式设计
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 16px;
+        padding: 12px 16px;
+        
+        .categoryArea {
+          width: 100%;
+          
+          .category-tabs {
+            justify-content: center;
+            flex-wrap: wrap;
+          }
+        }
+        
+        .filterAndSearchArea {
+          width: 100%;
+          justify-content: space-between;
+          
+          .searchArea .apps-search-input {
+            width: 200px;
+          }
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .filterAndSearchArea {
+          flex-direction: column;
+          gap: 12px;
+          
+          .tagFilter .tag-select {
+            width: 100%;
+          }
+          
+          .searchArea .apps-search-input {
+            width: 100%;
+          }
+        }
       }
     }
-    .card_list {
-      max-height: calc(100vh - 360px);
+    .scrollable_content {
+      flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 8px; // 为滚动条留出空间
+      
+      // 自定义滚动条样式
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+        
+        &:hover {
+          background: #a8a8a8;
+        }
+      }
+    }
+    
+    .card_list {
       display: flex;
       flex-wrap: wrap;
-      margin: 16px 0;
-      gap: 16px;
+      margin: 12px 0;
+      gap: 1rem;
+      margin-top: 12px; // 正常间距
       .card_box {
-        width: calc(25% - 16px);
-        height: 190px;
+        width: calc(25% - 12px);
+        height: 160px;
+        cursor: pointer;
+        border-radius: 8px;
+        
+        // 响应式设计
+        @media (max-width: 1200px) {
+          width: calc(33.333% - 12px);
+        }
+        
+        @media (max-width: 768px) {
+          width: calc(50% - 12px);
+        }
+        
+        @media (max-width: 480px) {
+          width: calc(100% - 12px);
+        }
+      }
+      
+      .loading_more {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 0;
+        color: #666;
+        font-size: 14px;
+      }
+      
+      .no_more_data {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px 0;
+        color: #999;
+        font-size: 14px;
+        margin-top: 8px;
+        position: relative;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 60px;
+          height: 1px;
+          background: #e8e8e8;
+        }
       }
     }
   }
-  .empty-box {
-    width: 100%;
-    margin: 100px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+   .empty-box {
+     width: 100%;
+     margin: 100px 0;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+   }
+ }
+
+// 搜索加载动画关键帧
+@keyframes search-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
