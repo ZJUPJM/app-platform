@@ -166,7 +166,7 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ setListCurrentList }) =
     if (appId && aippId) {
       refreshList();
     }
-  }, [appId, aippId]);
+  }, [appId, aippId, chatId]);
 
   // 如果历史记录为空且不在加载中，则不显示整个历史记录模块
   if (data.length === 0 && !loading) {
