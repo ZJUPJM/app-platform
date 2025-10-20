@@ -31,6 +31,11 @@ import {
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '@/store/hook';
+import { 
+  getMCPServices, 
+  testMCPConnection, 
+  deleteMCPService 
+} from '@/shared/http/mcp';
 import { TENANT_ID } from '../../chatPreview/components/send-editor/common/config';
 import ModaManualConfig from './ModaManualConfig';
 
@@ -58,29 +63,7 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
   const [searchText, setSearchText] = useState('');
   const [testingServices, setTestingServices] = useState<Set<string>>(new Set());
 
-  // 模拟数据
-  const mockServices: MCPService[] = [
-    {
-      id: '1',
-      name: '文件系统服务',
-      description: '提供文件读写操作的MCP服务',
-      endpoint: 'http://localhost:3001/mcp',
-      status: 'connected',
-      lastTestTime: '2025-01-17 10:30:00',
-      createTime: '2025-01-15 09:00:00',
-      source: 'custom'
-    },
-    {
-      id: '2',
-      name: '数据库连接服务',
-      description: '提供数据库查询和操作的MCP服务',
-      endpoint: 'http://localhost:3002/mcp',
-      status: 'disconnected',
-      lastTestTime: '2025-01-16 14:20:00',
-      createTime: '2025-01-14 16:30:00',
-      source: 'custom'
-    }
-  ];
+  // 删除本地模拟数据，改为真实接口
 
 
   useEffect(() => {
@@ -91,17 +74,11 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
   const loadServices = async () => {
     setLoading(true);
     try {
-      // TODO: 调用实际API
-      // const response = await getMCPServices(tenantId);
-      // setServices(response.data);
-      
-      // 使用模拟数据
-      setTimeout(() => {
-        setServices(mockServices);
-        setLoading(false);
-      }, 1000);
+      const response: any = await getMCPServices(tenantId);
+      setServices(response?.data || []);
     } catch (error) {
       message.error('加载MCP服务失败');
+    } finally {
       setLoading(false);
     }
   };
@@ -125,32 +102,22 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
 
   const handleTestConnection = async (service: MCPService) => {
     setTestingServices(prev => new Set(prev).add(service.id));
-    
     try {
-      // TODO: 调用实际API
-      // await testMCPConnection(tenantId, service.id);
-      
-      // 模拟测试过程
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // 模拟测试结果
-      const isConnected = Math.random() > 0.3; // 70%成功率
-      
+      await testMCPConnection(tenantId, service.id);
       setServices(prev => prev.map(s => 
         s.id === service.id 
           ? { 
               ...s, 
-              status: isConnected ? 'connected' : 'disconnected',
+              status: 'connected',
               lastTestTime: new Date().toLocaleString()
             }
           : s
       ));
-      
-      message.success(isConnected ? '连接测试成功' : '连接测试失败');
+      message.success('连接测试成功');
     } catch (error) {
       setServices(prev => prev.map(s => 
         s.id === service.id 
-          ? { ...s, status: 'disconnected' }
+          ? { ...s, status: 'disconnected', lastTestTime: new Date().toLocaleString() }
           : s
       ));
       message.error('连接测试失败');
@@ -163,12 +130,10 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
     }
   };
 
-  const handleDeleteService = async (service: MCPService) => {
+  const handleDeleteService = async (serviceId: string) => {
     try {
-      // TODO: 调用实际API
-      // await deleteMCPService(tenantId, service.id);
-      
-      setServices(prev => prev.filter(s => s.id !== service.id));
+      await deleteMCPService(tenantId, serviceId);
+      setServices(prev => prev.filter(s => s.id !== serviceId));
       message.success('MCP服务删除成功');
     } catch (error) {
       message.error('删除MCP服务失败');

@@ -227,16 +227,66 @@
       gap: 1rem;
       margin-top: 12px; // 正常间距
       .card_box {
-        width: calc(25% - 12px);
-        height: 160px;
+        width: calc(20% - 1rem);
+        height: 140px;
         cursor: pointer;
         border-radius: 8px;
+        // 局部收紧卡片内部间距与字号，使卡片更精致
+        .app_card_root {
+          padding: 16px 16px 12px;
+          border-radius: 8px;
+
+          .app_card_header {
+            .img_box {
+              width: 40px;
+              height: 40px;
+            }
+            .infoArea {
+              font-size: 12px;
+              margin-left: 12px;
+              .headerTitle {
+                margin-bottom: 6px;
+                .header-text {
+                  max-width: 200px;
+                }
+                .header-tag {
+                  width: 18px;
+                  height: 18px;
+                }
+              }
+            }
+          }
+
+          .app_card_body {
+            font-size: 12px;
+            line-height: 20px;
+            margin-top: 12px;
+          }
+
+          .app_card_footer {
+            margin-top: 12px;
+            .left {
+              .icon_box {
+                margin-right: 24px;
+              }
+              .status {
+                width: 46px;
+                height: 18px;
+                font-size: 11px;
+              }
+            }
+          }
+        }
         
         // 响应式设计
         @media (max-width: 1200px) {
-          width: calc(33.333% - 12px);
+          width: calc(25% - 12px);
         }
         
+        @media (max-width: 992px) {
+          width: calc(33.333% - 12px);
+        }
+
         @media (max-width: 768px) {
           width: calc(50% - 12px);
         }

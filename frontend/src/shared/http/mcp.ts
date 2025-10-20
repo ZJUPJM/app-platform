@@ -4,7 +4,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { get, post, put, del } from './request';
+import { get, post, put, del } from './http';
 
 const MCP_URL = '/api/mcp';
 

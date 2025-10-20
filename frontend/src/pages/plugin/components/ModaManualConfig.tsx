@@ -33,6 +33,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '@/store/hook';
 import { TENANT_ID } from '../../chatPreview/components/send-editor/common/config';
+import { testMCPServiceConnection, addManualMCPService } from '@/shared/http/mcp';
 
 interface ModaManualConfigProps {
   onServiceAdd?: (service: any) => void;
@@ -103,32 +104,23 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
     try {
       setLoading(true);
       const values = form.getFieldsValue();
-      
-      // TODO: 调用实际API测试连接
-      // const result = await testMCPConnection(tenantId, values.endpoint, values);
-      
-      // 模拟测试结果
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const isSuccess = Math.random() > 0.3; // 70%成功率
+      const apiResult: any = await testMCPServiceConnection(
+        tenantId,
+        values.endpoint,
+        values.config
+      );
+      const isSuccess = apiResult?.code === 0 || apiResult?.success === true;
       setTestResult({
         success: isSuccess,
-        message: isSuccess ? '连接测试成功' : '连接测试失败',
-        details: isSuccess ? 
-          '服务连接正常，配置参数有效' : 
-          '无法连接到指定端点，请检查URL和配置参数'
+        message: isSuccess ? '连接测试成功' : (apiResult?.msg || '连接测试失败'),
+        details: apiResult?.data?.details || apiResult?.detail || (isSuccess ? '服务连接正常，配置参数有效' : '无法连接到指定端点，请检查URL和配置参数')
       });
-      
-      if (isSuccess) {
-        message.success('连接测试成功');
-      } else {
-        message.error('连接测试失败');
-      }
+      isSuccess ? message.success('连接测试成功') : message.error(apiResult?.msg || '连接测试失败');
     } catch (error) {
       setTestResult({
         success: false,
         message: '连接测试异常',
-        details: error.message || '测试过程中发生错误'
+        details: (error as any)?.message || '测试过程中发生错误'
       });
       message.error('连接测试异常');
     } finally {
@@ -140,26 +132,30 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
     try {
       setLoading(true);
       const values = form.getFieldsValue();
-      
-      // TODO: 调用实际API添加服务
-      // await addMCPService(tenantId, values);
-      
-      const newService = {
-        id: Date.now().toString(),
+      await addManualMCPService(tenantId, {
         name: values.name,
         description: values.description,
         endpoint: values.endpoint,
         category: values.category,
-        config: values.config || {},
-        source: 'moda-manual',
-        status: 'connected',
-        createTime: new Date().toLocaleString()
-      };
-      
+        config: values.config,
+        timeout: values.timeout,
+        retryCount: values.retryCount,
+      });
+
       if (onServiceAdd) {
-        onServiceAdd(newService);
+        onServiceAdd({
+          id: Date.now().toString(),
+          name: values.name,
+          description: values.description,
+          endpoint: values.endpoint,
+          category: values.category,
+          config: values.config || {},
+          source: 'moda-manual',
+          status: 'disconnected',
+          createTime: new Date().toLocaleString()
+        });
       }
-      
+
       message.success('MCP服务导入成功');
       setIsModalVisible(false);
       setCurrentStep(0);
@@ -388,7 +384,7 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
           </div>
           <h3 style={{ marginBottom: '8px' }}>手动配置魔搭社区MCP服务</h3>
           <p style={{ color: '#666', marginBottom: '24px' }}>
-            从魔搭社区MCP广场 (https://modelscope.cn/mcp) 手动配置导入MCP服务
+            从<a href="https://modelscope.cn/mcp" target="_blank">魔搭社区MCP广场 (https://modelscope.cn/mcp)</a> 手动配置导入MCP服务
           </p>
           <Button type="primary" size="large" icon={<PlusOutlined />} onClick={handleStart}>
             开始配置

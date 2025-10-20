@@ -97,23 +97,6 @@ const Plugin = ({ compactInAppDev = false }: { compactInAppDev?: boolean }) => {
             )
           })}
         </div>
-        <div className='operatorArea'>
-          <Dropdown menu={{ items, activeKey: statusKey, onClick: (e) => clickItem(e) }}>
-            <div className='status-dropdown'>
-              <span>{statusLabel}</span>
-              <DownOutlined />
-            </div>
-          </Dropdown>
-          <Input
-            maxLength={64}
-            placeholder={t('search')}
-            style={{ width: '368px', height: '32px', marginLeft: '16px' }}
-            prefix={<Icons.search color={'rgb(230, 230, 230)'} />}
-            value={searchKey}
-            onChange={(e: any) => setSearchKey(e.target.value)}
-            onPressEnter={() => setReload(!reload)}
-          />
-        </div>
         </div>
         <div>
           <MarketItems

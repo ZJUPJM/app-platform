@@ -31,6 +31,36 @@
     gap: 16px;
     flex-wrap: wrap;
     align-content: flex-start;
+    // 卡片尺寸对齐探索/工作台页面
+    .page-plugin-card {
+      font-size: 12px; // 工具卡片文本统一为 12px
+      width: calc(20% - 16px);
+      height: 140px;
+      padding: 16px 16px 12px;
+      gap: 12px;
+      .plugin-card-header {
+        gap: 12px;
+        img { width: 40px; height: 40px; }
+        .plugin-title { .plugin-head { .text { max-width: 200px; } } }
+        .header-name { font-size: 12px; }
+      }
+      .card-content { line-height: 20px; font-size: 12px; }
+      .plugin-card-user { font-size: 12px; }
+      .card-footer { padding: 12px 0; gap: 24px; font-size: 12px; }
+      .plugin-tag { font-size: 12px; }
+    }
+
+    // “添加Http工具 / 添加自定义插件” 创建卡片，尺寸对齐
+    .card_box_add.create-card {
+      width: calc(20% - 16px);
+      height: 140px;
+      padding: 16px 16px 12px;
+      gap: 12px;
+      min-height: unset;
+
+      .create-plus { font-size: 36px; margin-bottom: 8px; }
+      .create-text { font-size: 12px; }
+    }
   }
   .market-page {
     padding-top: 16px;

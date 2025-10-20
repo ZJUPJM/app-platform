@@ -173,16 +173,25 @@ const EditModal = (props) => {
           return;
         }
       }
+
+      const typeMap = {
+        [APP_BUILT_CLASSIFICATION.AGENT]: APP_TYPE.BASIC,
+        [APP_BUILT_CLASSIFICATION.WORKFLOW]: APP_TYPE.WORK_FLOW,
+      };
+      const typeDef = typeMap[applicationType] || APP_TYPE[appBuiltType];
+
       const params = {
         name: applicationType === APP_BUILT_CLASSIFICATION.AGENT ? agentName : formParams.name,
         description: formParams.description,
         icon: type === 'add' && filePath ? filePath : formParams.icon,
         app_type: formParams.app_type,
-        app_built_type: applicationType === 'workflow' ? 'workflow' : APP_TYPE[appBuiltType].name,
+        app_built_type: typeDef.name,
         type: 'app',
         app_category: getCategory(),
-      }
-      const res: any = await createAipp(tenantId, applicationType === APP_BUILT_CLASSIFICATION.WORKFLOW ? APP_TYPE.WORK_FLOW.configId : APP_TYPE[appBuiltType].configId, params);
+      };
+
+      const res: any = await createAipp(tenantId, typeDef.configId, params);
+
       if (res.code === 0) {
         if (res.data.appCategory === APP_BUILT_CLASSIFICATION.AGENT) {
           updateAgent(res.data);

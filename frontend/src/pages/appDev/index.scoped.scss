@@ -70,13 +70,44 @@
       margin-top: 0;
       gap: 16px;
       .card_box {
-        width: calc(25% - 16px);
-        height: 190px;
+        width: calc(20% - 16px);
+        height: 140px;
+        .app_card_root {
+          padding: 16px 16px 12px;
+          border-radius: 8px;
+          .app_card_header {
+            .img_box {
+              width: 40px;
+              height: 40px;
+            }
+            .infoArea {
+              font-size: 12px;
+              margin-left: 12px;
+              .headerTitle {
+                margin-bottom: 6px;
+                .header-text { max-width: 200px; }
+                .header-tag { width: 18px; height: 18px; }
+              }
+            }
+          }
+          .app_card_body {
+            font-size: 12px;
+            line-height: 20px;
+            margin-top: 12px;
+          }
+          .app_card_footer {
+            margin-top: 12px;
+            .left {
+              .icon_box { margin-right: 24px; }
+              .status { width: 46px; height: 18px; font-size: 11px; }
+            }
+          }
+        }
       }
       .card_box_add {
         background-color: rgb(247, 247, 247);
         border-radius: 8px;
-        padding: 24px;
+        padding: 10px 24px;
         padding-bottom: 16px;
         display: flex;
         flex-direction: column;
