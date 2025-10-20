@@ -309,7 +309,6 @@ const AppDev: React.FC = () => {
                 <div className='add_title'>{t('create')}</div>
                 <div><img src={CreateImg} /><span onClick={() => create()}>{t('ceateBlankApplication')}</span></div>
                 <div><img src={TemplateImg} /><span onClick={() => tempalteListRef.current.open()}>{t('templateCreate')}</span></div>
-                <div className='split-line'></div>
                 <div><img src={ImportImg} /><span onClick={handleCreateClick}>{t('importApplication')}</span></div>
               </div>
             }
