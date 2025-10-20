@@ -5,7 +5,7 @@ fit:
     - 'modelengine.jade.common.controller'
 
 filter:
-  oauth2-filter: 'enable'
+  oauth2-filter: 'disable'
 
 oauth:
   client:
