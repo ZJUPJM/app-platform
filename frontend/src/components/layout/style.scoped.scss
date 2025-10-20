@@ -8,6 +8,7 @@
   flex-direction: column;
   height: 100vh;
   position: relative;
+  overflow: hidden; // 防止侧栏内容撑开整体布局高度
 
   &.collapsed {
     padding: 0 8px !important; // 折叠状态下减少内边距
@@ -64,6 +65,7 @@
     overflow: hidden;
     overflow-x: hidden;
     overflow-y: hidden;
+    min-height: 0; // 允许子项正确计算高度和滚动
     padding-bottom: 60px; // 为底部用户信息栏留出空间
   }
 
@@ -73,6 +75,8 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    flex: 1; // 占据剩余空间
+    min-height: 0; // 关键：使内部滚动生效
   }
 
   // 用户信息模块独立样式
