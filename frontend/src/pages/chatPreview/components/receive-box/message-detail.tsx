@@ -388,6 +388,8 @@ const MessageBox = (props: any) => {
       let thinkContent = content.slice(thinkStartIdx, thinkEndIdx);
       // 将思考内容中的引用ID替换为序号
       thinkContent = replaceReferenceIdsWithNumbers(thinkContent);
+      // 对深度思考内容进行 markdown 处理
+      thinkContent = markedProcess(thinkContent);
       setThinkContent(thinkContent);
       setAnswerContent(content.slice(thinkEndIdx));
     } else {

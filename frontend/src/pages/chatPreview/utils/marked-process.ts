@@ -8,7 +8,7 @@ export const markedProcess = (content) => {
       img: ['src', 'alt'],
       a: ['href', 'title', 'id'],
       div: ['class'],
-      span: ['class', 'data-reference'],
+      span: ['class', 'data-reference', 'data-ref-number', 'data-ref-url', 'data-ref-title', 'data-ref-summary'],
       br:['class'],
       font: ['color', 'id'],
       think: [],

@@ -20,6 +20,64 @@
   overflow: hidden;
   transition: height 0.3s ease-in-out;
   color: #71757f;
+  
+  /* 支持 markdown 格式 */
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  
+  p {
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  
+  ul, ol {
+    margin-bottom: 8px;
+    padding-left: 20px;
+    
+    li {
+      margin-bottom: 4px;
+    }
+  }
+  
+  pre {
+    margin-bottom: 12px;
+    padding: 12px;
+    background-color: #282c34;
+    border-radius: 6px;
+    overflow-x: auto;
+    
+    code {
+      background: none;
+      padding: 0;
+      color: #abb2bf;
+    }
+  }
+  
+  code {
+    background-color: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+  }
+  
+  blockquote {
+    margin: 12px 0;
+    padding-left: 16px;
+    border-left: 4px solid #ddd;
+    color: #666;
+  }
+  
+  strong, b {
+    font-weight: 600;
+  }
+  
+  em, i {
+    font-style: italic;
+  }
 }
 .think-info-html-finished {
   margin-bottom: 4px;
