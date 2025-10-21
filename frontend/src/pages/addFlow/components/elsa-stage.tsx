@@ -337,12 +337,12 @@ const Stage = (props) => {
   // 插件工具流选中
   const toolsConfirm = (item) => {
     let obj = {};
-    let uniqueName = '';
+    let llmObj = {};
     let loopObj = {};
     let parallelObj = {};
     item.forEach((e) => {
       obj = e.schema;
-      uniqueName = e.uniqueName;
+      llmObj = e;
       loopObj = e;
       parallelObj = e;
     });
@@ -351,7 +351,7 @@ const Stage = (props) => {
     } else if (modalTypes === 'parallel') {
       pluginCallback.current(parallelObj);
     } else if (modalTypes === 'llmTool') {
-      pluginCallback.current(uniqueName);
+      pluginCallback.current(llmObj);
     } else {
       pluginCallback.current(obj);
     }
