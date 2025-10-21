@@ -175,20 +175,32 @@ const SendEditor = (props: any) => {
     } else if (e.keyCode === 13) {
       e.preventDefault();
       sendMessage();
-    } else if (e.keyCode === 8) { // Backspace键
-      // 检查光标是否在智能体tag后面
+    } else if (e.keyCode === 8) { // Backspace
       const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const container = range.startContainer;
-        
-        // 如果光标在智能体tag后面，删除整个tag
-        if (container.nodeType === Node.TEXT_NODE && container.textContent === '\u00A0') {
-          const agentTag = container.previousSibling as HTMLElement;
-          if (agentTag && agentTag.classList && agentTag.classList.contains('agent-tag')) {
-            e.preventDefault();
-            removeAgentTag();
-          }
+      if (!selection || !selection.rangeCount) return;
+      const range = selection.getRangeAt(0);
+      if (!range.collapsed) return;
+
+      const node = range.startContainer;
+      const offset = range.startOffset;
+
+      // 光标在文本节点开头时
+      if (node.nodeType === Node.TEXT_NODE && offset === 0) {
+        const prev = node.previousSibling;
+        if (prev && prev.nodeType === Node.ELEMENT_NODE && (prev as HTMLElement).classList.contains('agent-tag')) {
+          e.preventDefault();
+          removeAgentTag();
+          return;
+        }
+      }
+
+      // 光标在元素节点中时（比如直接在 div 内）
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const prev = (node as HTMLElement).childNodes[offset - 1];
+        if (prev && prev.nodeType === Node.ELEMENT_NODE && (prev as HTMLElement).classList.contains('agent-tag')) {
+          e.preventDefault();
+          removeAgentTag();
+          return;
         }
       }
     }
