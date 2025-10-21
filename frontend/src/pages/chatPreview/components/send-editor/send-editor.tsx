@@ -205,6 +205,51 @@ const SendEditor = (props: any) => {
       }
     }
   }
+
+  // 粘贴事件处理 - 禁用富文本输入
+  useEffect(() => {
+    const editorDom = document.getElementById('ctrl-promet');
+    if (!editorDom) return;
+
+    // 只允许粘贴纯文本，忽略所有 HTML/CSS 样式、背景色等富文本格式
+    const handlePaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const text = e.clipboardData?.getData('text/plain');
+      if (text) {
+        document.execCommand('insertText', false, text);
+      }
+    };
+
+    // 处理 beforeinput 事件 - 禁止所有富文本命令
+    const handleBeforeInput = (e: InputEvent) => {
+      const allowedTypes = [
+        'insertText',              // 普通文本输入
+        'deleteContentBackward',   // Backspace 删除
+        'deleteContentForward',    // Delete 键删除
+        'insertParagraph',         // 换行（Enter/Ctrl+Enter）
+        'insertLineBreak',         // 换行
+        'historyUndo',             // 撤销操作（Ctrl+Z）
+        'historyRedo'              // 重做操作（Ctrl+Y 或 Ctrl+Shift+Z）
+      ];
+      
+      // 如果不是允许的输入类型，阻止默认行为
+      if (e.inputType && !allowedTypes.includes(e.inputType)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    // 添加原生事件监听器（使用捕获阶段确保优先执行）
+    editorDom.addEventListener('paste', handlePaste, true);
+    editorDom.addEventListener('beforeinput', handleBeforeInput as any, true);
+
+    return () => {
+      editorDom.removeEventListener('paste', handlePaste, true);
+      editorDom.removeEventListener('beforeinput', handleBeforeInput as any, true);
+    };
+  }, []);
+
   // 发送消息
   function sendMessage() {
     if (isChatRunning()) {
