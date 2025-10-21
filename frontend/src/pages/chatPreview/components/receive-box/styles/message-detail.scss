@@ -209,7 +209,7 @@
   font-weight: 500;
   line-height: 1.4;
   display: block;
-  
+
   &:hover {
     color: #61666b;
     text-decoration: underline;
@@ -278,7 +278,7 @@
   ul, ol {
     margin-bottom: 12px;
     padding-left: 24px;
-    
+
     li {
       margin-bottom: 4px;
     }
@@ -290,7 +290,7 @@
     background-color: #282c34;
     border-radius: 6px;
     overflow-x: auto;
-    
+
     code {
       background: none;
       padding: 0;
@@ -317,13 +317,13 @@
     border-collapse: collapse;
     margin-bottom: 12px;
     width: 100%;
-    
+
     th, td {
       border: 1px solid #ddd;
       padding: 8px 12px;
       text-align: left;
     }
-    
+
     th {
       background-color: #f5f5f5;
       font-weight: 600;
@@ -333,7 +333,7 @@
   a {
     color: #1890ff;
     text-decoration: none;
-    
+
     &:hover {
       text-decoration: underline;
     }
@@ -397,7 +397,7 @@
 .think-reference {
   background-color: rgba(235, 238, 242, 0.7);
   color: #61666b;
-  
+
   &:hover {
     background-color: rgba(219, 226, 232, 0.9);
   }
@@ -487,19 +487,6 @@
   }
 }
 
-.reference-overview-item-number-circle {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  line-height: 22px;
-  text-align: center;
-  background-color: #f0f0f0;
-  color: #666;
-  border-radius: 50%;
-  font-size: 12px;
-  font-weight: 500;
-  border: 1px solid #d9d9d9;
-}
 
 .reference-overview-item-content {
   flex: 1;

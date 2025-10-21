@@ -136,7 +136,7 @@ const ChatPreview = (props) => {
   useEffect(() => {
     currentInfo.current = appInfo;
     window.addEventListener('previewPicture', handlePreview);
-    
+
     // 重置聊天状态的函数
   const resetChatState = () => {
     console.log('执行重置聊天状态');
@@ -150,7 +150,7 @@ const ChatPreview = (props) => {
         console.log('未找到输入栏元素');
       }
     }, 100);
-    
+
     // 重置think和search按钮状态
     console.log('重置按钮状态');
     setUserContext({
@@ -173,11 +173,11 @@ const ChatPreview = (props) => {
       }
     }
   };
-  
+
   // 监听storage变化和自定义事件
   window.addEventListener('storage', handleStorageMessage);
   window.addEventListener('resetChatState', resetChatState);
-    
+
     return () => {
       closeConnected();
       dispatch(setAppId(null));
@@ -812,7 +812,7 @@ const ChatPreview = (props) => {
         if (editorDom) {
           editorDom.innerText = '';
         }
-        
+
         // 重置think和search按钮状态
         setUserContext({
           think: false,

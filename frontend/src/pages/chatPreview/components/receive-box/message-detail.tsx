@@ -106,7 +106,7 @@ const MessageBox = (props: any) => {
   const chatReference = useAppSelector((state) => state.chatCommonStore.chatReference);
   const referenceList = useAppSelector((state) => state.chatCommonStore.referenceList);
   const contentContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // 使用 useMemo 缓存引用列表和所有引用键
   const { referenceData, allRefKeys } = useMemo(() => {
     if (!reference || !Array.isArray(reference) || reference.length === 0) {
@@ -166,13 +166,13 @@ const MessageBox = (props: any) => {
     const title = ref?.data?.metadata?.fileName || ref?.data?.source || '未知来源';
     const summary = ref?.data?.txt || ref?.data?.text || '无摘要';
     const url = ref?.data?.metadata?.url || ref?.data?.source || '';
-    
+
     const escapedTitle = escapeAttribute(title);
     const escapedSummary = escapeAttribute(summary);
     const escapedUrl = escapeAttribute(url);
-    
+
     const className = isThinkReference ? 'reference-circle think-reference' : 'reference-circle';
-    
+
     return `<span class="${className}" data-ref-number="${num}" data-ref-url="${escapedUrl}" data-ref-title="${escapedTitle}" data-ref-summary="${escapedSummary}">${num}</span>`;
   }, [usedReferences]);
 
@@ -186,17 +186,17 @@ const MessageBox = (props: any) => {
     }
 
     let processedContent = content;
-    
+
     // 1. 处理 <ref>ID</ref> 格式（合并相邻的引用标签）
     processedContent = processedContent.replace(/<\/ref><ref>/g, '_');
     processedContent = processedContent.replace(/<ref>(.*?)<\/ref>/g, (match, keyContent) => {
       const keys = keyContent.split('_').filter((k: string) => refKeyToNewNumber.has(k));
       if (keys.length === 0) return match;
-      
+
       const refNumbers = keys.map((k: string) => refKeyToNewNumber.get(k)!).sort((a: number, b: number) => a - b);
       return refNumbers.map((num: number) => createReferenceTag(num, true)).join('');
     });
-    
+
     // 2. 处理 [ID] 格式（方括号格式，常见于思考内容中）
     processedContent = processedContent.replace(/\[([a-f0-9]{6})\]/gi, (match, keyContent) => {
       if (refKeyToNewNumber.has(keyContent)) {
@@ -217,15 +217,15 @@ const MessageBox = (props: any) => {
 
     // 合并相邻的引用标签
     let processedContent = rawContent.replace(/<\/ref><ref>/g, '_');
-    
+
     // 收集引用数据用于后续替换
     const refPlaceholders: Array<{id: string, refData: any[]}> = [];
     let placeholderIndex = 0;
-    
+
     processedContent = processedContent.replace(/<ref>(.*?)<\/ref>/g, (match, keyContent) => {
       const keys = keyContent.split('_').filter((k: string) => refKeyToNewNumber.has(k));
       const refNumbers = keys.map((k: string) => refKeyToNewNumber.get(k)!).sort((a: number, b: number) => a - b);
-      
+
       const refData = refNumbers.map((num: number) => {
         const ref = usedReferences.find(r => r.number === num);
         return {
@@ -235,7 +235,7 @@ const MessageBox = (props: any) => {
           url: ref?.data?.metadata?.url || ref?.data?.source
         };
       });
-      
+
       // 使用特殊标记作为占位符
       const placeholderId = `REFPLACEHOLDER${placeholderIndex}ENDREF`;
       refPlaceholders.push({ id: placeholderId, refData });
@@ -258,19 +258,19 @@ const MessageBox = (props: any) => {
         const escapedTitle = escapeAttribute(data.title);
         const escapedSummary = escapeAttribute(data.summary);
         const escapedUrl = escapeAttribute(data.url || '');
-        
+
         return `<span class="reference-circle" data-ref-number="${data.number}" data-ref-url="${escapedUrl}" data-ref-title="${escapedTitle}" data-ref-summary="${escapedSummary}">${data.number}</span>`;
       }).join('');
-      
+
       console.log('[Debug 3] Replacing placeholder:', id, 'with HTML:', refHtml);
-      
+
       // 替换占位符 - 注意可能被 markdown 包裹或转义
       const patterns = [
         id,  // 原始格式
         `<p>${id}</p>`,  // 被包裹在 p 标签中
         `>${id}<`,  // 在标签之间
       ];
-      
+
       patterns.forEach(pattern => {
         if (htmlContent.includes(pattern)) {
           // 如果是被 p 标签包裹的，替换整个 p 标签
@@ -400,11 +400,11 @@ const MessageBox = (props: any) => {
   // 接受消息点击事件
   useEffect(() => {
     const container = document.querySelector('.message-box');
-    
+
     if (container) {
       container.addEventListener('click', recieveClick);
     }
-    
+
     return () => {
       if (container) {
         container.removeEventListener('click', recieveClick);
@@ -422,14 +422,14 @@ const MessageBox = (props: any) => {
       if (target.classList.contains('reference-circle')) {
         event.preventDefault();
         event.stopPropagation();
-        
+
         const url = target.getAttribute('data-ref-url');
-        
+
         if (isChatRunning()) {
           Message({ type: 'warning', content: t('tryLater') });
           return;
         }
-        
+
         if (url && /^https?:\/\//.test(url)) {
           window.open(url, '_blank');
         }
@@ -442,10 +442,10 @@ const MessageBox = (props: any) => {
         // 清除之前可能存在的 tooltip
         const existingTooltips = document.querySelectorAll('[data-tooltip-id="ref-tooltip"]');
         existingTooltips.forEach(t => t.remove());
-        
+
         const title = target.getAttribute('data-ref-title') || '未知来源';
         const summary = target.getAttribute('data-ref-summary') || '无摘要';
-        
+
         const tooltip = document.createElement('div');
         tooltip.className = 'reference-hover-tooltip';
         tooltip.setAttribute('data-tooltip-id', 'ref-tooltip');
@@ -453,14 +453,14 @@ const MessageBox = (props: any) => {
           <div class="reference-hover-title">${title}</div>
           <div class="reference-hover-summary">${summary}</div>
         `;
-        
+
         // 计算 tooltip 位置
         const rect = target.getBoundingClientRect();
         tooltip.style.left = `${rect.left}px`;
         tooltip.style.top = `${rect.bottom + 8}px`;
-        
+
         document.body.appendChild(tooltip);
-        
+
         // 移除 tooltip
         const removeTooltip = () => {
           const existingTooltip = document.querySelector('[data-tooltip-id="ref-tooltip"]');
@@ -469,7 +469,7 @@ const MessageBox = (props: any) => {
           }
           target.removeEventListener('mouseleave', removeTooltip);
         };
-        
+
         target.addEventListener('mouseleave', removeTooltip);
       }
     };

@@ -52,7 +52,7 @@ const getFilteredMenus = (routeList: any[], currentPath: string): any[] => {
         return null; // 隐藏这些菜单项
       }
     }
-    
+
     // 处理子菜单
     if (route.children && route.children.length) {
       const filteredChildren = getFilteredMenus(route.children, currentPath);
@@ -61,10 +61,10 @@ const getFilteredMenus = (routeList: any[], currentPath: string): any[] => {
         children: filteredChildren.length > 0 ? filteredChildren : undefined,
       };
     }
-    
+
     return route;
   }).filter((item): item is any => item !== null); // 过滤掉 null 值并确保类型安全
-  
+
   return filteredMenus.filter((item) => !item?.hidden);
 };
 
@@ -93,12 +93,12 @@ const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 const HistorySidebarWithContext: React.FC = () => {
   const { setListCurrentList } = useContext(HistoryContext);
   const location = useLocation();
-  
+
   // 在 /chat/* 路由下使用独立的对话历史组件
   if (location.pathname.includes('/chat/') && !location.pathname.includes('/app/')) {
     return <ChatHistorySidebar setListCurrentList={setListCurrentList} />;
   }
-  
+
   // 其他路由使用原有的历史记录组件
   return <HistorySidebar setListCurrentList={setListCurrentList} />;
 };
@@ -162,16 +162,16 @@ const AppLayout: React.FC = () => {
       key: 'logout',
       label: (
         <div className="user-menu-item">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             aria-hidden="true"
             className="user-menu-icon"
           >
@@ -221,13 +221,13 @@ const AppLayout: React.FC = () => {
       if (location.pathname.includes('/chat/') && !location.pathname.includes('/app/')) {
         // 在 /chat/* 路由下，只清空聊天相关状态，保留应用信息
         console.log('在 /chat/* 路由下创建新对话，保持在当前路由');
-        
+
         // 只清空聊天相关的状态，不清空应用信息
         dispatch(setChatRunning(false));
         dispatch(setChatId(null));
         dispatch(setChatList([]));
         dispatch(setAtChatId(null));
-        
+
         // 清空本地存储的聊天ID
         if (appId) {
           updateChatId(null, appId);
@@ -243,14 +243,14 @@ const AppLayout: React.FC = () => {
           type: 'deleteChat'
         };
         localStorage.setItem('storageMessage', JSON.stringify(storageParams));
-        
+
         // 触发自定义事件来通知页面重置状态
         const resetEvent = new CustomEvent('resetChatState');
         window.dispatchEvent(resetEvent);
 
         // 清空菜单选中状态
         setDefaultActive([]);
-        
+
         // 不跳转路由，保持在当前 /chat/* 路由
         return;
       } else {
@@ -277,7 +277,7 @@ const AppLayout: React.FC = () => {
           type: 'deleteChat'
         };
         localStorage.setItem('storageMessage', JSON.stringify(storageParams));
-        
+
         // 触发自定义事件来通知页面重置状态
         console.log('触发新对话重置事件');
         const resetEvent = new CustomEvent('resetChatState');
@@ -285,7 +285,7 @@ const AppLayout: React.FC = () => {
 
         // 清空菜单选中状态
         setDefaultActive([]);
-        
+
         // 跳转到 /home
         navigate(e.key);
       }
@@ -315,7 +315,7 @@ const AppLayout: React.FC = () => {
       return true; // 修改为 true，支持 /chat/* 路由显示边栏
     }
     // 去除工作流编排相关页面的左侧边栏显示
-    if (location.pathname.includes('/add-flow/') || 
+    if (location.pathname.includes('/add-flow/') ||
         location.pathname.includes('/flow-detail/') ||
         location.pathname.includes('/app-detail/')) {
       return false;
@@ -325,13 +325,13 @@ const AppLayout: React.FC = () => {
 
   // 判断是否显示历史记录侧边栏
   const shouldShowHistorySidebar = () => {
-    return location.pathname.includes('/chat/') || 
+    return location.pathname.includes('/chat/') ||
            location.pathname.includes('/home');
   }
 
   // 判断是否显示用户信息栏
   const shouldShowUserInfo = () => {
-    return location.pathname.includes('/chat/') || 
+    return location.pathname.includes('/chat/') ||
            location.pathname.includes('/home') ||
            location.pathname.includes('/app') ||
            location.pathname.includes('/app-develop');
@@ -361,7 +361,7 @@ const AppLayout: React.FC = () => {
       getRole();
     }
     getChatPluginList();
-    
+
     // 获取用户名信息
     fetchUsername();
   }, [])
@@ -433,8 +433,8 @@ const AppLayout: React.FC = () => {
               {shouldShowUserInfo() && (
                 <div className='layout-sider-user'>
                   <Dropdown
-                    menu={{ 
-                      items: userMenuItems, 
+                    menu={{
+                      items: userMenuItems,
                       onClick: ({ key }) => {
                         if (key === 'logout') {
                           handleLogout(setLoading);
