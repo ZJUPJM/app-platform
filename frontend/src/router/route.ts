@@ -144,6 +144,14 @@ export const routeList: MenuItem[] = [
     hidden:true,
     children: [],
   },
+  {
+    key: '/welcome',
+    icon: Icons.home({}),
+    label: i18n.t('newConversation'), // 欢迎页面
+    component: WelcomePage,
+    hidden:true,
+    children: [],
+  },
 ];
 
 // 生成菜单

@@ -296,7 +296,8 @@ const AppLayout: React.FC = () => {
     }
   };
 
-  const colorBgContainer = '#ffffff';
+  const isWelcomePage = () => location.pathname.startsWith('/welcome');
+  const colorBgContainer = isWelcomePage() ? '#0b0b0f' : '#ffffff';
   const setClassName = () => {
     if (location.pathname.includes('home')) {
       return `${setSpaClassName('home-chat')} layout-container`
@@ -374,7 +375,7 @@ const AppLayout: React.FC = () => {
   return (
     <HistoryProvider>
       <Layout>
-        { layoutValidate() && (
+        { layoutValidate() && !isWelcomePage() && (
           <>
             <Sider
               collapsible
@@ -470,7 +471,7 @@ const AppLayout: React.FC = () => {
       }
         <Layout className={setClassName()}>
           <Provider store={store}>
-            <Content style={{ padding: (layoutValidate() || isSpaMode()) ? '0 16px' : '0', background: colorBgContainer }}>
+            <Content style={{ padding: isWelcomePage() ? '0' : ((layoutValidate() || isSpaMode()) ? '0 16px' : '0'), background: colorBgContainer }}>
               <Switch>
                 {flattenRouteList.map((route) => (
                   <Route
@@ -481,7 +482,7 @@ const AppLayout: React.FC = () => {
                   />
                 ))}
                 <Route exact path='/' key='/' >
-                  <Redirect to='/home' />
+                  <Redirect to='/welcome' />
                 </Route>
               </Switch>
             </Content>
