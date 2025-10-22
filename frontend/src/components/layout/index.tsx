@@ -139,10 +139,10 @@ const AppLayout: React.FC = () => {
 
     try {
       const response: any = await getUsername();
-      if (response && (response.code === 0 || response.code === 200) && response.data) {
-        setApiUsername(response.data);
+      if (response && (response.code === 0 || response.code === 200) && response.username) {
+        setApiUsername(response.username);
         // 缓存到localStorage
-        localStorage.setItem('apiUsername', response.data);
+        localStorage.setItem('apiUsername', response.username);
       }
     } catch (error) {
       console.error('获取用户名失败:', error);
