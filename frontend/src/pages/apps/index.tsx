@@ -12,7 +12,6 @@ import { queryAppsApi, queryToolsApi } from '@/shared/http/apps';
 import serviceConfig from '@/shared/http/httpConfig';
 import AppCard from '@/components/appCard';
 import { debounce, getCookie, setSpaClassName } from '@/shared/utils/common';
-import { useHistory } from 'react-router-dom';
 import { deleteAppApi } from '@/shared/http/appDev';
 import Empty from '@/components/empty/empty-item';
 import { TENANT_ID } from '../chatPreview/components/send-editor/common/config';
@@ -23,7 +22,6 @@ const Apps: React.FC = () => {
   const tenantId = TENANT_ID;
   const { t } = useTranslation();
   const { APP_URL } = serviceConfig;
-  const navigate = useHistory().push;
   const [appData, setAppData] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -48,7 +46,7 @@ const Apps: React.FC = () => {
     const currentPage = forcePage !== undefined ? forcePage : page;
     
     // 生成请求标识符，防止重复请求
-    const requestId = `${currentPage}-${search}-${activeCategory}-${isLoadMore}`;
+    const requestId = `${currentPage}-${search}-${isLoadMore}`;
     
     // 如果已经有相同的请求在进行中，直接返回
     if (requestRef.current === requestId) {
@@ -57,53 +55,50 @@ const Apps: React.FC = () => {
     }
     
     requestRef.current = requestId;
-    console.log('queryApps 被调用:', { isLoadMore, currentPage, pageSize, search, activeCategory, requestId });
-    
-    // 根据分类配置不同的搜索参数
-    const getCategoryParams = (category: string) => {
-      switch (category) {
-        case 'agent':
-          // 智能体：包含APP类型，指定agent分类，排除BUILTIN
-          return {
-            includeTags: ['APP'],
-            excludeTags: ['BUILTIN'],
-            appCategory: 'agent'
-          };
-        case 'chat':
-          // 聊天助手：包含APP类型，指定chatbot分类，排除BUILTIN
-          return {
-            includeTags: ['APP'],
-            excludeTags: ['BUILTIN'],
-            appCategory: 'chatbot'
-          };
-        default:
-          return {
-            includeTags: ['APP'],
-            excludeTags: ['BUILTIN'],
-            appCategory: 'agent'
-          };
-      }
-    };
-    
-    const categoryParams = getCategoryParams(activeCategory);
-    
+    console.log('queryApps 被调用:', { isLoadMore, currentPage, pageSize, search, requestId });
+
+    // // 根据分类配置不同的搜索参数
+    // const getCategoryParams = (category: string) => {
+    //   switch (category) {
+    //     case 'agent':
+    //       // 智能体：包含APP类型，指定agent分类，排除BUILTIN
+    //       return {
+    //         includeTags: ['APP'],
+    //         excludeTags: ['BUILTIN'],
+    //         appCategory: 'agent'
+    //       };
+    //     case 'chat':
+    //       // 聊天助手：包含APP类型，指定chatbot分类，排除BUILTIN
+    //       return {
+    //         includeTags: ['APP'],
+    //         excludeTags: ['BUILTIN'],
+    //         appCategory: 'chatbot'
+    //       };
+    //     default:
+    //       return {
+    //         includeTags: ['APP'],
+    //         excludeTags: ['BUILTIN'],
+    //         appCategory: 'agent'
+    //       };
+    //   }
+    // };
+
+    // 获取所有应用（不区分分类）
     const params = {
       pageNum: currentPage,
       pageSize,
       name: search,
-      ...categoryParams
+      includeTags: ['APP'],
+      excludeTags: ['BUILTIN']
     };
     
-    // 根据分类选择不同的API
-    const apiCall = activeCategory === 'tool' ? queryToolsApi : queryAppsApi;
-    const endpoint = activeCategory === 'tool' ? `${APP_URL}/store/plugins/search` : `${APP_URL}/store/apps/search`;
+    const apiCall = queryAppsApi;
+    const endpoint = `${APP_URL}/store/apps/search`;
     
     // 添加调试信息
     console.log('API请求参数:', {
-      category: activeCategory,
       endpoint: endpoint,
-      params: params,
-      categoryParams: categoryParams
+      params: params
     });
     
     if (isLoadMore) {
@@ -116,7 +111,6 @@ const Apps: React.FC = () => {
     try {
       const res: any = await apiCall(tenantId, params);
       console.log('API响应数据:', {
-        category: activeCategory,
         response: res,
         dataLength: res?.data?.length || 0,
         total: res?.total || 0
@@ -198,37 +192,37 @@ const Apps: React.FC = () => {
     }, 300); // 减少防抖时间到300ms，提升响应速度
   }, [search]);
 
-  // 分类切换
-  const handleCategoryChange = useCallback((category: string) => {
-    if (category !== activeCategory) {
-      // 使用批量更新避免多次触发useEffect
-      setPage(1);
-      setActiveCategory(category);
-      setAppData([]);
-      setHasMore(true);
-      setHasTriedLoadMore(false);
-      // 切换分类时清空搜索框内容
-      setSearch('');
-      setIsSearching(false);
-      // 清除搜索防抖定时器
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-        searchTimeoutRef.current = null;
-      }
-    }
-  }, [activeCategory]);
+  // // 分类切换
+  // const handleCategoryChange = useCallback((category: string) => {
+  //   if (category !== activeCategory) {
+  //     // 使用批量更新避免多次触发useEffect
+  //     setPage(1);
+  //     setActiveCategory(category);
+  //     setAppData([]);
+  //     setHasMore(true);
+  //     setHasTriedLoadMore(false);
+  //     // 切换分类时清空搜索框内容
+  //     setSearch('');
+  //     setIsSearching(false);
+  //     // 清除搜索防抖定时器
+  //     if (searchTimeoutRef.current) {
+  //       clearTimeout(searchTimeoutRef.current);
+  //       searchTimeoutRef.current = null;
+  //     }
+  //   }
+  // }, [activeCategory]);
 
   // 点击卡片
   function clickCard(item: any, e: any) {
     let id = item.runnables?.APP?.appId;
     let aippId = item.runnables?.APP?.aippId;
     
-    let url = `/app/${tenantId}/chat/${id}`;
+    let url = `#/app/${tenantId}/chat/${id}`;
     if (aippId) {
       url += `/${aippId}`;
     }
 
-    navigate(url);
+    window.open(url, '_blank');
   }
 
   // 点击更多操作选项
@@ -287,16 +281,16 @@ const Apps: React.FC = () => {
   useEffect(() => {
     // 添加防抖，避免快速连续的状态更新导致多次请求
     const timeoutId = setTimeout(() => {
-      // 检查是否是搜索或分类改变
+      // 检查是否是搜索改变
       const isSearchChanged = search !== prevSearchRef.current;
-      const isCategoryChanged = activeCategory !== prevCategoryRef.current;
-      const isSearchOrCategoryChange = isSearchChanged || isCategoryChanged;
-      
+      // const isCategoryChanged = activeCategory !== prevCategoryRef.current;
+      // const isSearchOrCategoryChange = isSearchChanged || isCategoryChanged;
+
       // 更新ref值
       prevSearchRef.current = search;
-      prevCategoryRef.current = activeCategory;
-      
-      if (page === 1 || isSearchOrCategoryChange) {
+      // prevCategoryRef.current = activeCategory;
+
+      if (page === 1 || isSearchChanged) {
         // 重新加载数据，强制使用page=1
         console.log('重新加载数据，使用page=1');
         queryApps(false, 1);
@@ -308,7 +302,7 @@ const Apps: React.FC = () => {
     }, 0);
 
     return () => clearTimeout(timeoutId);
-  }, [page, search, activeCategory]);
+  }, [page, search]);
 
   // 清理搜索防抖定时器
   useEffect(() => {
@@ -328,54 +322,23 @@ const Apps: React.FC = () => {
       </div>
       <div className='apps_main_market'>
         <div className='searchAndCategoryArea'>
-          {/* 左侧：分类标签 */}
-          <div className='categoryArea'>
-            <div className='category-tabs'>
-              <div 
-                className={`category-tab ${activeCategory === 'agent' ? 'active' : ''}`}
-                onClick={() => handleCategoryChange('agent')}
-              >
-                <RobotOutlined />
-                <span>{t('agent')}</span>
-              </div>
-              <div 
-                className={`category-tab ${activeCategory === 'chat' ? 'active' : ''}`}
-                onClick={() => handleCategoryChange('chat')}
-              >
-                <MessageOutlined />
-                <span>{t('chatAssistant')}</span>
-              </div>
-            </div>
-          </div>
-          
-          {/* 右侧：标签筛选器和搜索框 */}
-          <div className='filterAndSearchArea'>
-            <div className='tagFilter'>
-              <Select
-                value={selectedTag}
-                onChange={setSelectedTag}
-                suffixIcon={<DownOutlined />}
-                className='tag-select'
-                options={availableTags.map(tag => ({ label: tag, value: tag }))}
-              />
-            </div>
-            <div className='searchArea'>
-              <Input
-                className='apps-search-input'
-                placeholder={t('search')}
-                value={search}
-                prefix={
-                  isSearching ? (
-                    <div className="search-loading">
-                      <div className="search-spinner"></div>
-                    </div>
-                  ) : (
-                    <Icons.search color={'rgb(230, 230, 230)'} />
-                  )
-                }
-                onChange={(e) => handleSearch(e.target.value)}
-              />
-            </div>
+          {/* 居中：搜索框 */}
+          <div className='searchArea'>
+            <Input
+              className='apps-search-input'
+              placeholder={t('search')}
+              value={search}
+              prefix={
+                isSearching ? (
+                  <div className="search-loading">
+                    <div className="search-spinner"></div>
+                  </div>
+                ) : (
+                  <Icons.search color={'rgb(230, 230, 230)'} />
+                )
+              }
+              onChange={(e) => handleSearch(e.target.value)}
+            />
           </div>
         </div>
         <div ref={scrollContainerRef} className='scrollable_content'>
