@@ -10,13 +10,16 @@ import { Button, Dropdown, Badge, Typography } from 'antd';
 import { LeftArrowIcon, UploadIcon } from '@/assets/icon';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { setTestStatus, setTestTime } from "@/store/flowTest/flowTest";
-import { setChatId, setChatList } from '@/store/chatStore/chatStore';
+import { setChatId, setChatList, setChatRunning } from '@/store/chatStore/chatStore';
 import { APP_TYPE } from '@/pages/components/common/common';
 import { getCookie } from '@/shared/utils/common';
 import { useTranslation } from 'react-i18next';
 import { Message } from "@/shared/utils/message";
-import { setAppInfo, setValidateInfo } from '@/store/appInfo/appInfo';
+import { setAppInfo, setValidateInfo, setAtAppInfo, setAtAppId } from '@/store/appInfo/appInfo';
 import { getCheckList, exportApp, updateAppInfo, updateFlowInfo } from '@/shared/http/aipp';
+import { updateChatId } from '@/shared/utils/common';
+import { setAtChatId } from '@/store/chatStore/chatStore';
+import { isChatRunning } from '@/shared/utils/chat';
 import { convertImgPath } from '@/common/util';
 import { createGraphOperator } from '@fit-elsa/elsa-react';
 import { get, cloneDeep } from 'lodash';
@@ -229,6 +232,33 @@ const ChoreographyHead = (props) => {
     document.body.removeChild(a);
   };
 
+  // 点击"新对话"按钮回调
+  const onClickNewChat = async () => {
+    if (isChatRunning()) {
+      return;
+    }
+    const storageId = aippId || appId;
+    dispatch(setChatRunning(false));
+    updateChatId(null, storageId);
+    dispatch(setChatId(null));
+    dispatch(setChatList([]));
+    dispatch(setAtAppInfo(null));
+    dispatch(setAtChatId(null));
+    dispatch(setAtAppId(null));
+
+    // 重置输入栏内容
+    setTimeout(() => {
+      const editorDom = document.getElementById('ctrl-promet');
+      if (editorDom) {
+        editorDom.innerText = '';
+      }
+    }, 100);
+
+    // 触发自定义事件来通知页面重置状态
+    const resetEvent = new CustomEvent('resetChatState');
+    window.dispatchEvent(resetEvent);
+  };
+
   // 更新应用状态
   const updateAppState = async () => {
     try {
@@ -303,6 +333,14 @@ const ChoreographyHead = (props) => {
       </div>
       <div className='header-grid'>
         <div className='header-grid-btn'>
+          {/* 新对话按钮 */}
+          {!preview && (
+            <div className='new-chat-btn' onClick={onClickNewChat} title={t('newChat')}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          )}
           <div className='more'>
             <Dropdown menu={{ items: getMoreItems(), onClick: handleMenuClick }} disabled={preview}>
               <img src={moreBtnImg} alt="" />
