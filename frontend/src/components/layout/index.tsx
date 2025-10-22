@@ -362,8 +362,10 @@ const AppLayout: React.FC = () => {
     }
     getChatPluginList();
 
-    // 获取用户名信息
-    fetchUsername();
+    // 获取用户名信息（欢迎页面不需要）
+    if (!location.pathname.includes('/welcome')) {
+      fetchUsername();
+    }
   }, [])
 
   // 当显示用户信息时，确保获取用户名
