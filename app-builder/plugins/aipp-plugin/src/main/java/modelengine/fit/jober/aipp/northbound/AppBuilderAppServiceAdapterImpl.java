@@ -20,6 +20,7 @@ import modelengine.fit.jober.common.RangedResultSet;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.beans.BeanUtils;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -44,11 +45,11 @@ public class AppBuilderAppServiceAdapterImpl implements AppBuilderAppServiceAdap
     @Override
     public RangedResultSet<AppMetadata> list(AppQueryParams params, OperationContext context) {
         AppQueryCondition appQueryCondition = this.convertParams(params);
-        if (params.getType() == null) {
-            params.setType("app");
+        if (params.getTypes() == null) {
+            params.setTypes(List.of("app", "waterFlow"));
         }
         appQueryCondition.setTenantId(context.getTenantId());
-        appQueryCondition.setType(params.getType());
+        appQueryCondition.setTypes(params.getTypes());
         Rsp<RangedResultSet<AppBuilderAppMetadataDto>> rsp =
                 this.appBuilderAppService.list(appQueryCondition, context, params.getOffset(), params.getLimit());
         return this.appMetadataDtoConvertToAdapter(rsp.getData());
@@ -72,7 +73,7 @@ public class AppBuilderAppServiceAdapterImpl implements AppBuilderAppServiceAdap
                 .excludeNames(params.getExcludeNames())
                 .offset(Long.valueOf(params.getOffset()))
                 .limit(params.getLimit())
-                .type(params.getType())
+                .types(params.getTypes())
                 .build();
     }
 }

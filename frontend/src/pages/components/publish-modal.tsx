@@ -131,7 +131,7 @@ const PublishModal = (props) => {
           if (window.location.href.indexOf('type=chatWorkflow') !== -1) {
             navigate(`/app-develop`);
           } else {
-            navigate(`/plugin`);
+            navigate(`/app-develop`);
           }
         }
       }

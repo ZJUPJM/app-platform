@@ -10,13 +10,13 @@ export const tabItems = [
     key: 'agent',
   },
   {
-    label: i18n.t('AIWorkflow'),
+    label: i18n.t('Chatflow'),
     key: 'chatbot',
   },
-  // {
-  //   label: i18n.t('workflow'),
-  //   key: 'workflow',
-  // }
+  {
+    label: i18n.t('workflow'),
+    key: 'workflow',
+  }
 ]
 export const items = [
   {

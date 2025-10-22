@@ -6,12 +6,12 @@
 
 import React, { useEffect, useState, useImperativeHandle, useRef } from 'react';
 import { Input, Modal, Button, Form, Upload, Spin, Radio, Select } from 'antd';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { Message } from '@/shared/utils/message';
 import { uploadChatFile, updateAppInfo, createAipp, createAgent, templateCreateAipp } from '@/shared/http/aipp';
 import serviceConfig from '@/shared/http/httpConfig';
 import { updateFormInfo } from '@/shared/http/aipp';
-import { fileValidate, queryAppCategories } from '@/shared/utils/common';
+import { fileValidate, queryAppCategories, formEnv } from '@/shared/utils/common';
 import type { RadioChangeEvent } from 'antd';
 import { TENANT_ID } from '../chatPreview/components/send-editor/common/config';
 import { APP_TYPE, APP_BUILT_TYPE, APP_BUILT_CLASSIFICATION } from './common/common';
@@ -38,6 +38,7 @@ const EditModal = (props) => {
   const [form] = Form.useForm();
   const { appId } = useParams();
   const tenantId = TENANT_ID;
+  const navigate = useHistory().push;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [filePath, setFilePath] = useState('');
@@ -95,7 +96,11 @@ const EditModal = (props) => {
 
   const confrimClick = () => {
     if (type === 'add') {
-      handleAddOk();
+      if (applicationType === 'workflow') {
+        createWorkflow();
+      } else {
+        handleAddOk();
+      }
     } else if (type === 'template') {
       templateCreate();
     } else {
@@ -321,6 +326,33 @@ const EditModal = (props) => {
       setAiLoading(false);
     }
   }
+  // 创建工作流
+  const createWorkflow = async () => {
+    try {
+      setLoading(true);
+      const formParams = await form.validateFields();
+      const icon = filePath && `${formEnv() ? '/appbuilder' : '/api/jober'}/v1/api/${tenantId}/file?filePath=${filePath}&fileName=${fileName}`;
+      const res = await createAipp(tenantId, 'df87073b9bc85a48a9b01eccc9afccc3', { 
+        // type: 'app',
+        type: 'waterFlow',
+        name: formParams.name,
+        icon: icon, 
+        description: formParams.description,
+        app_built_type: 'workflow',
+        app_type: formParams.app_type,
+        app_category: 'workflow' 
+      });
+      const aippId = res.data.id;
+      sessionStorage.setItem('add-type', 'plugin');
+      navigate(`/app-develop/${tenantId}/add-flow/${aippId}?type=workFlow`);
+      handleCancel();
+    } catch (error) {
+      Message({ type: 'error', content: error.message || t('createdFailed') });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 应用类型切换方法
   const applicationOnChange = (e: RadioChangeEvent) => {
     setApplicationType(e.target.value);
@@ -378,18 +410,18 @@ const EditModal = (props) => {
                 className='app-edit-btn-box'
               >
                 {/* <Radio.Button value='agent' className='app-edit-btn app-edit-btn-position'> */}
-                <Radio.Button value='agent' className='app-edit-btn'>
+                <Radio.Button value='agent' className='app-edit-btn app-edit-btn-position'>
                   <img src={agent} alt='' className='app-edit-btn-img' />
                   {t('agent')}
                 </Radio.Button>
                 <Radio.Button value='assistant' className='app-edit-btn app-edit-btn-position'>
                   <img src={assistant} alt='' className='app-edit-btn-img' />
-                  {t('AIWorkflow')}
+                  {t('Chatflow')}
                 </Radio.Button>
-                {/* <Radio.Button value='workflow' className='app-edit-btn'>
+                <Radio.Button value='workflow' className='app-edit-btn app-edit-btn-position'>
                   <img src={workflow} alt='' className='app-edit-btn-img' />
                   {t('workflow')}
-                </Radio.Button> */}
+                </Radio.Button>
               </Radio.Group>
             </div>
           </>

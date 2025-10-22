@@ -19,6 +19,8 @@ import modelengine.jade.store.service.support.DeployStatus;
 
 import modelengine.fitframework.annotation.Component;
 
+import java.util.List;
+
 /**
  * Statistics相关服务实现
  *
@@ -44,9 +46,14 @@ public class StatisticsServiceImpl implements StatisticsService {
     public StatisticsDTO getStatistics(OperationContext operationContext) {
         String tenantId = operationContext.getTenantId();
         long appNum = this.appBuilderAppService.getAppCount(tenantId,
-                AppQueryCondition.builder().type(AppTypeEnum.APP.code()).build());
+                AppQueryCondition.builder()
+                        .types(List.of(AppTypeEnum.APP.code(), AppTypeEnum.WORKFLOW.code()))
+                        .build());
         long publishedAppNum = this.appBuilderAppService.getAppCount(tenantId,
-                AppQueryCondition.builder().type(AppTypeEnum.APP.code()).state(AppState.PUBLISHED.getName()).build());
+                AppQueryCondition.builder()
+                        .types(List.of(AppTypeEnum.APP.code(), AppTypeEnum.WORKFLOW.code()))
+                        .state(AppState.PUBLISHED.getName())
+                        .build());
         long formNum = this.appBuilderFormService.countByType(RUNTIME, operationContext.getTenantId());
         int deployedPluginNum = this.pluginService.getPluginsCount(DeployStatus.DEPLOYED);
         int undeployedPluginNum = this.pluginService.getPluginsCount(DeployStatus.UNDEPLOYED);

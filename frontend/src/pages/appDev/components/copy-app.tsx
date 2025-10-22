@@ -15,6 +15,7 @@ import { TENANT_ID } from '@/pages/chatPreview/components/send-editor/common/con
 import UploadImg from '@/components/file-upload';
 import serviceConfig from "@/shared/http/httpConfig";
 import { uploadChatFile } from '@/shared/http/aipp';
+import { APP_BUILT_CLASSIFICATION, APP_BUILT_TYPE } from '@/pages/components/common/common';
 /**
  * 复制应用
  *
@@ -89,7 +90,11 @@ const CopyApp = ({ copyRef }) => {
         const { data } = res;
         setOpen(false);
         Message({ type: 'success', content: t('operationSucceeded') });
-        navigate(`/app-develop/${TENANT_ID}/app-detail/${data.id}/${data.aippId}`);
+        if (appCategory === APP_BUILT_CLASSIFICATION.WORKFLOW) {
+          navigate(`/app-develop/${TENANT_ID}/add-flow/${data.id}?type=workFlow`);
+        } else {
+          navigate(`/app-develop/${TENANT_ID}/app-detail/${data.id}/${data.aippId}`);
+        }
       } else {
         Message({ type: 'error', content: res.msg || t('copyAppFailed') });
       }

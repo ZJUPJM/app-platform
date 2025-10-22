@@ -230,7 +230,7 @@ public class AppImExportUtil {
         if (!TENANT_PATTERN.matcher(app.getTenantId()).matches()) {
             throw new AippException(IMPORT_CONFIG_FIELD_ERROR, "app.tenantId");
         }
-        if (Stream.of(APP_TYPE_SET).noneMatch(type -> StringUtils.equals(type, app.getType()))) {
+        if (Stream.of(APP_TYPE_SET).noneMatch(type -> StringUtils.equals(type, app.getType().toLowerCase()))) {
             throw new AippException(IMPORT_CONFIG_FIELD_ERROR, "app.type");
         }
         if (app.getVersion() == null || !VERSION_PATTERN.matcher(app.getVersion()).matches()) {

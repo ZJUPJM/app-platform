@@ -27,8 +27,9 @@ import java.util.List;
 public class AppQueryCondition {
     private String tenantId;
 
-    @RequestParam(name = "type", required = false, defaultValue = "app")
-    private String type;
+    @RequestParam(name = "types", required = false)
+    @Builder.Default
+    private List<String> types = List.of("app", "waterFlow");
     private List<String> ids;
 
     @RequestParam(name = "name", required = false)

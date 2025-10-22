@@ -64,6 +64,7 @@ import modelengine.jade.service.annotations.SpanAttr;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -77,7 +78,7 @@ import java.util.stream.Collectors;
 @Component
 @RequestMapping(path = "/v1/api/{tenant_id}/app")
 public class AppBuilderAppController extends AbstractController {
-    private static final String DEFAULT_TYPE = "app";
+    private static final List<String> DEFAULT_TYPES = List.of("app", "waterFlow");
     private static final int ERR_CODE = -1;
     private static final String ERR_LOCALE_CODE = "90002920";
     private static final Logger log = Logger.get(AppBuilderAppController.class);
@@ -138,7 +139,7 @@ public class AppBuilderAppController extends AbstractController {
      * @param offset 偏移量。
      * @param limit 每页查询条数。
      * @param cond 查询条件。
-     * @param type 查询类型。
+     * @param types 查询类型。
      * @return 查询结果列表。
      */
     @GetMapping(description = "查询 app 列表")
@@ -146,8 +147,9 @@ public class AppBuilderAppController extends AbstractController {
     public Rsp<RangedResultSet<AppBuilderAppMetadataDto>> list(HttpClassicServerRequest httpRequest,
             @PathVariable("tenant_id") String tenantId, @RequestParam(value = "offset", defaultValue = "0") long offset,
             @RequestParam(value = "limit", defaultValue = "10") int limit, @RequestBean AppQueryCondition cond,
-            @RequestQuery(name = "type", defaultValue = "app") String type) {
-        return this.appService.list(this.buildAppQueryCondition(cond, type), this.contextOf(httpRequest, tenantId), offset, limit);
+            @RequestQuery(name = "type", required = false, defaultValue = "app, waterFlow") String types) {
+        List<String> defaultTypes = Arrays.stream(types.split(",")).map(String::trim).toList();
+        return this.appService.list(this.buildAppQueryCondition(cond, defaultTypes), this.contextOf(httpRequest, tenantId), offset, limit);
     }
 
     /**
@@ -237,7 +239,7 @@ public class AppBuilderAppController extends AbstractController {
         OperationContext context = this.contextOf(request, tenantId);
         if (this.appService.getAppCount(tenantId,
                 this.buildAppQueryCondition(AppQueryCondition.builder().createBy(context.getOperator()).build(),
-                        DEFAULT_TYPE)) >= this.maxAppNum) {
+                        DEFAULT_TYPES)) >= this.maxAppNum) {
             return Rsp.err(ERR_CODE, this.localeService.localize(AppBuilderAppController.ERR_LOCALE_CODE));
         }
         AppVersion appVersion = this.appVersionService.create(appId, dto, context);
@@ -438,7 +440,7 @@ public class AppBuilderAppController extends AbstractController {
     public Rsp<AppBuilderAppDto> importApp(HttpClassicServerRequest httpRequest,
             @PathVariable("tenant_id") String tenantId, PartitionedEntity appConfig) {
         this.fitRuntime.publisherOfEvents().publishEvent(new AppCreatingEvent(this));
-        if (this.appService.getAppCount(tenantId, this.buildAppQueryCondition(new AppQueryCondition(), DEFAULT_TYPE))
+        if (this.appService.getAppCount(tenantId, this.buildAppQueryCondition(new AppQueryCondition(), DEFAULT_TYPES))
                 >= this.maxAppNum) {
             throw new AippException(AippErrCode.TOO_MANY_APPS);
         }
@@ -492,8 +494,8 @@ public class AppBuilderAppController extends AbstractController {
         return Rsp.ok();
     }
 
-    private AppQueryCondition buildAppQueryCondition(AppQueryCondition cond, String type) {
-        cond.setType(type);
+    private AppQueryCondition buildAppQueryCondition(AppQueryCondition cond, List<String> types) {
+        cond.setTypes(types);
         if (cond.getExcludeNames() == null) {
             cond.setExcludeNames(this.excludeNames);
         } else {

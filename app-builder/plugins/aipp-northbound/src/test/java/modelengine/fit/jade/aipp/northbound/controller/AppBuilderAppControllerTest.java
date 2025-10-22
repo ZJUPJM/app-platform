@@ -8,12 +8,11 @@ package modelengine.fit.jade.aipp.northbound.controller;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import modelengine.fit.jane.task.gateway.Authenticator;
-
 import modelengine.fit.http.protocol.Address;
 import modelengine.fit.http.protocol.support.DefaultMessageHeaders;
 import modelengine.fit.http.server.HttpClassicServerRequest;
 import modelengine.fit.http.support.DefaultCookieCollection;
+import modelengine.fit.jane.task.gateway.Authenticator;
 import modelengine.fit.jober.aipp.dto.chat.AppQueryParams;
 import modelengine.fit.jober.aipp.genericable.AppBuilderAppService;
 import modelengine.fit.jober.aipp.genericable.adapter.AppBuilderAppServiceAdapter;
@@ -59,7 +58,7 @@ public class AppBuilderAppControllerTest {
     @DisplayName("当查询用户应用列表时，返回正确结果。")
     void shouldReturnOkWhenGetAppList() {
         AppQueryParams cond =
-                AppQueryParams.builder().name("name").state("state").type("type").offset(1).limit(2).build();
+                AppQueryParams.builder().name("name").state("state").offset(1).limit(2).build();
         Mockito.when(request.headers()).thenReturn(new DefaultMessageHeaders());
         Mockito.when(request.cookies()).thenReturn(new DefaultCookieCollection());
         Mockito.when(request.remoteAddress()).thenReturn(Address.builder().hostAddress("127.0.0.1").port(6666).build());

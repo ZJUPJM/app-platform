@@ -37,7 +37,7 @@
             <when test="cond.appType != null and cond.appType != ''">
                 app_type = #{cond.appType}
             </when>
-            <when test="cond.type != null and cond.type == 'template'">
+            <when test="cond.types != null and cond.types.contains('template')">
                 app_type is not null and app_type != ''
             </when>
             <otherwise>
@@ -91,9 +91,12 @@
         <include refid="Base_Column_List"/>
         from (
             SELECT DISTINCT ON ( "name" ) * FROM app_builder_app where tenant_id = #{tenantId} and is_deleted = 0
-            <if test="cond.type != null">
-                and type = #{cond.type}
-            </if>
+        <if test="cond.types != null and cond.types.size() > 0">
+            and type in
+            <foreach collection="cond.types" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
             <if test="cond.appCategory != null">
                 and app_category = #{cond.appCategory}
             </if>
@@ -152,8 +155,11 @@
             <if test="appSuiteId!=null">
                 and app_suite_id = #{appSuiteId}
             </if>
-            <if test="type!=null">
-                and type = #{type}
+            <if test="types != null and types.size() > 0">
+                and type in
+                <foreach collection="types" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
             </if>
             <if test="ids != null and ids.size() > 0">
                 and id in
@@ -179,8 +185,11 @@
         DISTINCT ON (name) *
         from app_builder_app
         where tenant_id = #{tenantId} and is_deleted = 0
-        <if test="cond.type != null">
-            and type = #{cond.type}
+        <if test="cond.types != null and cond.types.size() > 0">
+            and type in
+            <foreach collection="cond.types" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
         </if>
         <if test="cond.state != null">
             <choose>

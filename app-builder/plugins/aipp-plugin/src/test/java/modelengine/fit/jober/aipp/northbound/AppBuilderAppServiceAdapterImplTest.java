@@ -79,7 +79,7 @@ public class AppBuilderAppServiceAdapterImplTest {
                 .state("active")
                 .offset(100)
                 .limit(20)
-                .type("app")
+                .types(List.of("app"))
                 .build();
         OperationContext operationContext = new OperationContext();
         operationContext.setTenantId("tenantId");

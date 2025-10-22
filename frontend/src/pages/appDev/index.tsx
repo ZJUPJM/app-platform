@@ -48,7 +48,6 @@ const AppDev: React.FC = () => {
   const [search, setSearch] = useState('');
   const [appData, setAppData] = useState([]);
   const [tabs, setTabs] = useState([]);
-  const [typeKey, setTypeKey] = useState('all');
   const [categoryKey, setCategoryKey] = useState('all');
   const [statusKey, setStatusKey] = useState(items[0].key);
   const [statusLabel, setStatusLabel] = useState(items[0].label);
@@ -70,7 +69,6 @@ const AppDev: React.FC = () => {
       offset: (page - 1) * pageSize,
       limit: pageSize,
       name: search || '',
-      app_type: typeKey !== 'all' ? typeKey : null,
       state: statusKey !== 'all' ? statusKey : null,
       app_category: categoryKey !== 'all' ? categoryKey : null
     };
@@ -101,11 +99,6 @@ const AppDev: React.FC = () => {
     setCategoryKey(key);
   };
 
-  // 点击类目tab
-  const handleTypeChange = (id: String) => {
-    setPage(1);
-    setTypeKey(id);
-  }
 
   // 分页change回调方法
   const paginationChange = (curPage: number, curPageSize: number) => {
@@ -128,7 +121,7 @@ const AppDev: React.FC = () => {
         attributes: {
           description: '',
           icon: '',
-          app_type: typeKey !== 'all' ? typeKey : tabs?.[1]?.key,
+          app_type: tabs?.[1]?.key,
         },
       };
     });
@@ -138,8 +131,8 @@ const AppDev: React.FC = () => {
   function addAippCallBack(appId: string, aippId: string, appCategory?: string) {
     if (appCategory && appCategory === 'workflow') {
       navigate({
-        pathname: `/app-develop/${tenantId}/app-detail/${appId}/${aippId}`,
-        search: '?type=chatWorkflow',
+        pathname: `/app-develop/${tenantId}/add-flow/${appId}`,
+        search: '?type=workFlow',
       });
       return;
     }
@@ -233,7 +226,7 @@ const AppDev: React.FC = () => {
   // 获取应用列表
   useEffect(() => {
     queryApps();
-  }, [page, pageSize, search, categoryKey, typeKey, statusKey]);
+  }, [page, pageSize, search, categoryKey, statusKey]);
 
   // 删除弹窗title组件
   const DeleteTitle = () => {
@@ -294,13 +287,6 @@ const AppDev: React.FC = () => {
             />
           </div>
         </div>
-        <Tabs
-          items={tabs}
-          activeKey={typeKey}
-          onChange={(key: string) => handleTypeChange(key)}
-          style={{ width: '100%', textAlign: 'center', margin: '16px 0' }}
-          centered={true}
-        />
         {/* 应用卡片列表 */}
         <Spin spinning={listLoading}>
           <div className='card_list'>
@@ -361,7 +347,7 @@ const AppDev: React.FC = () => {
         tenantId={tenantId}
         addAippCallBack={addAippCallBack}
       ></UploadApp>
-      <TemplateList tempalteRef={tempalteListRef} tabs={tabs}/>
+      <TemplateList tempalteRef={tempalteListRef} tabs={[]}/>
     </div>
   );
 };

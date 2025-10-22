@@ -50,7 +50,7 @@ public class AppQueryParams {
     @Property(description = "每页查询条数")
     private int limit;
 
-    @RequestQuery(name = "type", defaultValue = "app", required = false)
+    @RequestQuery(name = "type", required = false)
     @Property(description = "查询类型")
-    private String type;
+    private List<String> types;
 }

@@ -76,6 +76,6 @@ public class AppExportDto {
      */
     @JsonIgnore
     public String getType() {
-        return ObjectUtils.cast(this.app.getAttributes().getOrDefault("appType", AppTypeEnum.APP.code()));
+        return ObjectUtils.cast(this.app.getAttributes().getOrDefault("type", AppTypeEnum.APP.code()));
     }
 }

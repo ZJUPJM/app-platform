@@ -23,6 +23,7 @@ import userImg from '@/assets/images/ai/user.jpg';
 import WarningIcon from '@/assets/images/warning_icon.svg';
 import PublicCard from './public-card';
 import './style.scoped.scss';
+import { APP_BUILT_CLASSIFICATION } from '@/pages/components/common/common';
 
 /**
  * 应用详情概览组件
@@ -81,12 +82,16 @@ const AppOverview: React.FC = () => {
         const newAppId = res.data.id;
         const aippId = res.data.aippId;
 
-        let url = `/app-develop/${tenantId}/app-detail/${newAppId}`;
-        if (aippId) {
-          url += `/${aippId}`;
-        }
-        if (detail.appCategory === 'workflow') {
-          url += '?type=chatWorkflow';
+        let url;
+        if (detail.appCategory === APP_BUILT_CLASSIFICATION.WORKFLOW) {
+          // workflow类型跳转到工作流编排页面
+          url = `/app-develop/${tenantId}/add-flow/${newAppId}?type=workFlow`;
+        } else {
+          // 其他类型跳转到应用详情页面
+          url = `/app-develop/${tenantId}/app-detail/${newAppId}`;
+          if (aippId) {
+            url += `/${aippId}`;
+          }
         }
 
         navigate(url);
@@ -187,17 +192,19 @@ const AppOverview: React.FC = () => {
             {detail?.attributes?.description}
           </div>
           <Divider style={{ margin: 0, backgroundColor: 'rgb(230, 230, 230)' }} />
-          <div>
-            <div className='remarks-content'>
-              <div className='remarks'>
-                <div className='left'>{t('prologue')}</div>
-                <div className='right'>{opening}</div>
+          {detail.appCategory === APP_BUILT_CLASSIFICATION.WORKFLOW ? null :
+            <div>
+              <div className='remarks-content'>
+                <div className='remarks'>
+                  <div className='left'>{t('prologue')}</div>
+                  <div className='right'>{opening}</div>
+                </div>
               </div>
             </div>
-          </div>
+          }
         </div>
         <div className='detail-card'>
-          <PublicCard url={detail.chatUrl} type='URL' detail={detail}  />
+          {detail.appCategory === APP_BUILT_CLASSIFICATION.WORKFLOW ? null : <PublicCard url={detail.chatUrl} type='URL' detail={detail}  />}
           <PublicCard url={`${process.env.PACKAGE_MODE === 'spa' ? '' : '/api/jober'}`} type='API' auth={readOnly} detail={detail} />
         </div>
       </div>
