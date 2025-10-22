@@ -108,19 +108,25 @@ const Recommends = (props) => {
   useEffect(() => {
     if (chatRunning) {
       refreshRef.current = true;
+    } else if (!chatRunning && refreshRef.current && chatList?.length >= 2 && showRecommend) {
+      // 当对话结束时（chatRunning变为false），自动刷新推荐
+      // 确保至少有一问一答（length >= 2）
+      getRecommendList();
+      refreshRef.current = false;
     }
-  }, [chatRunning]);
+  }, [chatRunning, chatList, showRecommend]);
 
-  // 实时刷新推荐列表
+  // 实时刷新推荐列表（备用逻辑：基于finished字段的触发）
   useEffect(() => {
-    if (chatList?.length > 0 && showRecommend && refreshRef.current) {
+    if (chatList?.length > 0 && showRecommend) {
       let chatItem = chatList[chatList.length - 1];
-      if (chatItem && chatItem.finished && !chatItem.messageType) {
+      // 当对话结束且不是表单类型时，自动刷新推荐列表
+      if (chatItem && chatItem.finished && !chatItem.messageType && refreshRef.current) {
         getRecommendList();
         refreshRef.current = false;
       }
     }
-  }, [chatList]);
+  }, [chatList, showRecommend]);
 
   useEffect(() => {
     return () => {
