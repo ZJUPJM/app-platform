@@ -139,7 +139,7 @@ const AppLayout: React.FC = () => {
 
     try {
       const response: any = await getUsername();
-      if (response && (response.code === 0 || response.code === 200) && response.username) {
+      if (response && response.username) {
         setApiUsername(response.username);
         // 缓存到localStorage
         localStorage.setItem('apiUsername', response.username);
