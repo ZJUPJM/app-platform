@@ -190,10 +190,9 @@ const ToolDrawer = (props) => {
     });
   };
 
-  // 创建跳转到插件
+  // 跳转到创建HTTP插件
   const onClickCreate = () => {
-    sessionStorage.setItem('pluginType', 'plugin');
-    navigate(`/plugin`);
+    navigate(`/http`);
   };
 
   // 获取智能体数据
