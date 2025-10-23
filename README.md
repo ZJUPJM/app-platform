@@ -224,11 +224,11 @@ fit debug
 
 ```
 "dependencies": {
-    "@fit-elsa/elsa-core": "file:${fitElsaCoreUrl}",
-    "@fit-elsa/elsa-react": "file:${fitElsaReactUrl}",
+    "@fit-elsa/elsa": "file:${fitElsaCoreUrl}",
+    "@fit-elsa/agent-flow": "file:${fitElsaReactUrl}",
 ```
 
-将 `${fitElsaCoreUrl}` 和 `${fitElsaReactUrl}` 分别改成 `ELSA` 框架编译产物 `fit-elsa-core` 和 `fit-react` 的目录地址即可。
+将 `${fitElsaCoreUrl}` 和 `${fitElsaReactUrl}` 分别改成 `ELSA` 框架编译产物 `fit-elsa` 和 `fit-react` 的目录地址即可。
 
 **修改代理文件**
 

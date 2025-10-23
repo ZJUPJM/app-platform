@@ -21,7 +21,7 @@ import { updateChatId } from '@/shared/utils/common';
 import { setAtChatId } from '@/store/chatStore/chatStore';
 import { isChatRunning } from '@/shared/utils/chat';
 import { convertImgPath } from '@/common/util';
-import { createGraphOperator } from '@fit-elsa/elsa-react';
+import { createGraphOperator } from '@fit-elsa/agent-flow';
 import { get, cloneDeep } from 'lodash';
 import TimeLineDrawer from '@/components/timeLine';
 import PublishModal from './publish-modal';

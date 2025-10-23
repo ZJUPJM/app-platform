@@ -14,7 +14,7 @@ import React, {
 } from 'react';
 import {Alert, Button, Spin} from 'antd';
 import {useParams} from 'react-router-dom';
-import {JadeFlow} from '@fit-elsa/elsa-react';
+import {JadeFlow} from '@fit-elsa/agent-flow';
 import {validate} from '../utils';
 import AddKnowledge from '../../configForm/configUi/components/add-knowledge';
 import HuggingFaceModal from './hugging-face-modal';
