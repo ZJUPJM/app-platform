@@ -839,7 +839,7 @@ const ChatPreview = (props) => {
     >
       <Spin spinning={loading}>
         <span className='icon-back' onClick={previewBack}>
-          {showElsa && <LeftArrowIcon />}
+          {showElsa && !(location.pathname.includes('/app/') && location.pathname.includes('/chat/')) && <LeftArrowIcon />}
         </span>
         <div
           className={`${setSpaClassName('chat-inner')} ${!detailPage ? setSpaClassName('chat-page-inner') : ''}`}

@@ -110,7 +110,7 @@ export const routeList: MenuItem[] = [
   },
   {
     key: '/tools',
-    icon: Icons.app({}),
+    icon: Icons.tools({}),
     label: i18n.t('tools'), // 工具
     component: Plugin,
     children: [

@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button, Modal, Spin } from 'antd';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { getAppInfo, getPublishAppId, getPreviewAppInfo } from '@/shared/http/aipp';
 import {
   setAppId,
@@ -44,6 +44,7 @@ import WrongAddress from '@/pages/chatRunning/wrong-address';
 const ChatRunning = () => {
   const { t } = useTranslation();
   const history = useHistory();
+  const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
@@ -251,18 +252,21 @@ const ChatRunning = () => {
           {isPreview ? (
             <Login login={login} />
           ) : (
-            <div className='chat-running-chat'>
-              <Button
-                className='chat-btn-back'
-                size='small'
-                type='text'
-                style={{ margin: '6px 12px' }}
-                onClick={handleBack}
-              >
-                {t('return')}
-              </Button>
-              {plugin ? null : <span className='running-app-name'>{appInfo.name}</span>}
-            </div>
+            // 应用聊天页面不显示返回按钮和应用名称
+            !(location.pathname.includes('/app/') && location.pathname.includes('/chat/')) && (
+              <div className='chat-running-chat'>
+                <Button
+                  className='chat-btn-back'
+                  size='small'
+                  type='text'
+                  style={{ margin: '6px 12px' }}
+                  onClick={handleBack}
+                >
+                  {t('return')}
+                </Button>
+                {plugin ? null : <span className='running-app-name'>{appInfo.name}</span>}
+              </div>
+            )
           )}
           <CommonChat pluginName={pluginName} />
           <Modal

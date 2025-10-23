@@ -33,6 +33,7 @@ const ChatDetail = ({ showMask = false }) => {
   const location = useLocation();
   let modalRef = useRef<any>();
   const isHomepage = location.pathname.includes('home');
+  const isAppChatPage = location.pathname.includes('/app/') && location.pathname.includes('/chat/');
   const addApp = () => {
     setModalInfo(() => {
       modalRef.current.showModal();
@@ -60,7 +61,7 @@ const ChatDetail = ({ showMask = false }) => {
   }, [appInfo]);
   return <>{(
     <div className='chat-details-content'>
-      {appInfo?.name ? (isHomepage ? (
+      {appInfo?.name ? (isHomepage || isAppChatPage ? (
         <></>
         // <div className='home-top'>
         //   <div className='head-inner'>

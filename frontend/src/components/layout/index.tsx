@@ -25,7 +25,9 @@ import { Provider } from 'react-redux';
 import { KnowledgeIcons } from '../icons/index';
 import AidoIcon from '../../assets/images/aido-icon.png';
 import CollapseIcon from '../../assets/svg/collapse-icon.svg';
+import knowledgeBase from '@/assets/images/knowledge/knowledge-base.png';
 import { store } from '@/store';
+import { convertImgPath } from '@/common/util';
 import { setSpaClassName, updateChatId } from '@/shared/utils/common';
 import { getUser, getOmsUser, getRole, getChatPluginList } from '../../pages/helper';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
@@ -46,10 +48,15 @@ type MenuItem = Required<MenuProps>['items'][number];
 // 根据当前路由过滤菜单项
 const getFilteredMenus = (routeList: any[], currentPath: string): any[] => {
   const filteredMenus = routeList.map((route) => {
-    // 在 /chat/* 路由下隐藏"探索"和"工作台"
-    if (currentPath.includes('/chat/') && !currentPath.includes('/app/')) {
-      if (route.key === '/app' || route.key === '/app-develop') {
-        return null; // 隐藏这些菜单项
+    // 判断是否是应用聊天页面：/app/{tenantId}/chat/{appId}
+    const isAppChatPage = currentPath.includes('/app/') && currentPath.includes('/chat/');
+    // 判断是否是独立聊天页面：/chat/*（不含 /app/）
+    const isChatPage = currentPath.includes('/chat/') && !currentPath.includes('/app/');
+    
+    // 聊天相关页面下不显示"探索"、"工作台"、"工具"
+    if (isAppChatPage || isChatPage) {
+      if (route.key === '/app' || route.key === '/app-develop' || route.key === '/tools') {
+        return null;
       }
     }
 
@@ -118,10 +125,12 @@ const AppLayout: React.FC = () => {
     // 初始化时从localStorage加载缓存的用户名
     return localStorage.getItem('apiUsername') || '';
   });
+  const [appIconPath, setAppIconPath] = useState('');
   const navigate = useHistory().push;
   const location = useLocation();
   const dispatch = useAppDispatch();
   const appId = useAppSelector((state) => state.appStore.appId);
+  const appInfo = useAppSelector((state) => state.appStore.appInfo);
   const isGuest = useAppSelector((state) => state.appStore.isGuest);
   const { t } = useTranslation();
   const guestName = useGuestName();
@@ -217,10 +226,14 @@ const AppLayout: React.FC = () => {
   const menuClick = (e: any) => {
     // 如果是新对话菜单项，需要清空聊天状态和选中状态
     if (e.key === '/home') {
-      // 根据当前路由判断处理方式
-      if (location.pathname.includes('/chat/') && !location.pathname.includes('/app/')) {
-        // 在 /chat/* 路由下，只清空聊天相关状态，保留应用信息
-        console.log('在 /chat/* 路由下创建新对话，保持在当前路由');
+      // 判断是否是应用聊天页面：/app/{tenantId}/chat/{appId}
+      const isAppChatPage = location.pathname.includes('/app/') && location.pathname.includes('/chat/');
+      // 判断是否是独立聊天页面：/chat/*（不含 /app/）
+      const isChatPage = location.pathname.includes('/chat/') && !location.pathname.includes('/app/');
+      
+      if (isAppChatPage || isChatPage) {
+        // 在聊天相关页面下创建新对话，不跳转
+        console.log('在聊天页面创建新对话，保持在当前路由');
 
         // 只清空聊天相关的状态，不清空应用信息
         dispatch(setChatRunning(false));
@@ -251,10 +264,10 @@ const AppLayout: React.FC = () => {
         // 清空菜单选中状态
         setDefaultActive([]);
 
-        // 不跳转路由，保持在当前 /chat/* 路由
+        // 不跳转路由，保持在当前页面
         return;
       } else {
-        // 在其他路由下（如 /home），清空所有状态并跳转到 /home
+        // 在其他路由下（如 /home、/app 市场页），清空所有状态并跳转到 /home
         dispatch(setChatRunning(false));
         dispatch(setChatId(null));
         dispatch(setChatList([]));
@@ -368,6 +381,17 @@ const AppLayout: React.FC = () => {
     }
   }, [])
 
+  // 获取应用图标
+  useEffect(() => {
+    if (appInfo?.attributes?.icon) {
+      convertImgPath(appInfo.attributes.icon, isGuest).then((res: any) => {
+        setAppIconPath(res || '');
+      });
+    } else {
+      setAppIconPath('');
+    }
+  }, [appInfo?.attributes?.icon, isGuest]);
+
   // 当显示用户信息时，确保获取用户名
   useEffect(() => {
     if (shouldShowUserInfo() && !apiUsername) {
@@ -389,17 +413,64 @@ const AppLayout: React.FC = () => {
             >
               <div className='layout-sider-header'>
                 <div className='layout-sider-content'>
-                  <img
-                    style={{width: '44px', height: '44px', objectFit: 'contain', cursor: 'pointer'}}
-                    src={AidoIcon}
-                    alt="Aido Icon"
-                    className={`project-icon ${isCollapsed ? 'collapsed' : ''}`}
-                    onClick={() => {
-                      if (isCollapsed) {
-                        setIsCollapsed(false);
-                      }
-                    }}
-                  />
+                  {location.pathname.includes('/app/') && location.pathname.includes('/chat/') && appInfo?.name ? (
+                    // 应用聊天页面
+                    isCollapsed ? (
+                      // 折叠时只显示应用图标
+                      <img
+                        style={{width: '44px', height: '44px', objectFit: 'contain', cursor: 'pointer', borderRadius: '4px'}}
+                        src={appIconPath || knowledgeBase}
+                        alt="App Icon"
+                        className='project-icon collapsed'
+                        onClick={() => setIsCollapsed(false)}
+                      />
+                    ) : (
+                      // 展开时显示应用图标 + 名称
+                      <div className='app-name-header' style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        overflow: 'hidden',
+                        cursor: 'default'
+                      }}>
+                        <img 
+                          src={appIconPath || knowledgeBase} 
+                          alt="App Icon"
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            
+                            objectFit: 'contain',
+                            borderRadius: '4px',
+                            flexShrink: 0
+                          }}
+                        />
+                        <span style={{
+                          fontSize: '16px',
+                          fontWeight: 500,
+                          color: '#000',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {appInfo.name}
+                        </span>
+                      </div>
+                    )
+                  ) : (
+                    // 其他页面显示 AidoIcon
+                    <img
+                      style={{width: '44px', height: '44px', objectFit: 'contain', cursor: 'pointer'}}
+                      src={AidoIcon}
+                      alt="Aido Icon"
+                      className={`project-icon ${isCollapsed ? 'collapsed' : ''}`}
+                      onClick={() => {
+                        if (isCollapsed) {
+                          setIsCollapsed(false);
+                        }
+                      }}
+                    />
+                  )}
                 </div>
                 <img
                   src={CollapseIcon}
