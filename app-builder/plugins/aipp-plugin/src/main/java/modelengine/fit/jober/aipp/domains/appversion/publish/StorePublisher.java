@@ -87,6 +87,7 @@ public class StorePublisher implements Publisher {
         itemData.setTags(Set.of(appCategory.getTag()));
         itemData.setRunnables(this.buildRunnables(context, appVersion));
         itemData.setUserGroupId(context.getPublishData().getUserGroupId());
+        itemData.setAppCategory(appVersion.getData().getAppCategory());
         return itemData;
     }
 
