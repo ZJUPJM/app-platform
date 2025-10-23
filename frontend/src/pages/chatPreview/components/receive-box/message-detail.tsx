@@ -348,7 +348,8 @@ const MessageBox = (props: any) => {
       output += '</div>';
     };
     if (!hasStepContent) {
-      return str
+      // 对智能体输出也进行 markdown 处理
+      return markedProcess(str);
     }
     return setClosureLabel(output);
   }
@@ -359,7 +360,8 @@ const MessageBox = (props: any) => {
     const match = str.match(regex);
     setStepContent(str.replace(regex, ''));
     if (match && match[1]) {
-      return match[1].trim();
+      // 对智能体的最终输出也进行 markdown 处理
+      return markedProcess(match[1].trim());
     } else {
       return '';
     }
@@ -370,7 +372,8 @@ const MessageBox = (props: any) => {
     if (msgType === 'META_MSG' || chatReference) {
       setReplacedNodes(renderWithReferences(finalContent));
     } else {
-      setReplacedNodes(<span dangerouslySetInnerHTML={{ __html: finalContent }} />);
+      const htmlContent = markedProcess(finalContent);
+      setReplacedNodes(<span dangerouslySetInnerHTML={{ __html: htmlContent }} />);
     }
   }, [answerContent, renderWithReferences, msgType, chatReference]);
 
