@@ -17,7 +17,12 @@ import java.net.URISyntaxException;
  * @author 宋永坦
  * @since 2025-07-11
  */
-public class McpUtils {
+public final class McpUtils {
+
+    private McpUtils() {
+        // 工具类，禁止实例化
+    }
+
     /**
      * 获取 {@code baseUrl} 部分。
      *
