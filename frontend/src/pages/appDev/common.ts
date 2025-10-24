@@ -12,10 +12,6 @@ export const tabItems = [
   {
     label: i18n.t('Chatflow'),
     key: 'chatbot',
-  },
-  {
-    label: i18n.t('workflow'),
-    key: 'workflow',
   }
 ]
 export const items = [

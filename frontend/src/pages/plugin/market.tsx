@@ -4,7 +4,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Tabs, Input, Tag, Button, Spin } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import Pagination from '@/components/pagination/index';
@@ -13,7 +13,7 @@ import WorkflowCard from '@/components/plugin-card/workFlowCard';
 import { getPlugins, getPluginWaterFlow } from '@/shared/http/plugin';
 import { Icons } from '@/components/icons';
 import { PluginCardTypeE, sourceTabs } from './helper';
-import { debounce } from '@/shared/utils/common';
+import { debounce, queryAppCategories } from '@/shared/utils/common';
 import { Message } from '@/shared/utils/message';
 import UploadToolDrawer from './upload/uploadTool';
 import EmptyItem from '@/components/empty/empty-item';
@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '@/store/hook';
 import { useHistory } from 'react-router-dom';
 import CreateWorkfowDrawer from './upload/createWorkflow';
+import EditModal from '@/pages/components/edit-modal';
 import CreateImg from '@/assets/images/ai/create.png';
 import TemplateImg from '@/assets/images/ai/create2.png';
 import ImportImg from '@/assets/images/ai/import.png';
@@ -42,6 +43,9 @@ const MarketItems = ({ reload, readOnly, hideHeader = false, keyword, externalUp
   const history = useHistory().push;
   const [openCreateDrawer, setOpenCreateDrawer] = useState(0);
   const currentUser = localStorage.getItem('currentUser') || '';
+  const modalRef = useRef<any>();
+  const [modalInfo, setModalInfo] = useState({});
+  const [tabs, setTabs] = useState([]);
 
   useEffect(() => {
     if (selectedSourceProp && selectedSourceProp !== selectedSource) {
@@ -154,6 +158,15 @@ const MarketItems = ({ reload, readOnly, hideHeader = false, keyword, externalUp
     }
   }, [externalUploadTrigger]);
 
+  // 初始化获取应用分类
+  useEffect(() => {
+    const fetchTab = async () => {
+      const newTab = await queryAppCategories(tenantId, false);
+      setTabs(newTab);
+    };
+    fetchTab();
+  }, []);
+
   // tabs切换回调
   const tabsOnChange = (key:string) =>{
     onChangeSelected ? onChangeSelected(key) : setSelectedSource(key);
@@ -176,6 +189,31 @@ const MarketItems = ({ reload, readOnly, hideHeader = false, keyword, externalUp
     setIsOpenPlugin(Date.now());
   };
 
+  // 创建工具流
+  const createWorkflow = () => {
+    setModalInfo(() => {
+      modalRef.current.showModal();
+      return {
+        name: '',
+        attributes: {
+          description: '',
+          icon: '',
+          app_type: tabs?.[1]?.key,
+        },
+      };
+    });
+  };
+
+  // 应用添加成功回调
+  function addAippCallBack(appId: string, aippId: string, appCategory?: string) {
+    if (appCategory && appCategory === 'workflow') {
+      history({
+        pathname: `/app-develop/${tenantId}/add-flow/${appId}`,
+        search: '?type=workFlow',
+      });
+      return;
+    }
+  }
 
   // 部署插件
   const deployPlugins = () => {
@@ -216,7 +254,7 @@ const MarketItems = ({ reload, readOnly, hideHeader = false, keyword, externalUp
         {selectedSource === 'MCP' ? (
           /* MCP标签页 - 使用MCPServiceManager组件 */
           <MCPServiceManager />
-        ) : (selectedSource === 'HTTP' || selectedSource === 'CUSTOM') ? (
+        ) : (selectedSource === 'HTTP' || selectedSource === 'CUSTOM' || selectedSource === 'WATERFLOW') ? (
           <>
             {/* 操作栏 - 只在自定义插件时显示部署按钮 */}
             {selectedSource === 'CUSTOM' && !readOnly && (
@@ -231,11 +269,17 @@ const MarketItems = ({ reload, readOnly, hideHeader = false, keyword, externalUp
               {!readOnly && (
                 <div 
                   className='card_box card_box_add create-card' 
-                  onClick={selectedSource === 'HTTP' ? createHttpTool : createCustomPlugin}
+                  onClick={
+                    selectedSource === 'HTTP' ? createHttpTool : 
+                    selectedSource === 'CUSTOM' ? createCustomPlugin : 
+                    createWorkflow
+                  }
                 >
                   <div className='create-plus'>+</div>
                   <div className='create-text'>
-                    {selectedSource === 'HTTP' ? '添加Http工具' : '添加自定义插件'}
+                    {selectedSource === 'HTTP' ? '添加Http工具' : 
+                     selectedSource === 'CUSTOM' ? '添加自定义插件' : 
+                     '创建工具流'}
                   </div>
                 </div>
               )}
@@ -304,6 +348,13 @@ const MarketItems = ({ reload, readOnly, hideHeader = false, keyword, externalUp
         )}
       </Spin>
       <CreateWorkfowDrawer openSignal={openCreateDrawer} />
+      <EditModal
+        type='add'
+        modalRef={modalRef}
+        appInfo={modalInfo}
+        addAippCallBack={addAippCallBack}
+        fixedWorkflow={true}
+      />
     </div>
   );
 };

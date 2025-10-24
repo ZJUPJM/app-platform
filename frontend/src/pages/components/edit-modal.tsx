@@ -34,7 +34,7 @@ const { TextArea } = Input;
 const { AIPP_URL } = serviceConfig;
 const EditModal = (props) => {
   const { t } = useTranslation();
-  const { modalRef, appInfo, updateAippCallBack, type, addAippCallBack } = props;
+  const { modalRef, appInfo, updateAippCallBack, type, addAippCallBack, fixedWorkflow } = props;
   const [form] = Form.useForm();
   const { appId } = useParams();
   const tenantId = TENANT_ID;
@@ -46,7 +46,9 @@ const EditModal = (props) => {
   const [showImg, setShowImg] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [appBuiltType, setAppBuiltType] = useState(APP_BUILT_TYPE.WORK_FLOW);
-  const [applicationType, setApplicationType] = useState(APP_BUILT_CLASSIFICATION.ASSISTANT);
+  const [applicationType, setApplicationType] = useState(
+    fixedWorkflow ? APP_BUILT_CLASSIFICATION.WORKFLOW : APP_BUILT_CLASSIFICATION.ASSISTANT
+  );
   const [types, setTypes] = useState([]);
   const inputData = useRef<any>({});
   const graphOperator = useRef<any>({});
@@ -59,6 +61,10 @@ const EditModal = (props) => {
   useEffect(() => {
     if (isModalOpen && !types.length) {
       getTypes();
+    }
+    // 如果是固定工具流模式，设置应用类型为 workflow
+    if (fixedWorkflow && isModalOpen) {
+      setApplicationType(APP_BUILT_CLASSIFICATION.WORKFLOW);
     }
     if (isTemplate) {
       setFilePath(appInfo.icon);
@@ -399,7 +405,7 @@ const EditModal = (props) => {
           </Button>,
         ]}
       >
-        {type && !isTemplate && (
+        {type && !isTemplate && !fixedWorkflow && (
           <>
             <div style={{ marginBottom: '4px', fontSize: '12px' }}>{t('applicationType')}</div>
             <div className='app-edit-modal'>
