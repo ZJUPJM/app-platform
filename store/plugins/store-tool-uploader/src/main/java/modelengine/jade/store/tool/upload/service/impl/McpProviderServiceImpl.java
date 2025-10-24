@@ -18,7 +18,7 @@ import modelengine.fel.tool.model.transfer.DefinitionGroupData;
 import modelengine.fel.tool.model.transfer.ToolData;
 import modelengine.fel.tool.model.transfer.ToolGroupData;
 import modelengine.fit.jade.aipp.domain.division.service.DomainDivisionService;
-import modelengine.fit.jober.aipp.util.McpUtils;
+import modelengine.jade.store.tool.upload.util.McpUtils;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.annotation.Value;
 import modelengine.fitframework.log.Logger;
