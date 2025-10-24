@@ -39,7 +39,7 @@ const SkillList = (props) => {
         window.open(`${location.origin}/${setLocationUrl()}/app-develop/${tenantId}/app-detail/flow-detail/${item.appId}`);
       }
     } else {
-      window.open(`${location.origin}/${setLocationUrl()}/plugin/detail/${item.pluginId}`);
+      window.open(`${location.origin}/${setLocationUrl()}/tools/detail/${item.pluginId}`);
     }
   }
 

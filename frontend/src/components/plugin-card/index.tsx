@@ -52,7 +52,7 @@ const PluginCard = ({ pluginData, cardType, getPluginList, pluginId, pluginRoot,
   ]
   // 插件点击详情
   const pluginCardClick = () => {
-    pluginRoot ? navigate(`/plugin/detail/${pluginId}`) : setIsShow(true);
+    pluginRoot ? navigate(`/tools/detail/${pluginId}`) : setIsShow(true);
   };
   
   // 测试连接

@@ -69,16 +69,12 @@ const ToolDrawer = (props) => {
   const [pluginCategory, setPluginCategory] = useState('mine');
 
   useEffect(() => {
-    if (selectedSourceTab === 'WATERFLOW') {
-      getWaterFlowList();
-      return;
-    }
     if(chatbotPluginCategories.includes(selectedSourceTab)){
       getChatbotInfo(selectedSourceTab);
       return
     }
-    showModal && getPluginList();
-  }, [props.showModal, pageNum, pageSize, activeKey, selectedSourceTab]);
+    showModal && (pluginCategory === 'mine' ? getPluginList(currentUser) : getPluginList(null));
+  }, [props.showModal, pageNum, pageSize, activeKey, selectedSourceTab, pluginCategory, currentUser]);
   useEffect(() => {
     type === 'addSkill' && (checkedList.current = JSON.parse(JSON.stringify(checkData)));
   }, [props.checkData]);
@@ -90,7 +86,7 @@ const ToolDrawer = (props) => {
   };
 
   // 获取插件列表
-  const getPluginList = async () => {
+  const getPluginList = async (creator) => {
     let extrasParams = '';
     let params: any = {
       name: searchName?.current,
@@ -98,9 +94,14 @@ const ToolDrawer = (props) => {
       pageSize,
       isDeployed: true,
     };
+    extrasParams = 'excludeTags=BASIC';
+    if (creator != null) {
+      params.creator = creator;
+    }
     if (selectedSourceTab === 'APP') {
       params.excludeTags = selectedSourceTab;
-      extrasParams = 'excludeTags=BASIC';
+    } else if (selectedSourceTab === 'CUSTOM') {
+      extrasParams = 'excludeTags=HTTP&excludeTags=MCP&excludeTags=WATERFLOW&excludeTags=BASIC';
     } else {
       params.includeTags = selectedSourceTab;
     }
@@ -150,7 +151,7 @@ const ToolDrawer = (props) => {
   const filterByName = (value: string) => {
     searchName.current = value.trim();
     setPageNum(1);
-    getPluginList();
+    getPluginList(null);
   };
   const handleSearch = debounce(filterByName, 1000);
   // 添加插件
@@ -215,7 +216,6 @@ const ToolDrawer = (props) => {
   const onClickMine = ()=>{
     setPluginCategory('mine');
     setSelectedSourceTab(minePluginCategories[0].key);
-    getPluginList();
   }
 
   // 点击切换左侧菜单
@@ -233,7 +233,7 @@ const ToolDrawer = (props) => {
     switch (imgName) {
       case 'APP':
         return All;
-      case 'TOOL':
+      case 'CUSTOM':
         return Tool;
       case 'HTTP':
         return Http;
@@ -247,7 +247,7 @@ const ToolDrawer = (props) => {
         return Chatbot;
       case 'AGENT':
         return Agent;
-      case 'WORKFLOW':
+      case 'WATERFLOW':
         return Workflow;
       default:
         break;

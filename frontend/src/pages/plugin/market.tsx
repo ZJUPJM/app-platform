@@ -97,7 +97,7 @@ const MarketItems = ({ reload, readOnly, hideHeader = false, keyword, externalUp
       params.includeTags = selectedSource;
     }
     setLoading(true);
-    const excludeTags = selectedSource === 'CUSTOM' ? 'excludeTags=HTTP&excludeTags=MCP' : '';
+    const excludeTags = selectedSource === 'CUSTOM' ? 'excludeTags=HTTP&excludeTags=MCP&excludeTags=WATERFLOW' : '';
     getPlugins(params, excludeTags).then(({ data, total }) => {
       setTotal(total);
       setPluginData(data || []);

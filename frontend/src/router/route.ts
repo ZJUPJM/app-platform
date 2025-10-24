@@ -115,14 +115,14 @@ export const routeList: MenuItem[] = [
     component: Plugin,
     children: [
       {
-        key: '/plugin/detail/:pluginId',
+        key: '/tools/detail/:pluginId',
         icon: Icons.app({}),
         label: i18n.t('pluginDetails'),
         component: PlugeDetail,
         hidden: true,
       },
       {
-        key: '/plugin/detail-flow/:pluginId',
+        key: '/tools/detail-flow/:pluginId',
         icon: Icons.app({}),
         label: i18n.t('pluginDetails2'),
         component: PlugeFlowDetail,

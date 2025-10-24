@@ -12,12 +12,12 @@ import { getPluginDetail } from '@/shared/http/plugin';
 import { PluginCardTypeE } from '../helper';
 import { useAppSelector } from '@/store/hook';
 import { useTranslation } from 'react-i18next';
+import GoBack from '@/components/go-back/GoBack';
 import PluginCard from '@/components/plugin-card';
 import EmptyItem from '@/components/empty/empty-item';
 import DeployMent from '../deployment';
 import userImg from '@/assets/images/ai/user.jpg';
 import knowledgeImg from '@/assets/images/knowledge/plugin.png';
-import leftArrowImg from '@/assets/images/ai/left-arrow.png';
 import '../styles/plugin.scss';
 
 /**
@@ -63,15 +63,12 @@ const PliginList = (props) => {
       <div className={`${setSpaClassName('app-fullpage')} plugin-detail`}>
         <div className='aui-header-1 '>
           <div className='aui-title-1'>
-            {t('pluginManagement')}
+            <GoBack path={'/tools'} title={t('pluginDetail')} />
             { process.env.PACKAGE_MODE === 'spa' && <QuestionCircleOutlined onClick={onlineHelp} style={{ marginLeft: '8px', fontSize: '18px' }} />}
           </div>
         </div>
         <div className='plugin-detail-list'>
           <div className='list-head'>
-            <div className='list-back-icon flex'>
-              <img src={leftArrowImg} onClick={() => window.history.back()} />
-            </div>
             <div className='list-detail-img flex'>
               <img src={knowledgeImg} />
             </div>

@@ -216,6 +216,7 @@
   "deployment": "Deploying",
   "notDeployed": "Undeployed",
   "pluginManagement": "Tools",
+  "pluginDetail": "Tool Details",
   "viewInspirations": "View inspirations",
   "chatWith": "Talking with",
   "return": "Back",
