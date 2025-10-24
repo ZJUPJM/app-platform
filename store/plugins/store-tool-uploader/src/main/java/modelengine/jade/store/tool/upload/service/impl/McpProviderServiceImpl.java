@@ -326,7 +326,7 @@ public class McpProviderServiceImpl implements McpProviderService {
             extensions.put("tags", Arrays.asList(MCP));
             toolData.setExtensions(extensions);
             
-            Map<String, String> runnables = new HashMap<>();
+            Map<String, Object> runnables = new HashMap<>();
             runnables.put(MCP, "mcp-tool-" + tool.getName());
             toolData.setRunnables(runnables);
             
