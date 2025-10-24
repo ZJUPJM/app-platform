@@ -88,8 +88,8 @@ const Apps: React.FC = () => {
       pageNum: currentPage,
       pageSize,
       name: search,
-      includeTags: ['APP'],
-      excludeTags: ['BUILTIN']
+      includeTags: 'APP',
+      excludeTags: 'BUILTIN'
     };
     
     const apiCall = queryAppsApi;
