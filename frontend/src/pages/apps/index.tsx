@@ -118,12 +118,19 @@ const Apps: React.FC = () => {
       if (res.code === 0) {
         const { data, total } = res;
         
+        // 前端二次过滤：排除包含 BUILTIN 标签的应用
+        const filteredData = data.filter((item: any) => {
+          return !item.tags || !item.tags.includes('BUILTIN');
+        });
+        
+        console.log('过滤前数据量:', data.length, '过滤后数据量:', filteredData.length);
+        
         if (isLoadMore) {
           // 累积加载数据
           setAppData(prev => {
-            const newData = [...prev, ...data];
+            const newData = [...prev, ...filteredData];
             // 如果返回的数据为空，说明没有更多数据了
-            if (data.length === 0) {
+            if (filteredData.length === 0) {
               setHasMore(false);
             } else {
               // 检查是否还有更多数据
@@ -133,10 +140,10 @@ const Apps: React.FC = () => {
           });
         } else {
           // 重新加载数据
-          setAppData([...data]);
+          setAppData([...filteredData]);
           setTotal(total);
           // 如果返回的数据为空或少于pageSize，说明没有更多数据了
-          setHasMore(data.length >= pageSize && data.length < total);
+          setHasMore(filteredData.length >= pageSize && filteredData.length < total);
         }
       }
     } finally {
