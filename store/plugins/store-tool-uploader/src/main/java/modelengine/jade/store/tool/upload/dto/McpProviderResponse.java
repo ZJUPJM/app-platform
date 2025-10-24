@@ -6,6 +6,8 @@
 
 package modelengine.jade.store.tool.upload.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 import java.util.Map;
 
@@ -16,23 +18,58 @@ import java.util.Map;
  * @since 2025-10-24
  */
 public class McpProviderResponse {
+    @JsonProperty("id")
     private String id;
+    
+    @JsonProperty("author")
     private String author;
+    
+    @JsonProperty("name")
     private String name;
+    
+    @JsonProperty("plugin_id")
     private String pluginId;
+    
+    @JsonProperty("plugin_unique_identifier")
     private String pluginUniqueIdentifier;
+    
+    @JsonProperty("description")
     private Map<String, String> description;
+    
+    @JsonProperty("label")
     private Map<String, String> label;
+    
+    @JsonProperty("type")
     private String type;
+    
+    @JsonProperty("team_credentials")
     private Map<String, Object> teamCredentials;
+    
+    @JsonProperty("is_team_authorization")
     private Boolean isTeamAuthorization;
+    
+    @JsonProperty("allow_delete")
     private Boolean allowDelete;
+    
+    @JsonProperty("tools")
     private List<McpToolInfo> tools;
+    
+    @JsonProperty("labels")
     private List<String> labels;
+    
+    @JsonProperty("server_url")
     private String serverUrl;
+    
+    @JsonProperty("updated_at")
     private Long updatedAt;
+    
+    @JsonProperty("server_identifier")
     private String serverIdentifier;
+    
+    @JsonProperty("timeout")
     private Integer timeout;
+    
+    @JsonProperty("sse_read_timeout")
     private Integer sseReadTimeout;
 
     /**
