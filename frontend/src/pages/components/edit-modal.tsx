@@ -154,6 +154,9 @@ const EditModal = (props) => {
   };
 
   const getTitle = () => {
+    if (fixedWorkflow && type === 'add') {
+      return t('createWorkflow');
+    }
     switch (type) {
       case 'add':
         return t('ceateBlankApplication')
@@ -338,6 +341,8 @@ const EditModal = (props) => {
       setLoading(true);
       const formParams = await form.validateFields();
       const icon = filePath && `${formEnv() ? '/appbuilder' : '/api/jober'}/v1/api/${tenantId}/file?filePath=${filePath}&fileName=${fileName}`;
+      // 如果是固定工具流模式，使用默认的 app_type（从 appInfo 中获取或使用 types 的第一个）
+      const appType = fixedWorkflow ? (appInfo.attributes?.app_type || types?.[0]?.key) : formParams.app_type;
       const res = await createAipp(tenantId, 'df87073b9bc85a48a9b01eccc9afccc3', { 
         // type: 'app',
         type: 'waterFlow',
@@ -345,7 +350,7 @@ const EditModal = (props) => {
         icon: icon, 
         description: formParams.description,
         app_built_type: 'workflow',
-        app_type: formParams.app_type,
+        app_type: appType,
         app_category: 'workflow' 
       });
       const aippId = res.data.id;
@@ -434,58 +439,60 @@ const EditModal = (props) => {
         )}
         <div>
           <Form form={form} layout='vertical' autoComplete='off' className='edit-form-content'>
-            {applicationType !== APP_BUILT_CLASSIFICATION.AGENT && (
-              <div>
-                <Form.Item label={t('icon')} name='icon'>
-                  <div className='avatar'>
-                    <Upload
-                      beforeUpload={beforeUpload}
-                      onChange={onChange}
-                      showUploadList={false}
-                      accept='.jpg,.png,.gif,.jpeg'
-                    >
-                      <span className={['upload-img-btn', filePath ? 'upload-img-uploaded' : ''].join(' ')}>
-                        {imgPath ? (
-                          <img
-                            className={showImg ? 'img-send-item' : ''}
-                            onLoad={imgLoad}
-                            src={imgPath}
-                          />
-                        ) : (
-                          <img src={UploadImg} alt='' />
-                        )}
-                        {showImg && (
-                          <span className='upload-img-mask'>
-                            <img src={UploadOtherImg} alt='' />
-                          </span>
-                        )}
-                      </span>
-                    </Upload>
-                  </div>
-                </Form.Item>
-                <Form.Item
-                  label={t('name')}
-                  name='name'
-                  rules={[
-                    { required: true, message: t('plsEnter') },
-                    {
-                      type: 'string',
-                      max: 64,
-                      message: `${t('characterLength')}：1 - 64`,
-                    },
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-              </div>
+            {applicationType !== APP_BUILT_CLASSIFICATION.AGENT && !fixedWorkflow && (
+              <Form.Item label={t('icon')} name='icon'>
+                <div className='avatar'>
+                  <Upload
+                    beforeUpload={beforeUpload}
+                    onChange={onChange}
+                    showUploadList={false}
+                    accept='.jpg,.png,.gif,.jpeg'
+                  >
+                    <span className={['upload-img-btn', filePath ? 'upload-img-uploaded' : ''].join(' ')}>
+                      {imgPath ? (
+                        <img
+                          className={showImg ? 'img-send-item' : ''}
+                          onLoad={imgLoad}
+                          src={imgPath}
+                        />
+                      ) : (
+                        <img src={UploadImg} alt='' />
+                      )}
+                      {showImg && (
+                        <span className='upload-img-mask'>
+                          <img src={UploadOtherImg} alt='' />
+                        </span>
+                      )}
+                    </span>
+                  </Upload>
+                </div>
+              </Form.Item>
             )}
-            <Form.Item
-              label={t('classify')}
-              name='app_type'
-              rules={[{ required: true, message: t('appCategoryCanNotBeEmpty') }]}
-            >
-              <Select options={types} fieldNames={{ label: 'label', value: 'key' }} />
-            </Form.Item>
+            {applicationType !== APP_BUILT_CLASSIFICATION.AGENT && (
+              <Form.Item
+                label={t('name')}
+                name='name'
+                rules={[
+                  { required: true, message: t('plsEnter') },
+                  {
+                    type: 'string',
+                    max: 64,
+                    message: `${t('characterLength')}：1 - 64`,
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            )}
+            {!fixedWorkflow && (
+              <Form.Item
+                label={t('classify')}
+                name='app_type'
+                rules={[{ required: true, message: t('appCategoryCanNotBeEmpty') }]}
+              >
+                <Select options={types} fieldNames={{ label: 'label', value: 'key' }} />
+              </Form.Item>
+            )}
             <Form.Item
               label={t('description')}
               rules={[{ required: applicationType === APP_BUILT_CLASSIFICATION.AGENT, message: `${t('plsEnter')}${t('description')}` }]}

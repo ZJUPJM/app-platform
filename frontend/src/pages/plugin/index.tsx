@@ -4,7 +4,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Drawer, Button, Dropdown } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import { setSpaClassName, getCookie } from '@/shared/utils/common';
@@ -34,6 +34,15 @@ const Plugin = ({ compactInAppDev = false }: { compactInAppDev?: boolean }) => {
   const [selectedSource, setSelectedSource] = useState('ALL');
   const [statusKey, setStatusKey] = useState('all');
   const [statusLabel, setStatusLabel] = useState(t('all'));
+
+  // 检查是否需要选中工具流 tab（从发布页面跳转回来）
+  useEffect(() => {
+    const toolTab = sessionStorage.getItem('tool-selected-tab');
+    if (toolTab === 'WATERFLOW') {
+      setSelectedSource('WATERFLOW');
+      sessionStorage.removeItem('tool-selected-tab'); // 清除标记
+    }
+  }, []);
 
   // 下拉菜单选项
   const items = [

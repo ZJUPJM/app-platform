@@ -127,11 +127,19 @@ const PublishModal = (props) => {
         if (appEngineId) {
           appEngineId && navigate(`/app-develop/${tenantId}/app-detail/${appEngineId}`);
         } else {
+          const addType = sessionStorage.getItem('add-type');
           sessionStorage.setItem('pluginType', 'workflow');
-          if (window.location.href.indexOf('type=chatWorkflow') !== -1) {
-            navigate(`/app-develop`);
+          if (addType === 'plugin') {
+            // 从 tool 创建的工具流，跳转回 tool 页面并设置 tab
+            sessionStorage.setItem('tool-selected-tab', 'WATERFLOW');
+            navigate(`/tools`);
           } else {
-            navigate(`/app-develop`);
+            // 从 app-develop 创建的工具流，保持原逻辑
+            if (window.location.href.indexOf('type=chatWorkflow') !== -1) {
+              navigate(`/app-develop`);
+            } else {
+              navigate(`/app-develop`);
+            }
           }
         }
       }
