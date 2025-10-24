@@ -18,13 +18,14 @@ import modelengine.fel.tool.model.transfer.DefinitionGroupData;
 import modelengine.fel.tool.model.transfer.ToolData;
 import modelengine.fel.tool.model.transfer.ToolGroupData;
 import modelengine.fit.jade.aipp.domain.division.service.DomainDivisionService;
-import modelengine.jade.store.tool.upload.util.McpUtils;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.annotation.Value;
 import modelengine.fitframework.log.Logger;
 import modelengine.fitframework.util.MapBuilder;
+import modelengine.jade.carver.ListResult;
 import modelengine.jade.common.exception.ModelEngineException;
 import modelengine.jade.store.code.PluginRetCode;
+import modelengine.jade.store.entity.query.PluginQuery;
 import modelengine.jade.store.entity.transfer.PluginData;
 import modelengine.jade.store.entity.transfer.PluginToolData;
 import modelengine.jade.store.service.PluginService;
@@ -35,6 +36,7 @@ import modelengine.jade.store.tool.upload.dto.McpToolInfo;
 import modelengine.jade.store.tool.upload.service.McpProviderService;
 import modelengine.jade.store.tool.upload.support.processor.PluginProcessor;
 import modelengine.jade.store.tool.upload.util.McpToolConverter;
+import modelengine.jade.store.tool.upload.util.McpUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -161,9 +163,10 @@ public class McpProviderServiceImpl implements McpProviderService {
         notBlank(userId, "The user ID cannot be blank.");
 
         // 获取所有插件并过滤 MCP 类型
-        List<PluginData> allPlugins = this.pluginService.getAllPlugins();
-        return allPlugins.stream()
-                .filter(plugin -> MCP_TYPE.equals(plugin.getExtension().get(TYPE)))
+        PluginQuery query = new PluginQuery();
+        ListResult<PluginData> result = this.pluginService.getPlugins(query);
+        return result.getData().stream()
+                .filter(plugin -> plugin.getExtension() != null && MCP_TYPE.equals(plugin.getExtension().get(TYPE)))
                 .map(plugin -> convertToResponse(plugin, Collections.emptyList(), null))
                 .collect(Collectors.toList());
     }
@@ -175,7 +178,7 @@ public class McpProviderServiceImpl implements McpProviderService {
 
         PluginData pluginData = this.pluginService.getPlugin(providerId);
         if (pluginData.getPluginId() == null) {
-            throw new ModelEngineException(PluginRetCode.PLUGIN_NOT_FOUND);
+            throw new ModelEngineException(PluginRetCode.PLUGIN_NOT_EXISTS);
         }
 
         return convertToResponse(pluginData, Collections.emptyList(), null);
@@ -209,7 +212,7 @@ public class McpProviderServiceImpl implements McpProviderService {
             return mcpClient.getTools();
         } catch (IOException exception) {
             log.error("Failed to fetch tools from MCP server: url={}", url, exception);
-            throw new ModelEngineException(PluginRetCode.PLUGIN_UPLOAD_ERROR, 
+            throw new ModelEngineException(PluginRetCode.NO_PLUGIN_FOUND_ERROR, 
                     "Failed to connect to MCP server: " + exception.getMessage());
         }
     }
@@ -257,7 +260,9 @@ public class McpProviderServiceImpl implements McpProviderService {
         extension.put(SERVER_IDENTIFIER, request.getServerIdentifier());
         extension.put(SERVER_URL, request.getMcpServerUrl());
         if (request.getHeaders() != null) {
-            extension.put(HEADERS, request.getHeaders());
+            // 转换为 Map<String, Object>
+            Map<String, Object> headersMap = new HashMap<>(request.getHeaders());
+            extension.put(HEADERS, headersMap);
         }
         if (request.getConfig() != null) {
             Map<String, Object> configMap = new HashMap<>();
