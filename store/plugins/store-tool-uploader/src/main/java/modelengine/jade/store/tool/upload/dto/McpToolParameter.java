@@ -6,6 +6,8 @@
 
 package modelengine.jade.store.tool.upload.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 import java.util.Map;
 
@@ -16,21 +18,52 @@ import java.util.Map;
  * @since 2025-10-24
  */
 public class McpToolParameter {
+    @JsonProperty("name")
     private String name;
+    
+    @JsonProperty("label")
     private Map<String, String> label;
+    
+    @JsonProperty("placeholder")
     private String placeholder;
+    
+    @JsonProperty("scope")
     private String scope;
+    
+    @JsonProperty("auto_generate")
     private Object autoGenerate;
+    
+    @JsonProperty("template")
     private String template;
+    
+    @JsonProperty("required")
     private Boolean required;
+    
+    @JsonProperty("default")
     private Object defaultValue;
+    
+    @JsonProperty("min")
     private Number min;
+    
+    @JsonProperty("max")
     private Number max;
+    
+    @JsonProperty("precision")
     private Integer precision;
+    
+    @JsonProperty("options")
     private List<Object> options;
+    
+    @JsonProperty("type")
     private String type;
+    
+    @JsonProperty("human_description")
     private Map<String, String> humanDescription;
+    
+    @JsonProperty("form")
     private String form;
+    
+    @JsonProperty("llm_description")
     private String llmDescription;
 
     /**

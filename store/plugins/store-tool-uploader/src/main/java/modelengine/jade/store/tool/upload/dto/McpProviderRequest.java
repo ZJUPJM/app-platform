@@ -6,6 +6,8 @@
 
 package modelengine.jade.store.tool.upload.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
 
 /**
@@ -15,10 +17,19 @@ import java.util.Map;
  * @since 2025-10-24
  */
 public class McpProviderRequest {
+    @JsonProperty("name")
     private String name;
+    
+    @JsonProperty("mcp_server_url")
     private String mcpServerUrl;
+    
+    @JsonProperty("server_identifier")
     private String serverIdentifier;
+    
+    @JsonProperty("headers")
     private Map<String, String> headers;
+    
+    @JsonProperty("config")
     private McpConfig config;
 
     /**
@@ -115,7 +126,10 @@ public class McpProviderRequest {
      * 表示 MCP 配置。
      */
     public static class McpConfig {
+        @JsonProperty("sse_read_timeout")
         private Integer sseReadTimeout;
+        
+        @JsonProperty("timeout")
         private Integer timeout;
 
         /**
