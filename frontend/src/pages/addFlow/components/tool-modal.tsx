@@ -58,7 +58,7 @@ const ToolDrawer = (props) => {
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [pluginData, setPluginData] = useState([]);
-  const currentUser = localStorage.getItem('currentUser') || '';
+  const currentUser = localStorage.getItem('apiUsername') || '';
   const [open, setOpen] = useState(false);
   const checkedList = useRef([]);
   const [createWorkflowSignal, setCreateWorkflowSignal] = useState(false);
