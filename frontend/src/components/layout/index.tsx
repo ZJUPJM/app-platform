@@ -227,7 +227,7 @@ const AppLayout: React.FC = () => {
     // 如果点击工具菜单，导航到默认的ALL标签页
     if (e.key.startsWith('/tools')) {
       setDefaultActive([e.key]);
-      navigate('/tools/ALL');
+      navigate('/tools/all');
       return;
     }
     

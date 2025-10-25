@@ -194,7 +194,7 @@ const ToolDrawer = (props) => {
 
   // 跳转到工具页的工具流tab页（新窗口打开）
   const onClickCreate = () => {
-    window.open('/#/tools/WATERFLOW', '_blank');
+    window.open('/#/tools/waterflow', '_blank');
   };
 
   // 刷新工具列表

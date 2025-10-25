@@ -128,7 +128,7 @@ const PublishModal = (props) => {
           appEngineId && navigate(`/app-develop/${tenantId}/app-detail/${appEngineId}`);
         } else {
           // 发布成功后统一跳转到工具流tab页
-          navigate(`/tools/WATERFLOW`);
+          navigate(`/tools/waterflow`);
         }
       }
     } finally {

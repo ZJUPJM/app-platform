@@ -45,7 +45,7 @@ const Plugin = ({ compactInAppDev = false }: { compactInAppDev?: boolean }) => {
     const toolTab = sessionStorage.getItem('tool-selected-tab');
     if (toolTab === 'WATERFLOW') {
       setSelectedSource('WATERFLOW');
-      history.replace('/tools/WATERFLOW');
+      history.replace('/tools/waterflow');
       sessionStorage.removeItem('tool-selected-tab'); // 清除标记
       return;
     }
@@ -56,8 +56,8 @@ const Plugin = ({ compactInAppDev = false }: { compactInAppDev?: boolean }) => {
       if (validTab) {
         setSelectedSource(validTab.key);
       } else {
-        // 如果URL参数无效，重定向到ALL
-        history.replace('/tools/ALL');
+        // 如果URL参数无效，重定向到all
+        history.replace('/tools/all');
       }
     } else {
       // 如果没有tab参数，默认选中ALL
@@ -123,7 +123,7 @@ const Plugin = ({ compactInAppDev = false }: { compactInAppDev?: boolean }) => {
                 key={item.key}
                 onClick={() => {
                   setSelectedSource(item.key);
-                  history.push(`/tools/${item.key}`);
+                  history.push(`/tools/${item.key.toLowerCase()}`);
                 }}>
                 {item.label}
               </span>

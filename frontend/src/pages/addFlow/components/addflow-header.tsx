@@ -130,7 +130,7 @@ const AddHeader = (props) => {
     const isWorkflow = window.location.href.indexOf('type=workFlow') !== -1;
     if (isWorkflow) {
       // 如果是工具流，直接导航到工具流列表页
-      history.push('/tools/WATERFLOW');
+      history.push('/tools/waterflow');
     } else {
       // 否则使用 goBack
       history.goBack();
