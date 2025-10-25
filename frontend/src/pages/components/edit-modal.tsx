@@ -429,10 +429,6 @@ const EditModal = (props) => {
                   <img src={assistant} alt='' className='app-edit-btn-img' />
                   {t('Chatflow')}
                 </Radio.Button>
-                <Radio.Button value='workflow' className='app-edit-btn app-edit-btn-position'>
-                  <img src={workflow} alt='' className='app-edit-btn-img' />
-                  {t('workflow')}
-                </Radio.Button>
               </Radio.Group>
             </div>
           </>
