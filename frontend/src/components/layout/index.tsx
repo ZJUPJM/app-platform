@@ -206,6 +206,12 @@ const AppLayout: React.FC = () => {
       return;
     }
 
+    // 特殊处理：如果是工具相关的页面（包括工具流详情页），选中工具菜单
+    if (pathname.startsWith('/tools/')) {
+      setDefaultActive(['/tools/:tab?']);
+      return;
+    }
+
     // 拆开路由
     const pathGroup = pathname.split('/').filter(item => item !== '');
     if (pathGroup?.length) {
