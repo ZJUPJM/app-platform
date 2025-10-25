@@ -70,7 +70,8 @@ const AppDev: React.FC = () => {
       limit: pageSize,
       name: search || '',
       state: statusKey !== 'all' ? statusKey : null,
-      app_category: categoryKey !== 'all' ? categoryKey : null
+      app_category: categoryKey !== 'all' ? categoryKey : null,
+      type: 'app',
     };
     setListLoading(true);
     try {
