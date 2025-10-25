@@ -57,7 +57,7 @@ const WorkflowCard = ({ pluginData, type, getWaterFlowList }: any) => {
 
   const setClassName = () => {
     if (type === 'plugin') {
-      return setSpaClassName('page-plugin-card');
+      return setSpaClassName('page-plugin-card workflow-card');
     }
     return setSpaClassName('plugin-card');
   }
@@ -101,11 +101,6 @@ const WorkflowCard = ({ pluginData, type, getWaterFlowList }: any) => {
           <div className='plugin-card-user'>
             <img width="18" height="18" src={userImg} alt="" />
             <span style={{ marginRight: 8 }}>{pluginData?.createBy}</span>
-            {pluginData?.tags?.map((tag: string, index: number) => {
-              if (tag.trim().length > 0) {
-                return <Tag style={{ margin: 0 }} key={index}>{tag}</Tag>
-              }
-            })}
           </div>
         </div>
       </div>
@@ -119,7 +114,7 @@ const WorkflowCard = ({ pluginData, type, getWaterFlowList }: any) => {
             <span>
               {
                 (pluginData?.attributes?.latest_version || pluginData.state === 'active') ?
-                  <Tag color='processing' className='footer-type'>{t('active')}</Tag> :
+                  <Tag className='footer-type published'>{t('active')}</Tag> :
                   <Tag className='footer-type'>{t('draft')}</Tag>
               }
             </span>

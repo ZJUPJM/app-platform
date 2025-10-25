@@ -124,30 +124,15 @@ const PluginCard = ({ pluginData, cardType, getPluginList, pluginId, pluginRoot,
           {pluginRoot ? pluginData.extension.description : pluginData?.description}
         </div>
         {/* 卡片底部 */}
-        <div className='card-footer' style={{ position: 'relative' }}>
-          <div hidden>
-            <div className='card-footer-content'>
-              <span hidden={cardType === PluginCardTypeE.MARKET}>
-                <Tag className='footer-type'>Tag 1</Tag>
-              </span>
-              <span>
-                <UserOutlined style={{ marginRight: 8 }} />
-                {pluginData?.downloadCount}
-              </span>
-              <span>
-                <StarOutlined style={{ marginRight: 8 }} />
-                {pluginData?.likeCount}
-              </span>
-            </div>
+        <div className='card-footer'>
+          <div className='card-footer-left'>
+            {/* 卡片状态 */}
+            { (pluginData.deployStatus && !pluginData.isBuiltin) && 
+            <div className={['plugin-status', PluginStatusTypeE[pluginData.deployStatus]].join(' ')}>
+              {PluginCnType[pluginData.deployStatus]}
+            </div>}
           </div>
-          <div hidden={cardType !== PluginCardTypeE.MARKET}>
-            <div className='card-footer-right'>
-              {IconMap[pluginData?.source?.toUpperCase()]?.icon}
-              <span>
-                {IconMap[pluginData?.source?.toUpperCase()]?.name}
-              </span>
-            </div>
-          </div>
+          <div style={{ flex: 1 }}></div>
           { !readOnly && !(!pluginRoot || pluginData?.isBuiltin) && 
             <div className='footer-icon' onClick={(e) => {e.stopPropagation()}}>
               <Dropdown menu={{ items }} trigger={['click']}>
@@ -156,11 +141,6 @@ const PluginCard = ({ pluginData, cardType, getPluginList, pluginId, pluginRoot,
             </div> 
           }
         </div>
-        {/* 卡片状态 */}
-        { (pluginData.deployStatus && !pluginData.isBuiltin) && 
-        <span className={['plugin-tag', PluginStatusTypeE[pluginData.deployStatus]].join(' ')}>
-          {PluginCnType[pluginData.deployStatus]}
-        </span>}
       </div>
        <Drawer
           width={800}

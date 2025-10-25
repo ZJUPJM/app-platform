@@ -68,6 +68,8 @@
     flex-wrap: wrap;
     color: rgb(107 107 107);
     img {
+      width: 18px !important;
+      height: 18px !important;
       border-radius: 50%;
     }
     .creator {
@@ -77,12 +79,12 @@
   }
   .card-content {
     line-height: 22px;
-    display: block;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
     line-clamp: 2;
     -webkit-line-clamp: 2;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: 100%;
     color: rgb(77, 77, 77);
   }
   .card-footer {
@@ -92,9 +94,14 @@
     gap: 32px;
     color: #808080;
     align-items: center;
+    .card-footer-left {
+      display: flex;
+      align-items: center;
+    }
     .card-footer-content {
       display: flex;
       gap: 14px;
+      align-items: center;
     }
     .card-footer-right {
       display: flex;
@@ -122,31 +129,49 @@
     font-size: 24px;
     color: #000000;
   }
-  .plugin-tag {
-    color: rgb(89, 89, 89);
-    border: 1px solid rgb(89, 89, 89);
-    margin-left: 6px;
-    border-radius: 4px;
-    padding: 0 8px;
-    position: absolute;
-    top: 30px;
-    right: 24px;
+  .plugin-status {
+    border-radius: 10px;
+    width: 52px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-size: 12px;
   }
   .deployed {
-    border-color: rgb(0, 179, 54);
     color: rgb(0, 179, 54);
+    background-color: rgba(174, 228, 190, 0.5);
   }
   .published {
-    border-color: rgb(0, 179, 54);
     color: rgb(0, 179, 54);
+    background-color: rgba(174, 228, 190, 0.5);
   }
   .deploying {
-    border-color: #2673E5;
     color: #2673E5;
+    background-color: rgba(38, 115, 229, 0.06);
   }
   .deployment_failed {
-    border-color: #f66f6a;
     color: #f66f6a;
+    background-color: rgba(246, 111, 106, 0.1);
+  }
+}
+
+.page-plugin-card.workflow-card {
+  gap: 0 !important;
+  padding: 16px 16px 5px 16px !important;
+  .card-content {
+    flex: 1;
+    min-height: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-top: 6px;
+  }
+  
+  .card-footer {
+    margin-top: auto;
+    padding: 0 !important;
   }
 }
