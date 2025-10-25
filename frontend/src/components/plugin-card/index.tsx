@@ -29,7 +29,7 @@ import './style.scss';
  * @param readOnly  是否只读
  * @constructor
  */
-const PluginCard = ({ pluginData, cardType, getPluginList, pluginId, pluginRoot, readOnly, showTestButton = true }: any) => {
+const PluginCard = ({ pluginData, cardType, getPluginList, pluginId, pluginRoot, readOnly, showTestButton = true, currentTab }: any) => {
   const { t } = useTranslation();
   const [isShow, setIsShow] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -52,7 +52,13 @@ const PluginCard = ({ pluginData, cardType, getPluginList, pluginId, pluginRoot,
   ]
   // 插件点击详情
   const pluginCardClick = () => {
-    pluginRoot ? navigate(`/tools/detail/${pluginId}`) : setIsShow(true);
+    if (pluginRoot) {
+      // 使用传入的currentTab或默认为ALL
+      const fromTab = currentTab || 'ALL';
+      navigate(`/tools/detail/${pluginId}?from=${fromTab}`);
+    } else {
+      setIsShow(true);
+    }
   };
   
   // 测试连接

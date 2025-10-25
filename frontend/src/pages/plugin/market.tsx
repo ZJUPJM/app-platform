@@ -296,6 +296,7 @@ const MarketItems = ({ reload, readOnly, hideHeader = false, keyword, externalUp
                     readOnly={readOnly}
                     pluginRoot={true}
                     showTestButton={false} // 不显示测试按钮
+                    currentTab={selectedSource}
                   />
               ))}
             </div>
@@ -328,6 +329,7 @@ const MarketItems = ({ reload, readOnly, hideHeader = false, keyword, externalUp
                     pluginId={card.pluginId}
                     readOnly={readOnly}
                     pluginRoot={true}
+                    currentTab={selectedSource}
                   />
               ))}
             </div>

@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { LeftArrowIcon } from '@/assets/icon';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { getAppInfo } from '@/shared/http/aipp';
 import { JadeFlow } from '@fit-elsa/agent-flow';
 import { configMap } from '../addFlow/config';
@@ -15,6 +15,7 @@ import './index.scss';
 
 const FlowDetail = () => {
   const { appId, tenantId } = useParams();
+  const history = useHistory();
   const [appInfo, setAppInfo] = useState(false);
   const { CONFIGS } = configMap[process.env.NODE_ENV];
 
@@ -52,7 +53,8 @@ const FlowDetail = () => {
     })
   }
   function handleBackClick() {
-    window.history.back();
+    // 使用 React Router 的 goBack 确保正确触发路由更新
+    history.goBack();
   }
   return <>{(
     <div className='graph-detail'>

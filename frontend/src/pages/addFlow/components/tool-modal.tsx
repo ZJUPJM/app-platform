@@ -6,6 +6,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Input, Modal, Select, Button, Empty, Spin, Tabs, Divider } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 import { Icons } from '@/components/icons';
 import Pagination from '@/components/pagination';
 import { useHistory } from 'react-router-dom';
@@ -191,9 +192,19 @@ const ToolDrawer = (props) => {
     });
   };
 
-  // 跳转到创建HTTP插件
+  // 跳转到工具页的工具流tab页（新窗口打开）
   const onClickCreate = () => {
-    navigate(`/http`);
+    window.open('/#/tools/WATERFLOW', '_blank');
+  };
+
+  // 刷新工具列表
+  const handleRefresh = () => {
+    setPageNum(1);
+    if(chatbotPluginCategories.includes(selectedSourceTab)){
+      getChatbotInfo(selectedSourceTab);
+    } else {
+      pluginCategory === 'mine' ? getPluginList(currentUser) : getPluginList(null);
+    }
   };
 
   // 获取智能体数据
@@ -311,15 +322,28 @@ const ToolDrawer = (props) => {
           </div>
           <div className='right-table'>
             <div>
-              {pluginCategory === 'mine' && (
-                <Tabs
-                  items={minePluginCategories}
-                  activeKey={selectedSourceTab}
-                  onChange={(key: string) => setSelectedSourceTab(key)}
-                  style={{ width: '100%', textAlign: 'center' }}
-                  centered={true}
-                />
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                {pluginCategory === 'mine' ? (
+                  <Tabs
+                    items={minePluginCategories}
+                    activeKey={selectedSourceTab}
+                    onChange={(key: string) => setSelectedSourceTab(key)}
+                    style={{ flex: 1, textAlign: 'center' }}
+                    centered={true}
+                  />
+                ) : (
+                  <div style={{ flex: 1 }} />
+                )}
+                <Button 
+                  type="text" 
+                  icon={<ReloadOutlined />} 
+                  onClick={handleRefresh}
+                  title={t('refresh')}
+                  style={{ marginLeft: '8px' }}
+                >
+                  {t('refresh')}
+                </Button>
+              </div>
               <Spin spinning={loading}>
                 {pluginData?.length > 0 && (
                   <div className='mashup-add-inner'>

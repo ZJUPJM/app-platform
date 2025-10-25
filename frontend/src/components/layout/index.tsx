@@ -55,7 +55,7 @@ const getFilteredMenus = (routeList: any[], currentPath: string): any[] => {
     
     // 聊天相关页面下不显示"探索"、"工作台"、"工具"
     if (isAppChatPage || isChatPage) {
-      if (route.key === '/app' || route.key === '/app-develop' || route.key === '/tools') {
+      if (route.key === '/app' || route.key === '/app-develop' || route.key.startsWith('/tools')) {
         return null;
       }
     }
@@ -224,6 +224,13 @@ const AppLayout: React.FC = () => {
     }
   }
   const menuClick = (e: any) => {
+    // 如果点击工具菜单，导航到默认的ALL标签页
+    if (e.key.startsWith('/tools')) {
+      setDefaultActive([e.key]);
+      navigate('/tools/ALL');
+      return;
+    }
+    
     // 如果是新对话菜单项，需要清空聊天状态和选中状态
     if (e.key === '/home') {
       // 判断是否是应用聊天页面：/app/{tenantId}/chat/{appId}
