@@ -11,7 +11,7 @@ import AddFlow from '../addFlow';
 import ConfigForm from '../configForm';
 const CommonChat = lazy(() => import('../chatPreview/chatComminPage'));
 import ChoreographyHead from '../components/header';
-import { getAppInfo, updateFormInfo } from '@/shared/http/aipp';
+import { getAppInfo, updateFormInfo, getCheckList } from '@/shared/http/aipp';
 import { debounce, getCurrentTime, getUiD, setSpaClassName, getAppConfig } from '@/shared/utils/common';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { setInspirationOpen } from '@/store/chatStore/chatStore';
@@ -19,6 +19,8 @@ import { setAippId, setAppId, setAppInfo, setChoseNodeId, setValidateInfo } from
 import { setIsDebug } from '@/store/common/common';
 import { setTestStatus } from '@/store/flowTest/flowTest';
 import { RenderContext } from '@/pages/aippIndex/context';
+import { createGraphOperator } from '@fit-elsa/agent-flow';
+import { get } from 'lodash';
 
 /**
  * 应用配置页面首页
@@ -95,6 +97,33 @@ const AippIndex = () => {
     dispatch(setIsDebug(appInfo.state !== 'active'));
   }, [appInfo.state])
 
+  // 配置校验
+  const checkValidity = async (data: any) => {
+    if (!data?.flowGraph?.appearance) {
+      return;
+    }
+    try {
+      const graphOperator = createGraphOperator(JSON.stringify(data.flowGraph.appearance));
+      const formValidate = graphOperator.getFormsToValidateInfo();
+      const res: any = await getCheckList(tenantId, formValidate);
+      if (res?.code === 0 && res?.data) {
+        const isWorkFlow = get(data, 'configFormProperties[0].name') === 'workflow';
+        let validateList = res.data;
+        if (!isWorkFlow) {
+          validateList = validateList.reduce((acc: any[], cur: any) => {
+            acc = acc.concat(cur.configChecks.map((item: any) => {
+              return { ...item, type: cur.type };
+            }));
+            return acc;
+          }, []);
+        }
+        dispatch(setValidateInfo(validateList));
+      }
+    } catch (error) {
+      console.error('配置校验失败:', error);
+    }
+  };
+
   // 获取aipp详情
   const getAippDetails = async (update = false) => {
     !update && setSpinning(true);
@@ -105,6 +134,8 @@ const AippIndex = () => {
         aippRef.current = res.data;
         dispatch(setAppInfo(res.data));
         RefreshChatStyle(res.data);
+        // 执行配置校验
+        checkValidity(res.data);
       }
     } finally {
       setSpinning(false);

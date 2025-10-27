@@ -4,16 +4,17 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import React, { useEffect, useState } from 'react';
-import { Button, Modal, Spin } from 'antd';
+import React, { useEffect, useState, useRef } from 'react';
+import { Button, Modal, Spin, Alert } from 'antd';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
-import { getAppInfo, getPublishAppId, getPreviewAppInfo } from '@/shared/http/aipp';
+import { getAppInfo, getPublishAppId, getPreviewAppInfo, getCheckList } from '@/shared/http/aipp';
 import {
   setAppId,
   setAppInfo,
   setAippId,
   setAppVersion,
   setIsGuest,
+  setValidateInfo,
 } from '@/store/appInfo/appInfo';
 import { setHistorySwitch } from '@/store/common/common';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
@@ -28,6 +29,8 @@ import {
   getGuestModePublishAppId,
 } from '@/shared/http/guest';
 import { TENANT_ID } from '../chatPreview/components/send-editor/common/config';
+import { createGraphOperator } from '@fit-elsa/agent-flow';
+import { get } from 'lodash';
 import CommonChat from '../chatPreview/chatComminPage';
 import Login from './login';
 import NoAuth from './no-auth';
@@ -51,13 +54,16 @@ const ChatRunning = () => {
   const [login, setLogin] = useState(true);
   const [notice, setNotice] = useState('');
   const [wrongAddress, setWrongAddress] = useState(false);
+  const [debugVisible, setDebugVisible] = useState(false);
   const { appId, tenantId, uid } = useParams();
   const dispatch = useAppDispatch();
   const appInfo = useAppSelector((state) => state.appStore.appInfo);
+  const appValidateInfo = useAppSelector((state) => state.appStore.validateInfo);
   const loginStatus = useAppSelector((state) => state.chatCommonStore.loginStatus);
   const noAuth = useAppSelector((state) => state.chatCommonStore.noAuth);
   const pluginList = useAppSelector((state) => state.chatCommonStore.pluginList);
   const isGuest = useAppSelector((state) => state.appStore.isGuest);
+  const isWorkFlow = useRef(false);
 
   // 插件不显示app name，可能遮挡插件内容，仅留返回按钮
   const [pluginName, setPluginName] = useState('default');
@@ -106,6 +112,36 @@ const ChatRunning = () => {
       setLoading(false);
     }
   };
+  // 配置校验
+  const checkValidity = async (data: any) => {
+    if (!data?.flowGraph?.appearance) {
+      return;
+    }
+    try {
+      const graphOperator = createGraphOperator(JSON.stringify(data.flowGraph.appearance));
+      const formValidate = graphOperator.getFormsToValidateInfo();
+      const res: any = await getCheckList(tenantId || TENANT_ID, formValidate);
+      if (res?.code === 0 && res?.data) {
+        let validateList = res.data;
+        if (!isWorkFlow.current) {
+          validateList = validateList.reduce((acc: any[], cur: any) => {
+            acc = acc.concat(cur.configChecks.map((item: any) => {
+              return { ...item, type: cur.type };
+            }));
+            return acc;
+          }, []);
+        }
+        dispatch(setValidateInfo(validateList));
+        // 如果有配置错误，显示错误清单弹窗
+        if (validateList.length > 0) {
+          setDebugVisible(true);
+        }
+      }
+    } catch (error) {
+      console.error('配置校验失败:', error);
+    }
+  };
+
   // 获取aipp详情
   const getAippDetails = async (appId: string) => {
     try {
@@ -121,6 +157,10 @@ const ChatRunning = () => {
         dispatch(setInspirationOpen(true));
         const appChatStyle = getAppConfig(res.data) ? getAppConfig(res.data).appChatStyle : null;
         setPluginName(appChatStyle || 'default');
+        // 检查是否为工作流类型
+        isWorkFlow.current = get(res.data, 'configFormProperties[0].name') === 'workflow';
+        // 执行配置校验
+        checkValidity(res.data);
       }
     } finally {
       setLoading(false);
@@ -284,6 +324,40 @@ const ChatRunning = () => {
               <Button onClick={() => setIsModalOpen(false)}>{t('gotIt')}</Button>
             </div>
           </Modal>
+          {/* 配置错误提示 - 对话页面不显示详细错误清单，引导用户去编排页面修复 */}
+          {debugVisible && appValidateInfo?.length > 0 && (
+            <div style={{ 
+              position: 'fixed', 
+              top: 80, 
+              right: 20, 
+              zIndex: 1000, 
+              maxWidth: 400 
+            }}>
+              <Alert
+                message={t('configurationErrorList')}
+                description={
+                  <div>
+                    <div>{`${t('currentProcess')}${appValidateInfo.length}${t('num')}${t('question')}`}</div>
+                    <div style={{ marginTop: 8 }}>
+                      <Button 
+                        size="small" 
+                        type="primary"
+                        onClick={() => {
+                          const baseUrl = `/app-develop/${tenantId || TENANT_ID}/app-detail/${appInfo.id}`;
+                          history.push(baseUrl);
+                        }}
+                      >
+                        {t('arrange')}
+                      </Button>
+                    </div>
+                  </div>
+                }
+                type="warning"
+                closable
+                onClose={() => setDebugVisible(false)}
+              />
+            </div>
+          )}
         </div>
       )}
     </Spin>

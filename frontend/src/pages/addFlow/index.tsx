@@ -7,17 +7,20 @@
 import React, { useEffect, useState, useRef, useImperativeHandle, useContext } from 'react';
 import { Tooltip } from 'antd';
 import { useParams, useHistory } from 'react-router-dom'
-import { getAppInfo } from '@/shared/http/aipp';
+import { getAppInfo, getCheckList } from '@/shared/http/aipp';
 import { ConfigFlowIcon } from '@/assets/icon';
 import { Message } from '@/shared/utils/message';
 import { FlowContext, RenderContext } from '../aippIndex/context';
 import { setTestTime, setTestStatus } from "@/store/flowTest/flowTest";
+import { setValidateInfo } from '@/store/appInfo/appInfo';
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import LeftMenu from './components/left-menu';
 import Stage from './components/elsa-stage';
 import FlowHeader from './components/addflow-header';
 import FlowTest from './components/flow-test';
 import { useTranslation } from 'react-i18next';
+import { createGraphOperator } from '@fit-elsa/agent-flow';
+import { get } from 'lodash';
 import './styles/index.scss';
 
 /**
@@ -97,6 +100,33 @@ const AddFlow = (props) => {
     }
   }, [evaluateType, elsaReadOnlyRef, readOnlyMode]);
 
+  // 配置校验
+  const checkValidity = async (data: any) => {
+    if (!data?.flowGraph?.appearance) {
+      return;
+    }
+    try {
+      const graphOperator = createGraphOperator(JSON.stringify(data.flowGraph.appearance));
+      const formValidate = graphOperator.getFormsToValidateInfo();
+      const res: any = await getCheckList(tenantId, formValidate);
+      if (res?.code === 0 && res?.data) {
+        const isWorkFlow = get(data, 'configFormProperties[0].name') === 'workflow';
+        let validateList = res.data;
+        if (!isWorkFlow) {
+          validateList = validateList.reduce((acc: any[], cur: any) => {
+            acc = acc.concat(cur.configChecks.map((item: any) => {
+              return { ...item, type: cur.type };
+            }));
+            return acc;
+          }, []);
+        }
+        dispatch(setValidateInfo(validateList));
+      }
+    } catch (error) {
+      console.error('配置校验失败:', error);
+    }
+  };
+
   // 新建工作流时获取详情
   async function initElsa() {
     if (window.location.href.indexOf('type=evaluate') !== -1) {
@@ -105,6 +135,8 @@ const AddFlow = (props) => {
     const res:any = await getAppInfo(tenantId, appId);
     if (res.code === 0) {
       setFlowInfo(res.data);
+      // 执行配置校验
+      checkValidity(res.data);
     }
   }
 

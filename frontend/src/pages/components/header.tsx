@@ -67,7 +67,7 @@ const ChoreographyHead = (props) => {
   const appValidateInfo = useAppSelector((state) => state.appStore.validateInfo);
   const readOnly = useAppSelector((state) => state.chatCommonStore.readOnly);
   const preview = useAppSelector((state) => state.commonStore.isReadOnly);
-  const [debugVisible, setDebugVisible] = useState(true);
+  const [debugVisible, setDebugVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [isFormPrompt, setIsFormPrompt] = useState(true);
   const [imgPath, setImgPath] = useState('');
@@ -196,6 +196,12 @@ const ChoreographyHead = (props) => {
 
   // 打开调试抽屉
   const handleOpenDebug = () => {
+    // 如果有配置错误，优先显示错误清单
+    if (appValidateInfo.length > 0) {
+      setDebugVisible(true);
+      return;
+    }
+    // 没有配置错误，打开调试抽屉
     openDebug();
   };
 

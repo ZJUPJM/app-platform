@@ -446,8 +446,8 @@ const Stage = (props) => {
   };
 
   const handleUpdateChose = (e) => {
-    if (e.detail.choseItem && agent) {
-      agent.scrollToShape(e.detail.choseItem.nodeId);
+    if (e.detail.choseItem && window.agent) {
+      window.agent.scrollToShape(e.detail.choseItem.nodeId);
     }
   };
 
