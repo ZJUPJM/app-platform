@@ -109,7 +109,7 @@ export const routeList: MenuItem[] = [
     ],
   },
   {
-    key: '/tools',
+    key: '/tools/:tab?',
     icon: Icons.tools({}),
     label: i18n.t('tools'), // 工具
     component: Plugin,

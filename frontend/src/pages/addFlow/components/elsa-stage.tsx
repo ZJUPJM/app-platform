@@ -170,7 +170,8 @@ const Stage = (props) => {
         configs: CONFIGS,
         i18n,
         importStatements: [],
-        flowType: appInfo.type === 'waterFlow' ? 'workflow' : appInfo.type
+        flowType: appInfo.type === 'waterFlow' ? 'workflow' : appInfo.type,
+        readOnly: readOnly
       });
     flow.then((agent) => {
       setSpinning && setSpinning(false);
@@ -384,6 +385,15 @@ const Stage = (props) => {
         setFlowInfo(currentApp.current);
       }
       setSaveTime(getCurrentTime());
+    } else if (res.code === 90002910) {
+      // 应用已经发布，无法修改 - 进入只读模式
+      if (elsaReadOnlyRef) {
+        elsaReadOnlyRef.current = true;
+        // 通知画布进入只读模式
+        if (window.agent) {
+          window.agent.readOnly();
+        }
+      }
     }
   }
 

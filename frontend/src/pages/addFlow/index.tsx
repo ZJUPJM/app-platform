@@ -4,13 +4,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import React, { useEffect, useState, useRef, useImperativeHandle } from 'react';
+import React, { useEffect, useState, useRef, useImperativeHandle, useContext } from 'react';
 import { Tooltip } from 'antd';
 import { useParams, useHistory } from 'react-router-dom'
 import { getAppInfo } from '@/shared/http/aipp';
 import { ConfigFlowIcon } from '@/assets/icon';
 import { Message } from '@/shared/utils/message';
-import { FlowContext } from '../aippIndex/context';
+import { FlowContext, RenderContext } from '../aippIndex/context';
 import { setTestTime, setTestStatus } from "@/store/flowTest/flowTest";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import LeftMenu from './components/left-menu';
@@ -58,6 +58,8 @@ const AddFlow = (props) => {
   const [evaluateType, setEvaluateType] = useState('waterFlow');
   const readOnly = useAppSelector((state) => state.chatCommonStore.readOnly);
   const preview = useAppSelector((state) => state.commonStore.isReadOnly);
+  const { elsaReadOnlyRef } = useContext(RenderContext);
+  const [readOnlyMode, setReadOnlyMode] = useState(false);
   const appRef = useRef<any>(null);
   const flowIdRef = useRef<any>(null);
   const elsaRunningCtl = useRef<any>(null);
@@ -79,6 +81,21 @@ const AddFlow = (props) => {
       navigate(`/app-develop`);
     }
   }, [readOnly]);
+
+  // 监听 elsaReadOnlyRef 的变化
+  useEffect(() => {
+    // 只对工具流类型启用只读模式检查
+    if (evaluateType === 'waterFlow' && elsaReadOnlyRef) {
+      // 定时检查 elsaReadOnlyRef 的值
+      const checkReadOnly = setInterval(() => {
+        if (elsaReadOnlyRef.current !== readOnlyMode) {
+          setReadOnlyMode(elsaReadOnlyRef.current);
+        }
+      }, 100);
+      
+      return () => clearInterval(checkReadOnly);
+    }
+  }, [evaluateType, elsaReadOnlyRef, readOnlyMode]);
 
   // 新建工作流时获取详情
   async function initElsa() {
@@ -166,7 +183,7 @@ const AddFlow = (props) => {
         {/* 左侧菜单 */}
         <div className={['content', !type ? 'content-add' : null].join(' ')}>
           {
-            !preview && (
+            !preview && !readOnlyMode && (
               showMenu ? (
                 <LeftMenu
                   menuClick={menuClick}

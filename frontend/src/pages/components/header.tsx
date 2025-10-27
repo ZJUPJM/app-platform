@@ -102,7 +102,7 @@ const ChoreographyHead = (props) => {
         key: 'export'
       },
     ];
-    if (getTalk()) {
+    if (getTalk() && !preview) {
       items.unshift({
         label: t('history'),
         key: 'history'
@@ -301,83 +301,85 @@ const ChoreographyHead = (props) => {
   }, [readOnly]);
   return <>{(
     <div className='app-header'>
-      <div className='logo'>
-        <LeftArrowIcon className='back-icon' onClick={backClick} />
-        {imgPath ?
-          <img src={imgPath} onClick={backClick} /> :
-          <img src={knowledgeImg} onClick={backClick} />
-        }
-        <span className='header-text' title={appInfo?.name}>{appInfo?.name}</span>
-        <img
-          className={['edit-icon', preview ? 'not-allowed' : ''].join(' ')}
-          src={EditImg}
-          onClick={handleEditClick}
-        />
-        {
-          (appInfo.attributes?.latest_version || appInfo.state === 'active') ?
-            (
-              <div className='status-tag'>
-                <img src={complateImg} />
-                <span>{t('active')}</span>
-              </div>
-            ) :
-            (
-              <div className='status-tag'>
-                <img src={publishImg} />
-                <span>{t('inactive')}</span>
-              </div>
-            )
-        }
-        {saveTime && <span>{t('autoSave')}：{saveTime}</span>}
-        {showElsa && <TestStatus />}
-      </div>
-      <div className='header-grid'>
-        <div className='header-grid-btn'>
-          {/* 新对话按钮 */}
-          {!preview && (
-            <div className='new-chat-btn' onClick={onClickNewChat} title={t('newChat')}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          )}
-          <div className='more'>
-            <Dropdown menu={{ items: getMoreItems(), onClick: handleMenuClick }} disabled={preview}>
-              <img src={moreBtnImg} alt="" />
-            </Dropdown>
-            {
-              appValidateInfo.length > 0 &&
-              <>
-                <img src={lineImg} alt="" style={{ margin: '0px 6px' }} />
-                <div onClick={() => setDebugVisible(true)}>
-                  <Badge size="small" count={appValidateInfo.length}>
-                    <img src={debugBtnImg} alt="" style={{ margin: '3px 0px' }} />
-                  </Badge>
+      <div>
+        <div className='logo'>
+          <LeftArrowIcon className='back-icon' onClick={backClick} />
+          {imgPath ?
+            <img src={imgPath} onClick={backClick} /> :
+            <img src={knowledgeImg} onClick={backClick} />
+          }
+          <span className='header-text' title={appInfo?.name}>{appInfo?.name}</span>
+          <img
+            className={['edit-icon', preview ? 'not-allowed' : ''].join(' ')}
+            src={EditImg}
+            onClick={handleEditClick}
+          />
+          {
+            (appInfo.attributes?.latest_version || appInfo.state === 'active') ?
+              (
+                <div className='status-tag'>
+                  <img src={complateImg} />
+                  <span>{t('active')}</span>
                 </div>
-              </>
+              ) :
+              (
+                <div className='status-tag'>
+                  <img src={publishImg} />
+                  <span>{t('inactive')}</span>
+                </div>
+              )
+          }
+          {saveTime && <span>{t('autoSave')}：{saveTime}</span>}
+          {showElsa && <TestStatus />}
+        </div>
+        <div className='header-grid'>
+          <div className='header-grid-btn'>
+            {/* 新对话按钮 */}
+            {!preview && (
+              <div className='new-chat-btn' onClick={onClickNewChat} title={t('newChat')}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            )}
+            <div className='more'>
+              <Dropdown menu={{ items: getMoreItems(), onClick: handleMenuClick }} disabled={preview}>
+                <img src={moreBtnImg} alt="" />
+              </Dropdown>
+              {
+                appValidateInfo.length > 0 &&
+                <>
+                  <img src={lineImg} alt="" style={{ margin: '0px 6px' }} />
+                  <div onClick={() => setDebugVisible(true)}>
+                    <Badge size="small" count={appValidateInfo.length}>
+                      <img src={debugBtnImg} alt="" style={{ margin: '3px 0px' }} />
+                    </Badge>
+                  </div>
+                </>
+              }
+            </div>
+            {
+              getTalk() &&
+              <span className='history robot' onClick={chatClick}>
+                <img src={robotImg} />
+                <span>{t('toTalk')}</span>
+              </span>
             }
           </div>
-          {
-            getTalk() &&
-            <span className='history robot' onClick={chatClick}>
-              <img src={robotImg} />
-              <span>{t('toTalk')}</span>
-            </span>
-          }
+          {showElsa && <Button
+            className='header-btn test-btn'
+            disabled={testStatus === 'Running' || preview}
+            onClick={handleOpenDebug}>
+            {t('debug')}
+          </Button>}
+          <Button
+            type='primary'
+            className='header-btn publish-btn'
+            disabled={testStatus === 'Running' || preview}
+            onClick={handleUploadApp}>
+            <UploadIcon />{t('publish')}
+          </Button>
         </div>
-        {showElsa && <Button
-          className='header-btn test-btn'
-          disabled={testStatus === 'Running' || preview}
-          onClick={handleOpenDebug}>
-          {t('debug')}
-        </Button>}
-        <Button
-          type='primary'
-          className='header-btn publish-btn'
-          disabled={testStatus === 'Running' || preview}
-          onClick={handleUploadApp}>
-          <UploadIcon />{t('publish')}
-        </Button>
       </div>
       {/* 发布弹窗 */}
       <PublishModal modalRef={modalRef} appInfo={appInfo} publishType='app' />

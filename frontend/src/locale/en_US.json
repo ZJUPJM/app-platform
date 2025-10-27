@@ -751,6 +751,7 @@
   "plsChooseHFModel": "Select HuggingFace Model",
   "reset": "Reset",
   "save": "Save",
+  "refresh": "Refresh",
   "fullscreen": "Fullscreen",
   "pluginDetails2": "Plugin Orchestration Details",
   "workflow": "Workflow",

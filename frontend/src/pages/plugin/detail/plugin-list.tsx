@@ -12,6 +12,7 @@ import { getPluginDetail } from '@/shared/http/plugin';
 import { PluginCardTypeE } from '../helper';
 import { useAppSelector } from '@/store/hook';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
 import GoBack from '@/components/go-back/GoBack';
 import PluginCard from '@/components/plugin-card';
 import EmptyItem from '@/components/empty/empty-item';
@@ -28,11 +29,18 @@ import '../styles/plugin.scss';
  */
 const PliginList = (props) => {
   const { t } = useTranslation();
+  const history = useHistory();
+  const location = useLocation();
   const readOnly = useAppSelector((state) => state.chatCommonStore.readOnly);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pluginData, setPluginData] = useState([]);
   const [data, setData] = useState([]);
+  
+  // 从URL参数获取来源tab
+  const searchParams = new URLSearchParams(location.search);
+  const fromTab = searchParams.get('from') || 'ALL';
+  const backPath = `/tools/${fromTab}`;
   const getPluginList = async () => {
     setLoading(true);
     try {
@@ -63,7 +71,7 @@ const PliginList = (props) => {
       <div className={`${setSpaClassName('app-fullpage')} plugin-detail`}>
         <div className='aui-header-1 '>
           <div className='aui-title-1'>
-            <GoBack path={'/tools'} title={t('pluginDetail')} />
+            <GoBack path={backPath} title={t('pluginDetail')} />
             { process.env.PACKAGE_MODE === 'spa' && <QuestionCircleOutlined onClick={onlineHelp} style={{ marginLeft: '8px', fontSize: '18px' }} />}
           </div>
         </div>

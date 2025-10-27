@@ -11,6 +11,7 @@ import { setSpaClassName, getCookie } from '@/shared/utils/common';
 import { QuestionCircleOutlined, CloseOutlined } from '@ant-design/icons';
 import { useAppSelector } from '@/store/hook';
 import { useTranslation } from 'react-i18next';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import MarketItems from './market';
 import { Input, Tabs } from 'antd';
 import { Icons } from '@/components/icons';
@@ -25,6 +26,9 @@ import { sourceTabs } from './helper';
  */
 const Plugin = ({ compactInAppDev = false }: { compactInAppDev?: boolean }) => {
   const { t } = useTranslation();
+  const { tab } = useParams<{ tab?: string }>();
+  const history = useHistory();
+  const location = useLocation();
   const readOnly = useAppSelector((state) => state.chatCommonStore.readOnly);
   const [open, setOpen] = useState(false);
   const [reload, setReload] = useState(false);
@@ -35,14 +39,31 @@ const Plugin = ({ compactInAppDev = false }: { compactInAppDev?: boolean }) => {
   const [statusKey, setStatusKey] = useState('all');
   const [statusLabel, setStatusLabel] = useState(t('all'));
 
-  // 检查是否需要选中工具流 tab（从发布页面跳转回来）
+  // 从URL参数初始化选中的tab
   useEffect(() => {
+    // 检查是否需要选中工具流 tab（从发布页面跳转回来）
     const toolTab = sessionStorage.getItem('tool-selected-tab');
     if (toolTab === 'WATERFLOW') {
       setSelectedSource('WATERFLOW');
+      history.replace('/tools/waterflow');
       sessionStorage.removeItem('tool-selected-tab'); // 清除标记
+      return;
     }
-  }, []);
+
+    // 从URL参数读取tab
+    if (tab) {
+      const validTab = sourceTabs.find(item => item.key === tab.toUpperCase());
+      if (validTab) {
+        setSelectedSource(validTab.key);
+      } else {
+        // 如果URL参数无效，重定向到all
+        history.replace('/tools/all');
+      }
+    } else {
+      // 如果没有tab参数，默认选中ALL
+      setSelectedSource('ALL');
+    }
+  }, [tab, history, location.pathname]);
 
   // 下拉菜单选项
   const items = [
@@ -100,7 +121,10 @@ const Plugin = ({ compactInAppDev = false }: { compactInAppDev?: boolean }) => {
               <span
                 className={selectedSource === item.key ? 'tab-active app-card-tab' : 'app-card-tab'}
                 key={item.key}
-                onClick={() => setSelectedSource(item.key)}>
+                onClick={() => {
+                  setSelectedSource(item.key);
+                  history.push(`/tools/${item.key.toLowerCase()}`);
+                }}>
                 {item.label}
               </span>
             )
