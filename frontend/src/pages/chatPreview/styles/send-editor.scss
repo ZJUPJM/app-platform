@@ -316,6 +316,26 @@
         }
       }
 
+      // 新对话按钮样式 - 圆形小按钮
+      .new-chat-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 50%;
+        background-color: #ffffff;
+        border: 1px solid #e6e6e6;
+        color: #888888;
+
+        svg {
+          width: 16px;
+          height: 16px;
+        }
+
+        &:hover {
+          background-color: #f0f4f9;
+        }
+      }
+
       // 上传按钮样式 - 圆形小按钮
       .upload-btn {
         width: 32px;

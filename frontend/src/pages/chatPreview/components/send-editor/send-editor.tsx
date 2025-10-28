@@ -5,7 +5,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { Spin, Tooltip } from 'antd';
 import { AudioIcon, AudioActiveIcon, DeleteContentIcon } from '@/assets/icon';
 import { Message } from '@/shared/utils/message';
@@ -18,6 +18,9 @@ import { isChatRunning } from '@/shared/utils/chat';
 import { uploadChatFile, voiceToText } from '@/shared/http/aipp';
 import { useTranslation } from 'react-i18next';
 import { cloneDeep } from 'lodash';
+import { setChatId, setChatList, setChatRunning, setAtChatId } from '@/store/chatStore/chatStore';
+import { setAtAppInfo, setAtAppId } from '@/store/appInfo/appInfo';
+import { updateChatId } from '@/shared/utils/common';
 import Recommends from './components/recommends';
 import EditorBtnHome from './components/editor-btn-home';
 import EditorSelect from './components/editor-selet';
@@ -113,8 +116,8 @@ const SendEditor = (props: any) => {
   const isAppArrangementPage = location.pathname.includes('/app-develop/') ||
                                 location.pathname.includes('/app-detail/') ||
                                 location.pathname.includes('/add-flow/') || 
-                                location.pathname.includes('/flow-detail/') ||
-                                location.pathname.includes('/chat/');
+                                location.pathname.includes('/flow-detail/')
+  const isPublishedAppChat = location.pathname.includes('/app/') || location.pathname.includes('/chat/');
   
   const enableVoiceInput = false;
   const recording = useRef(false);
@@ -122,6 +125,35 @@ const SendEditor = (props: any) => {
   const audioDomRef = useRef<any>(null);
   const appId = useAppSelector((state) => state.appStore.appId);
   const tenantId = useAppSelector((state) => state.appStore.tenantId);
+  const { aippId } = useParams<{ aippId?: string }>();
+  
+  // 点击"新对话"按钮回调
+  const onClickNewChat = async () => {
+    if (isChatRunning()) {
+      return;
+    }
+    const storageId = aippId || appId;
+    dispatch(setChatRunning(false));
+    updateChatId(null, storageId);
+    dispatch(setChatId(null));
+    dispatch(setChatList([]));
+    dispatch(setAtAppInfo(null));
+    dispatch(setAtChatId(null));
+    dispatch(setAtAppId(null));
+
+    // 重置输入栏内容
+    setTimeout(() => {
+      const editorDom = document.getElementById('ctrl-promet');
+      if (editorDom) {
+        editorDom.innerText = '';
+      }
+    }, 100);
+
+    // 触发自定义事件来通知页面重置状态
+    const resetEvent = new CustomEvent('resetChatState');
+    window.dispatchEvent(resetEvent);
+  };
+
   // 编辑器change事件
   function messageChange() {
     const editorDom = document.getElementById('ctrl-promet');
@@ -131,8 +163,8 @@ const SendEditor = (props: any) => {
       return editorRef.current.innerText.length > 0
     });
     
-    // 检测@输入 - 只在非应用编排页面启用
-    if (chatContent.startsWith('@') && !isAppArrangementPage) {
+    // 检测@输入 - 只在Home的对话页面启用
+    if (chatContent.startsWith('@') && !isAppArrangementPage && !isPublishedAppChat) {
       // 检查是否已经有智能体tag（通过DOM检查，更准确）
       const agentTag = editorDom?.querySelector('.agent-tag');
       if (agentTag) {
@@ -786,7 +818,7 @@ const SendEditor = (props: any) => {
               contentEditable={true}
               onInput={messageChange}
               onKeyDown={messageKeyDown}
-              data-placeholder={showMask ? '' : (isAppArrangementPage ? t('askTipArrangement') : t('askTip'))}
+              data-placeholder={showMask ? '' : (isAppArrangementPage || isPublishedAppChat ? t('askTipArrangement') : t('askTip'))}
             />
             {showClear && <div className='send-icon clear-icon' onClick={clearContent}><DeleteContentIcon /></div>}
           </div>
@@ -796,7 +828,7 @@ const SendEditor = (props: any) => {
             {/* 左侧按钮组：思考、搜索、对话配置 */}
             <div className='left-actions'>
               {/* 思考按钮 - 只在主页对话页面显示 */}
-              {!isAppArrangementPage && (
+              {!isAppArrangementPage && !isPublishedAppChat && (
                 <div
                   className={`action-btn think-btn ${thinkActive ? 'active' : ''}`}
                   onClick={handleThinkClick}
@@ -811,7 +843,7 @@ const SendEditor = (props: any) => {
               )}
               
               {/* 搜索按钮 - 只在主页对话页面显示 */}
-              {!isAppArrangementPage && (
+              {!isAppArrangementPage && !isPublishedAppChat && (
                 <div
                   className={`action-btn search-btn ${searchActive ? 'active' : ''}`}
                   onClick={handleSearchClick}
@@ -834,8 +866,17 @@ const SendEditor = (props: any) => {
               />
             </div>
 
-            {/* 右侧按钮组：上传、发送 */}
+            {/* 右侧按钮组：新对话、上传、发送 */}
             <div className='right-actions'>
+              {/* 新对话按钮 - 仅在应用编排页面显示 */}
+              {isAppArrangementPage && (
+                <div className='action-btn new-chat-btn' onClick={onClickNewChat} title={t('newChat')}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              )}
+              
               {/* 上传按钮 */}
               {typeof openUploadModal === 'function' && multiFileConfig.useMultimodal && (
                 <div className='action-btn upload-btn' onClick={() => {
@@ -874,7 +915,7 @@ const SendEditor = (props: any) => {
           positionConfig={positionConfig}
           clearMove={() => setShowSelect(false)} />
       )}
-      {showAt && !isAppArrangementPage && (
+      {showAt && !isAppArrangementPage && !isPublishedAppChat && (
         <ReferencingApp
           atItemClick={handleAtItemClick}
           atClick={handleShowMoreApps}
