@@ -73,7 +73,27 @@ bash docker/dev-app-builder.sh
 浏览器打开 http://localhost:8001 测试
 
 ## 前端快速开发测试
-TODO
+本章节给出快速启动之后，本地快速开发测试前端的方法。
+
+### 1. 编译代码
+1. 全量编译前端（1 minutes 10 seconds）
+编写代码，在项目根目录下，执行以下命令编译：
+```shell
+cd frontend
+npm install --legacy-peer-deps --force --registry=https://registry.npmmirror.com
+npm run build:prod
+```
+
+### 2. 一键部署修改
+在项目根目录下，执行以下命令快速部署（18 seconds）：
+```shell
+cd ..
+bash docker/dev-frontend.sh
+```
+
+### 3. 测试
+浏览器打开 http://localhost:8001 测试
+
 
 ## 源码编译启动
 
@@ -215,20 +235,6 @@ fit debug
 - 开发环境：`WebStorm`、`Visual Studio Code`
 
 - 环境要求：node.js  >= 20
-
-- ELSA 框架编译产物：参考 [ELSA](https://github.com/ModelEngine-Group/fit-framework/blob/main/framework/elsa/README.md) 的编译构建章节
-
-**修改 ELSA 依赖地址**
-
-进入目录 `app-platform/frontend` ，搜索 `package.json` 文件的 ELSA 依赖地址：
-
-```
-"dependencies": {
-    "@fit-elsa/elsa": "file:${fitElsaCoreUrl}",
-    "@fit-elsa/agent-flow": "file:${fitElsaReactUrl}",
-```
-
-将 `${fitElsaCoreUrl}` 和 `${fitElsaReactUrl}` 分别改成 `ELSA` 框架编译产物 `fit-elsa` 和 `fit-react` 的目录地址即可。
 
 **修改代理文件**
 
