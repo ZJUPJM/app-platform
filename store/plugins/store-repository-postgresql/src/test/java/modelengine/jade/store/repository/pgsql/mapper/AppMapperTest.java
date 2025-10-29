@@ -40,7 +40,7 @@ public class AppMapperTest {
         List<AppDo> result = this.appMapper.getApps(appQuery);
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getCreator()).isEqualTo("system");
-        assertThat(result.get(1).getCreator()).isEqualTo("Jade");
+        assertThat(result.get(0).getCreator()).isEqualTo("Jade");
+        assertThat(result.get(1).getCreator()).isEqualTo("system");
     }
 }
