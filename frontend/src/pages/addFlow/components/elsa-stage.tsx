@@ -59,7 +59,8 @@ const Stage = (props) => {
     showFlowChangeWarning, 
     setShowFlowChangeWarning, 
     elsaRunningCtl, 
-    types, 
+    types,
+    onAgentReady, 
     setEvaluateData, 
     setSaveTime 
   } = props;
@@ -176,6 +177,12 @@ const Stage = (props) => {
     flow.then((agent) => {
       setSpinning && setSpinning(false);
       window.agent ? null : window.agent = agent;
+      
+      // 通知父组件 agent 已经初始化完成
+      if (onAgentReady && typeof onAgentReady === 'function') {
+        onAgentReady();
+      }
+      
       agent.onChange((dirtyAction) => {
         if (dirtyAction.action === 'jade_node_config_change') {
           handleFlowConfigChange();
@@ -247,8 +254,16 @@ const Stage = (props) => {
         formCallback.current = onSelect;
       });
       // 可用性检查高亮
-      agent.validate(appValidateInfo, (val) => {
-        dispatch(setValidateInfo(cloneDeep(val)));
+      const onlyBackend = Array.isArray(appValidateInfo)
+        ? appValidateInfo.map((n: any) => ({
+            ...n,
+            configChecks: (n.configChecks || []).filter((c: any) => c.source !== 'frontend')
+          }))
+        : appValidateInfo;
+      agent.validate(onlyBackend, () => {
+        // 仅用于画布高亮，不回写 Redux
+      }).catch(() => {
+        // 前端表单校验错误会在 checkValidity 中统一处理
       });
       if (choseNodeId) {
         agent.scrollToShape(choseNodeId);
@@ -453,8 +468,16 @@ const Stage = (props) => {
 
   useEffect(() => {
     if (appValidateInfo.length && window.agent) {
-      window.agent.validate(appValidateInfo, (val) => {
-        dispatch(setValidateInfo(cloneDeep(val)));
+      const onlyBackend = Array.isArray(appValidateInfo)
+        ? appValidateInfo.map((n: any) => ({
+            ...n,
+            configChecks: (n.configChecks || []).filter((c: any) => c.source !== 'frontend')
+          }))
+        : appValidateInfo;
+      window.agent.validate(onlyBackend, () => {
+        // 仅用于画布高亮，不回写 Redux
+      }).catch(() => {
+        // 前端表单校验错误会在 checkValidity 中统一处理
       });
     }
   }, [appValidateInfo]);

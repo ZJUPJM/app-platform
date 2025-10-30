@@ -17,11 +17,13 @@ import { useAppDispatch, useAppSelector } from "@/store/hook";
 import LeftMenu from './components/left-menu';
 import Stage from './components/elsa-stage';
 import FlowHeader from './components/addflow-header';
+import DebugModal from '../components/debug-modal';
 import FlowTest from './components/flow-test';
 import { useTranslation } from 'react-i18next';
 import { createGraphOperator } from '@fit-elsa/agent-flow';
 import { get } from 'lodash';
 import './styles/index.scss';
+import { useValidation } from '@/shared/hooks/useValidation';
 
 /**
  * 应用编排页面
@@ -48,6 +50,8 @@ const AddFlow = (props) => {
     saveTime,
     setSaveTime,
     updateAippCallBack,
+    debugVisible,
+    setDebugVisible,
   } = props;
   const [dragData, setDragData] = useState([]);
   const [evaluateData, setEvaluateData] = useState([]);
@@ -62,6 +66,10 @@ const AddFlow = (props) => {
   const readOnly = useAppSelector((state) => state.chatCommonStore.readOnly);
   const preview = useAppSelector((state) => state.commonStore.isReadOnly);
   const { elsaReadOnlyRef } = useContext(RenderContext);
+  const appValidateInfo = useAppSelector((state) => state.appStore.validateInfo);
+  
+  // 使用统一的校验 Hook
+  const { checkValidity } = useValidation(tenantId, 'AddFlow');
   const [readOnlyMode, setReadOnlyMode] = useState(false);
   const appRef = useRef<any>(null);
   const flowIdRef = useRef<any>(null);
@@ -100,33 +108,6 @@ const AddFlow = (props) => {
     }
   }, [evaluateType, elsaReadOnlyRef, readOnlyMode]);
 
-  // 配置校验
-  const checkValidity = async (data: any) => {
-    if (!data?.flowGraph?.appearance) {
-      return;
-    }
-    try {
-      const graphOperator = createGraphOperator(JSON.stringify(data.flowGraph.appearance));
-      const formValidate = graphOperator.getFormsToValidateInfo();
-      const res: any = await getCheckList(tenantId, formValidate);
-      if (res?.code === 0 && res?.data) {
-        const isWorkFlow = get(data, 'configFormProperties[0].name') === 'workflow';
-        let validateList = res.data;
-        if (!isWorkFlow) {
-          validateList = validateList.reduce((acc: any[], cur: any) => {
-            acc = acc.concat(cur.configChecks.map((item: any) => {
-              return { ...item, type: cur.type };
-            }));
-            return acc;
-          }, []);
-        }
-        dispatch(setValidateInfo(validateList));
-      }
-    } catch (error) {
-      console.error('配置校验失败:', error);
-    }
-  };
-
   // 新建工作流时获取详情
   async function initElsa() {
     if (window.location.href.indexOf('type=evaluate') !== -1) {
@@ -162,6 +143,11 @@ const AddFlow = (props) => {
 
   // 测试
   const handleDebugClick = () => {
+    // 如果有配置错误，优先显示错误清单弹窗（仅手动关闭）
+    if (appValidateInfo && appValidateInfo.length > 0) {
+      setDebugVisible && setDebugVisible(true);
+      return;
+    }
     window.agent.validate().then(() => {
       appRef.current.elsaChange();
       setDebugTypes(window.agent.getFlowRunInputMetaData());
@@ -181,12 +167,24 @@ const AddFlow = (props) => {
     });
   };
 
-  // 给父组件的测试回调
+  // 给父组件的测试回调和校验方法
   useImperativeHandle(addFlowRef, () => {
     return {
       'handleDebugClick': handleDebugClick,
+      'checkValidity': () => checkValidity(appInfo),
     }
   });
+
+  // agent 初始化完成的回调
+  const handleAgentReady = () => {
+    // 无论什么状态，只要有 flowGraph 就执行校验
+    if (appInfo?.flowGraph?.appearance) {
+      // 延迟一小段时间，确保 agent 完全就绪
+      setTimeout(() => {
+        checkValidity(appInfo);
+      }, 100);
+    }
+  };
 
   return <>{(
     <div className='add-flow-container'>
@@ -212,6 +210,15 @@ const AddFlow = (props) => {
           elsaRunningCtl={elsaRunningCtl}
           setShowFlowChangeWarning={type ? setShowFlowChangeWarning : setShowToolFlowChangeWarning}
         />
+        {/* 配置错误清单弹窗（工作流场景） */}
+        {debugVisible && (
+          <DebugModal
+            isWorkFlow={{ current: true }}
+            showElsa={true}
+            mashupClick={() => {}}
+            closeDebug={() => setDebugVisible && setDebugVisible(false)}
+          />
+        )}
         {/* 左侧菜单 */}
         <div className={['content', !type ? 'content-add' : null].join(' ')}>
           {
@@ -245,6 +252,7 @@ const AddFlow = (props) => {
             showFlowChangeWarning={type ? showFlowChangeWarning : showToolFlowChangeWarning}
             setShowFlowChangeWarning={type ? setShowFlowChangeWarning : setShowToolFlowChangeWarning}
             types={evaluateType}
+            onAgentReady={handleAgentReady}
           />
         </div>
       </FlowContext.Provider>

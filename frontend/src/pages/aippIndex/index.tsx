@@ -21,6 +21,7 @@ import { setTestStatus } from '@/store/flowTest/flowTest';
 import { RenderContext } from '@/pages/aippIndex/context';
 import { createGraphOperator } from '@fit-elsa/agent-flow';
 import { get } from 'lodash';
+import { useValidation } from '@/shared/hooks/useValidation';
 
 /**
  * 应用配置页面首页
@@ -39,6 +40,7 @@ const AippIndex = () => {
   const [showChat, setShowChat] = useState(false);
   const [messageChecked, setMessageCheck] = useState(false);
   const [showFlowChangeWarning, setShowFlowChangeWarning] = useState(false);
+  const [debugVisible, setDebugVisible] = useState(false);
   const aippRef = useRef<any>(null);
   const inspirationRefresh = useRef<any>(false);
   const dispatch = useAppDispatch();
@@ -47,6 +49,9 @@ const AippIndex = () => {
   const addFlowRef = useRef<any>(null);
   const renderRef = useRef(false);
   const elsaReadOnlyRef = useRef(false);
+  
+  // 使用统一的校验 Hook
+  const { checkValidity } = useValidation(tenantId, 'aippIndex');
 
   const [pluginName, setPluginName] = useState('default');
   const [plugin, setPlugin] = useState();
@@ -97,33 +102,6 @@ const AippIndex = () => {
     dispatch(setIsDebug(appInfo.state !== 'active'));
   }, [appInfo.state])
 
-  // 配置校验
-  const checkValidity = async (data: any) => {
-    if (!data?.flowGraph?.appearance) {
-      return;
-    }
-    try {
-      const graphOperator = createGraphOperator(JSON.stringify(data.flowGraph.appearance));
-      const formValidate = graphOperator.getFormsToValidateInfo();
-      const res: any = await getCheckList(tenantId, formValidate);
-      if (res?.code === 0 && res?.data) {
-        const isWorkFlow = get(data, 'configFormProperties[0].name') === 'workflow';
-        let validateList = res.data;
-        if (!isWorkFlow) {
-          validateList = validateList.reduce((acc: any[], cur: any) => {
-            acc = acc.concat(cur.configChecks.map((item: any) => {
-              return { ...item, type: cur.type };
-            }));
-            return acc;
-          }, []);
-        }
-        dispatch(setValidateInfo(validateList));
-      }
-    } catch (error) {
-      console.error('配置校验失败:', error);
-    }
-  };
-
   // 获取aipp详情
   const getAippDetails = async (update = false) => {
     !update && setSpinning(true);
@@ -134,8 +112,8 @@ const AippIndex = () => {
         aippRef.current = res.data;
         dispatch(setAppInfo(res.data));
         RefreshChatStyle(res.data);
-        // 执行配置校验
-        checkValidity(res.data);
+        // 注意：不在这里自动调用 checkValidity，因为此时 window.agent 可能还没初始化
+        // 校验由用户点击"配置校验"按钮时触发，或者由 AddFlow 组件在 agent 初始化后触发
       }
     } finally {
       setSpinning(false);
@@ -218,6 +196,8 @@ const AippIndex = () => {
                 updateAippCallBack={updateAippCallBack}
                 mashupClick={elsaChange}
                 openDebug={openDebug}
+                debugVisible={debugVisible}
+                setDebugVisible={setDebugVisible}
                 addFlowRef={addFlowRef}
               />
             ) : null}
@@ -233,6 +213,8 @@ const AippIndex = () => {
                   showFlowChangeWarning={showFlowChangeWarning}
                   setShowFlowChangeWarning={setShowFlowChangeWarning}
                   updateAippCallBack={updateAippCallBack}
+                  debugVisible={debugVisible}
+                  setDebugVisible={setDebugVisible}
                 />
               ) : (
                 <ConfigForm

@@ -23,6 +23,7 @@ import { isChatRunning } from '@/shared/utils/chat';
 import { convertImgPath } from '@/common/util';
 import { createGraphOperator } from '@fit-elsa/agent-flow';
 import { get, cloneDeep } from 'lodash';
+import { useValidation } from '@/shared/hooks/useValidation';
 import TimeLineDrawer from '@/components/timeLine';
 import PublishModal from './publish-modal';
 import EditModal from './edit-modal';
@@ -60,14 +61,15 @@ const ChoreographyHead = (props) => {
     updateAippCallBack,
     mashupClick,
     openDebug,
-    saveTime
+    saveTime,
+    debugVisible,
+    setDebugVisible
   } = props;
   const { aippId } = useParams();
   const testStatus = useAppSelector((state) => state.flowTestStore.testStatus);
   const appValidateInfo = useAppSelector((state) => state.appStore.validateInfo);
   const readOnly = useAppSelector((state) => state.chatCommonStore.readOnly);
   const preview = useAppSelector((state) => state.commonStore.isReadOnly);
-  const [debugVisible, setDebugVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [isFormPrompt, setIsFormPrompt] = useState(true);
   const [imgPath, setImgPath] = useState('');
@@ -79,6 +81,9 @@ const ChoreographyHead = (props) => {
   const { tenantId, appId } = useParams();
   const navigate = useHistory().push;
   const dispatch = useAppDispatch();
+  
+  // 使用统一的校验 Hook
+  const { checkValidity: checkValidityHook } = useValidation(tenantId, 'header');
 
   // 按钮点击回调
   const handleMenuClick = (e) => {
@@ -111,28 +116,21 @@ const ChoreographyHead = (props) => {
     return items;
   };
 
-  // 校验清单
+  // 校验清单（适配 header 的 graph 参数格式）
   const checkValidity = async (graph) => {
     if (!graph) { return};
-    const graphOperator = createGraphOperator(JSON.stringify(graph));
-    const formValidate = graphOperator.getFormsToValidateInfo();
-    const res:any = await getCheckList(tenantId, formValidate);
-    if (res?.code === 0 && res?.data) {
-      isChecked.current = true;
-      let validateList = res.data;
-      if (!isWorkFlow.current) {
-        validateList = validateList.reduce((acc, cur) => {
-          acc = acc.concat(cur.configChecks.map(item => {
-            return { ...item, type: cur.type };
-          }))
-          return acc;
-        }, []);
-      }
-      dispatch(setValidateInfo(validateList));
-      if (isWorkFlow.current && isFormPrompt && validateList.find(item => ['knowledgeRetrievalNodeState', 'manualCheckNodeState', 'endNodeEnd'].includes(item.type))) {
-        Message({ type: 'warning', content: t('formPrompt') });
-        setIsFormPrompt(false);
-      }
+    // 转换为标准格式调用统一的 Hook
+    const data = {
+      flowGraph: {
+        appearance: graph
+      },
+      configFormProperties: isWorkFlow.current ? [{ name: 'workflow' }] : []
+    };
+    isChecked.current = true;
+    const validateList = await checkValidityHook(data);
+    if (validateList && isWorkFlow.current && isFormPrompt && validateList.find(item => ['knowledgeRetrievalNodeState', 'manualCheckNodeState', 'endNodeEnd'].includes(item.type))) {
+      Message({ type: 'warning', content: t('formPrompt') });
+      setIsFormPrompt(false);
     }
   };
 
@@ -279,9 +277,8 @@ const ChoreographyHead = (props) => {
 
   useEffect(() => {
     isWorkFlow.current = get(appInfo, 'configFormProperties[0].name') === APP_TYPE['WORK_FLOW'].name;
-    if (appInfo?.state === 'importing' && !isChecked.current) {
-      checkValidity(appInfo?.flowGraph?.appearance);
-    }
+    // 注意：应用导入时的自动校验现在由 AddFlow 组件在 agent 初始化完成后执行
+    // 不在这里自动调用 checkValidity，避免 window.agent 还未初始化的问题
     if (appInfo.attributes?.icon) {
       convertImgPath(appInfo.attributes.icon).then(res => {
         setImgPath(res);

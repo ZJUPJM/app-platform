@@ -31,6 +31,7 @@ import {
 import { TENANT_ID } from '../chatPreview/components/send-editor/common/config';
 import { createGraphOperator } from '@fit-elsa/agent-flow';
 import { get } from 'lodash';
+import { useValidation } from '@/shared/hooks/useValidation';
 import CommonChat from '../chatPreview/chatComminPage';
 import Login from './login';
 import NoAuth from './no-auth';
@@ -61,6 +62,9 @@ const ChatRunning = () => {
   const appValidateInfo = useAppSelector((state) => state.appStore.validateInfo);
   const loginStatus = useAppSelector((state) => state.chatCommonStore.loginStatus);
   const noAuth = useAppSelector((state) => state.chatCommonStore.noAuth);
+  
+  // 使用统一的校验 Hook
+  const { checkValidity } = useValidation(tenantId || TENANT_ID, 'chatRunning');
   const pluginList = useAppSelector((state) => state.chatCommonStore.pluginList);
   const isGuest = useAppSelector((state) => state.appStore.isGuest);
   const isWorkFlow = useRef(false);
@@ -110,35 +114,6 @@ const ChatRunning = () => {
       }
     } finally {
       setLoading(false);
-    }
-  };
-  // 配置校验
-  const checkValidity = async (data: any) => {
-    if (!data?.flowGraph?.appearance) {
-      return;
-    }
-    try {
-      const graphOperator = createGraphOperator(JSON.stringify(data.flowGraph.appearance));
-      const formValidate = graphOperator.getFormsToValidateInfo();
-      const res: any = await getCheckList(tenantId || TENANT_ID, formValidate);
-      if (res?.code === 0 && res?.data) {
-        let validateList = res.data;
-        if (!isWorkFlow.current) {
-          validateList = validateList.reduce((acc: any[], cur: any) => {
-            acc = acc.concat(cur.configChecks.map((item: any) => {
-              return { ...item, type: cur.type };
-            }));
-            return acc;
-          }, []);
-        }
-        dispatch(setValidateInfo(validateList));
-        // 如果有配置错误，显示错误清单弹窗
-        if (validateList.length > 0) {
-          setDebugVisible(true);
-        }
-      }
-    } catch (error) {
-      console.error('配置校验失败:', error);
     }
   };
 

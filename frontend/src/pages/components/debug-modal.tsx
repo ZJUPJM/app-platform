@@ -54,14 +54,22 @@ const DebugModal = ({ isWorkFlow, showElsa, mashupClick, closeDebug }) => {
   };
 
   const getPrompt = (item, isWorkFlow) => {
+    // 前端表单校验错误直接显示错误消息
+    if (item.source === 'frontend' && item.errorMessage) {
+      return item.errorMessage;
+    }
+    
+    // 后端可用性校验错误
     if (isWorkFlow) {
       switch (item.type) {
         case NodeType.LLM:
-          if (item.serviceName) {
+          if (item.configName === 'accessInfo' && item.serviceName) {
             return `${item.serviceName}${t('doesNotExist')}`;
-          } else {
+          }
+          if (item.configName === 'plugin') {
             return `${item.name}${t('tool')}${t('doesNotExist')}`;
           }
+          break;
         case NodeType.KNOWLEDGE_RETRIEVAL:
         case NodeType.RETRIEVAL:
         case NodeType.END:
