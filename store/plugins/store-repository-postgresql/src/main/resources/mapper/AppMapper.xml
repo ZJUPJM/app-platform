@@ -92,7 +92,6 @@
     </sql>
     <sql id="sortAndLimit">
         order by
-        i.creator = 'system' desc,
         i."updated_time" desc
         <if test="offset != null and offset >= 0">
             offset #{offset}
