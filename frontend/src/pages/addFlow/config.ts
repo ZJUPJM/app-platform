@@ -114,8 +114,18 @@ export const configMap = {
         node: "questionClassificationNodeCondition",
         urls: {
           llmModelEndpoint: `/llmApi/v1/api/fetch/model-list`,
+        },
+      },{
+        node: "loopNodeState",
+        urls: {
+          toolListEndpoint: `${baseUrl}/store/plugins/tools`
         }
-      }
+      }, {
+        node: "parallelNodeState",
+        urls: {
+          toolListEndpoint: `${baseUrl}/store/plugins/tools`
+        }
+      },
     ]
   },
   'production': {
@@ -217,6 +227,18 @@ export const configMap = {
       {
         node: "replyNodeState",
         urls: {}
+      },
+      {
+        node: "loopNodeState",
+        urls: {
+          toolListEndpoint: `${baseUrl}/store/plugins/tools`
+        }
+      },
+      {
+        node: "parallelNodeState",
+        urls: {
+          toolListEndpoint: `${baseUrl}/store/plugins/tools`
+        }
       }
     ]
   }

@@ -46,8 +46,9 @@ const _ParallelTopBar = ({handlePluginAdd, disabled}) => {
     // 提取 appId 和 tenantId
     const appId = selectedData.runnables?.APP?.appId;
     const tenantId = selectedData.schema?.parameters?.properties?.tenantId?.default;
+    const version = selectedData.version ?? null;
     
-    handlePluginAdd(entity, selectedData.uniqueName, selectedData.name, selectedData.tags, appId, tenantId);
+    handlePluginAdd(entity, selectedData.uniqueName, selectedData.name, selectedData.tags, appId, tenantId, version);
   };
 
   const triggerSelect = (e) => {

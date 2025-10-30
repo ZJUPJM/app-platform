@@ -16,6 +16,7 @@ import {JadeCollapse} from '@/components/common/JadeCollapse.jsx';
 import {TOOL_TYPE} from '@/common/Consts.js';
 import {v4 as uuidv4} from 'uuid';
 import {recursive} from '@/components/util/ReferenceUtil.js';
+import '../llm/style.css';
 
 const {Panel} = Collapse;
 
@@ -23,12 +24,13 @@ const {Panel} = Collapse;
  * 并行节点插件配置组件
  *
  * @param plugin 插件信息.
+ * @param toolOption 工具详情（包含 version 等信息）.
  * @param handlePluginDelete 选项删除后的回调.
  * @param shapeStatus 图形状态.
  * @return {JSX.Element}
  * @constructor
  */
-const _ParallelPluginItem = ({plugin, handlePluginDelete, shapeStatus}) => {
+const _ParallelPluginItem = ({plugin, toolOption, handlePluginDelete, shapeStatus}) => {
   const shape = useShapeContext();
   const data = useDataContext();
   const [pluginInValid, setPluginInValid] = useState(false);
@@ -96,17 +98,23 @@ const _ParallelPluginItem = ({plugin, handlePluginDelete, shapeStatus}) => {
     }
   };
 
-  const hasViewIcon = () => {
+  const isWaterflow = () => {
     const appId = plugin?.value?.find(item => item.name === 'appId')?.value;
     const tenantId = plugin?.value?.find(item => item.name === 'tenantId')?.value;
     return !!(appId && tenantId);
   };
 
+  const renderVersion = (plugin, toolOption) => {
+    return (<>
+      <div className={'tool-version-wrapper'}>
+        <span className={'tool-version-font'}>
+          {plugin?.value?.find(item => item.name === 'version')?.value ?? toolOption?.version ?? ''}
+        </span>
+      </div>
+    </>);
+  }
+
   const renderViewIcon = () => {
-    if (!hasViewIcon()) {
-      return null;
-    }
-    
     return (<>
       <Button disabled={shapeStatus.disabled}
               type='text'
@@ -125,7 +133,7 @@ const _ParallelPluginItem = ({plugin, handlePluginDelete, shapeStatus}) => {
     const deleteIconStyle = {
       height: '100%',
       padding: '0 4px',
-      ...(hasViewIcon() ? {} : {marginLeft: 'auto'})
+      ...(isWaterflow() ? {} : {marginLeft: 'auto'})
     };
     
     return (<>
@@ -169,7 +177,12 @@ const _ParallelPluginItem = ({plugin, handlePluginDelete, shapeStatus}) => {
             className="jade-panel"
             header={<div style={{display: 'flex', alignItems: 'center'}}>
               <span className="jade-panel-header-font">{plugin?.value?.find(item => item.name === 'outputName')?.value ?? ''}</span>
-              {renderViewIcon()}
+              {isWaterflow() && (
+                <>
+                  {renderVersion(plugin, toolOption)}
+                  {renderViewIcon()}
+                </>
+              )}
               {renderDeleteIcon(plugin.id, outputName)}
             </div>}
             key="parallelPanel">
@@ -186,12 +199,14 @@ const _ParallelPluginItem = ({plugin, handlePluginDelete, shapeStatus}) => {
 
 _ParallelPluginItem.propTypes = {
   plugin: PropTypes.object.isRequired,
+  toolOption: PropTypes.object,
   handlePluginDelete: PropTypes.func.isRequired,
   shapeStatus: PropTypes.object.isRequired,
 };
 
 const areEqual = (prevProps, nextProps) => {
   return prevProps.plugin === nextProps.plugin &&
+    prevProps.toolOption === nextProps.toolOption &&
     prevProps.handlePluginDelete === nextProps.handlePluginDelete &&
     prevProps.shapeStatus === nextProps.shapeStatus;
 };

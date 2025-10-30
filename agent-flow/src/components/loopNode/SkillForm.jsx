@@ -13,6 +13,7 @@ import {useTranslation} from 'react-i18next';
 import {MinusCircleOutlined, EyeOutlined} from '@ant-design/icons';
 import PropTypes from 'prop-types';
 import {recursive} from '@/components/util/ReferenceUtil.js';
+import '../llm/style.css'; // 引入 llm 的样式以复用 version 样式
 
 /**
  * 循环节点插件折叠区域组件
@@ -53,11 +54,12 @@ const _SkillForm = ({plugin, data = undefined, handlePluginChange, handlePluginD
     outputParams.type = 'Array';
     entity.outputParams = [outputParams];
     
-    // 提取 appId 和 tenantId
+    // 提取 appId、tenantId 和 version
     const appId = selectedData.runnables?.APP?.appId;
     const tenantId = selectedData.schema?.parameters?.properties?.tenantId?.default;
-    
-    handlePluginChange(entity, selectedData.uniqueName, selectedData.name, selectedData.tags, appId, tenantId);
+    const version = selectedData.version;
+
+    handlePluginChange(entity, selectedData.uniqueName, selectedData.name, selectedData.tags, appId, tenantId, version);
   };
 
   const pluginSelectEvent = {
@@ -117,6 +119,14 @@ const _SkillForm = ({plugin, data = undefined, handlePluginChange, handlePluginD
       </Button>
     </>);
   };
+
+  const renderVersion = (plugin) => {
+    return (<>
+      <div className={'tool-version-wrapper'}>
+        <span className={'tool-version-font'}>{plugin.version ?? ''}</span>
+      </div>
+    </>);
+  }
 
   const renderDeleteIcon = (id) => {
     return (<>
@@ -183,7 +193,12 @@ const _SkillForm = ({plugin, data = undefined, handlePluginChange, handlePluginD
                 <span className={'jade-custom-multi-select-item'}>
                     {plugin?.name ?? ''}
                 </span>
-                {plugin?.appId && plugin?.tenantId && renderViewIcon()}
+                {plugin?.appId && plugin?.tenantId && (
+                  <>
+                    {renderVersion(plugin)}
+                    {renderViewIcon()}
+                  </>
+                )}
                 {renderDeleteIcon(plugin.id)}
               </div>
             </Row>}

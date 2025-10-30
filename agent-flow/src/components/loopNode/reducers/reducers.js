@@ -49,6 +49,7 @@ export const ChangePluginByMetaDataReducer = () => {
         tags: action.tags,
         appId: action.appId,
         tenantId: action.tenantId,
+        version: action.version,
       };
     };
 

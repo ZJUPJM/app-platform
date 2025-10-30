@@ -99,6 +99,12 @@ export const AddPluginByMetaDataReducer = () => {
         type: DATA_TYPES.STRING,
         from: FROM_TYPE.INPUT,
         value: action.tenantId,
+      }, {
+        id: uuidv4(),
+        name: 'version',
+        type: DATA_TYPES.STRING,
+        from: FROM_TYPE.INPUT,
+        value: action.version,
       }],
     };
 

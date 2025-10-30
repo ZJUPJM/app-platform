@@ -7,9 +7,12 @@
 import {InvokeInput} from '@/components/common/InvokeInput.jsx';
 import {InvokeOutput} from '@/components/common/InvokeOutput.jsx';
 import {SkillForm} from '@/components/loopNode/SkillForm.jsx';
-import {useDataContext, useDispatch} from '@/components/DefaultRoot.jsx';
+import {useDataContext, useDispatch, useShapeContext} from '@/components/DefaultRoot.jsx';
 import {TOOL_TYPE} from '@/common/Consts.js';
 import PropTypes from 'prop-types';
+import {useEffect, useRef, useState} from "react";
+import httpUtil from "@/components/util/httpUtil.jsx";
+import {v4 as uuidv4} from 'uuid';
 
 /**
  * 循环节点Wrapper
@@ -28,8 +31,18 @@ const LoopWrapper = ({shapeStatus}) => {
   const isWaterFlow = toolInfo?.tags?.some(tag => tag === TOOL_TYPE.WATER_FLOW)
   const filterArgs = isWaterFlow ? args.find(arg => arg.name === 'inputParams')?.value ?? args : args;
   const filterRadioValue = isWaterFlow && radioValue ? radioValue.replace(/^inputParams\./, '') : radioValue;
+  const shape = useShapeContext();
+  let config;
+  if (!shape || !shape.graph || !shape.graph.configs) {
+    // 没关系，继续.
+  } else {
+    config = shape.graph.configs.find(node => node.node === 'loopNodeState');
+  }
+  // 添加状态管理 - 改为单个工具对象
+  const [currentToolOption, setCurrentToolOption] = useState(null);
+  const lastRequestedNameRef = useRef(null);
 
-  const handlePluginChange = (entity, uniqueName, name, tags, appId, tenantId) => {
+  const handlePluginChange = (entity, uniqueName, name, tags, appId, tenantId, version) => {
     dispatch({
       type: 'changePluginByMetaData',
       entity: entity,
@@ -38,6 +51,7 @@ const LoopWrapper = ({shapeStatus}) => {
       tags: tags,
       appId: appId,
       tenantId: tenantId,
+      version: version
     });
   };
 
@@ -48,6 +62,74 @@ const LoopWrapper = ({shapeStatus}) => {
   };
 
   /**
+   * 获取技能详情信息
+   */
+  const getSkillInfo = () => {
+    const uniqueName = toolInfo?.uniqueName;
+    if (!uniqueName) {
+      setCurrentToolOption(null);
+      return;
+    }
+
+    if (!config?.urls?.toolListEndpoint) {
+      return;
+    }
+
+    httpUtil.get(
+      `${config.urls.toolListEndpoint}?uniqueNames=${uniqueName}`, 
+      new Map(), 
+      (jsonData) => {
+        processToolData(jsonData.data);
+      },
+      () => {
+        processToolData([]);
+      },
+    );
+
+    const processToolData = (responseData) => {
+      // 循环节点只需要一个工具，取第一个匹配项
+      const matchedTool = responseData.find(item => item.uniqueName === uniqueName);
+      
+      if (matchedTool) {
+        setCurrentToolOption({
+          id: uuidv4(),
+          name: matchedTool.name,
+          tags: matchedTool.tags,
+          version: matchedTool.version,
+          value: matchedTool.uniqueName,
+        });
+      } else {
+        // 若请求返回体中没有该 uniqueName 或请求失败，则从 toolInfo 中获取信息
+        setCurrentToolOption(toolInfo ? {
+          id: toolInfo.uniqueName,
+          name: toolInfo.pluginName || '',
+          tags: toolInfo.tags || [],
+          version: toolInfo.version || '',
+          value: toolInfo.uniqueName,
+        } : null);
+      }
+    };
+  };
+
+  useEffect(() => {
+    const uniqueName = toolInfo?.uniqueName;
+    const endpoint = config?.urls?.toolListEndpoint;
+
+    if (!uniqueName || !endpoint) {
+      setCurrentToolOption(null);
+      return;
+    }
+
+    if (lastRequestedNameRef.current === uniqueName) {
+      return;
+    }
+    
+    lastRequestedNameRef.current = uniqueName;
+    getSkillInfo();
+  }, [toolInfo?.uniqueName]);
+
+
+  /**
    * 组装插件对象。
    */
   const plugin = {
@@ -55,6 +137,7 @@ const LoopWrapper = ({shapeStatus}) => {
     id: toolInfo?.uniqueName ?? undefined,
     appId: toolInfo?.appId ?? undefined,
     tenantId: toolInfo?.tenantId ?? undefined,
+    version: toolInfo?.version ?? currentToolOption?.version ?? undefined,
   };
 
   return (<>
