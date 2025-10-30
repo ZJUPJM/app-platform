@@ -202,135 +202,157 @@
   .send-editor-container,
   .message-check-toolbox-wrap,
   .message-box {
-    width: 40%;
-    max-width: 1200px;
-    min-width: 600px;
-    // margin: 0 auto;
-    padding: 0 0;
+    width: 100%;
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 0 1rem;
     box-sizing: border-box;
   }
   
-  // 响应式设计 - 使用窗口相对宽度
-  @media (max-width: 1400px) {
+  // 超大屏幕 - 固定最大宽度 (类似 ChatGPT)
+  @media (min-width: 1536px) {
     .chat-details-content,
     .send-editor-container,
     .message-check-toolbox-wrap,
     .message-box {
-      width: 80%;
-      max-width: 1000px;
-      padding: 0 16px;
+      max-width: 50rem;
     }
   }
   
-  @media (max-width: 1200px) {
+  // 大屏幕 - 固定宽度
+  @media (min-width: 1024px) and (max-width: 1535px) {
     .chat-details-content,
     .send-editor-container,
     .message-check-toolbox-wrap,
     .message-box {
-      width: 85%;
-      max-width: 850px;
-      padding: 0 12px;
+      max-width: 48rem;
+      padding: 0 1.5rem;
     }
   }
   
-  @media (max-width: 992px) {
+  // 中等屏幕
+  @media (min-width: 768px) and (max-width: 1023px) {
     .chat-details-content,
     .send-editor-container,
     .message-check-toolbox-wrap,
     .message-box {
-      width: 85%;
-      max-width: 750px;
-      padding: 0 10px;
+      max-width: 42rem;
+      padding: 0 1.25rem;
     }
   }
   
-  @media (max-width: 768px) {
+  // 小屏幕 - 使用高百分比宽度
+  @media (max-width: 767px) {
     .chat-details-content,
     .send-editor-container,
     .message-check-toolbox-wrap,
     .message-box {
-      width: 90%;
+      width: 100%;
       max-width: 100%;
-      min-width: 320px;
-      padding: 0 8px;
+      padding: 0 1rem;
     }
   }
   
+  // 超小屏幕 (700px 以下)
+  @media (max-width: 699px) {
+    .chat-details-content,
+    .send-editor-container,
+    .message-check-toolbox-wrap,
+    .message-box {
+      width: 100%;
+      max-width: 100%;
+      padding: 0 0.75rem;
+    }
+  }
+  
+  // 极小屏幕 (手机竖屏)
   @media (max-width: 480px) {
     .chat-details-content,
     .send-editor-container,
     .message-check-toolbox-wrap,
     .message-box {
-      width: 95%;
-      padding: 0 6px;
+      width: 100%;
+      padding: 0 0.5rem;
     }
   }
+  
+  // 侧边栏打开时的布局
   .chat-left-close {
     .chat-details-content,
     .message-box,
     .send-editor-container,
     .message-check-toolbox-wrap {
-      width: 40%;
-      max-width: 1000px;
-      min-width: 600px;
+      width: 100%;
+      max-width: 42rem;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0 1.25rem;
       box-sizing: border-box;
     }
     
-    // 响应式设计 - 侧边栏打开时使用更窄的相对宽度
-    @media (max-width: 1400px) {
+    // 超大屏幕 - 侧边栏打开
+    @media (min-width: 1536px) {
       .chat-details-content,
       .message-box,
       .send-editor-container,
       .message-check-toolbox-wrap {
-        width: 80%;
-        max-width: 800px;
-        padding: 0 16px;
+        max-width: 44rem;
       }
     }
     
-    @media (max-width: 1200px) {
+    // 大屏幕 - 侧边栏打开
+    @media (min-width: 1024px) and (max-width: 1535px) {
       .chat-details-content,
       .message-box,
       .send-editor-container,
       .message-check-toolbox-wrap {
-        width: 75%;
-        max-width: 700px;
-        padding: 0 12px;
+        max-width: 40rem;
+        padding: 0 1.5rem;
       }
     }
     
-    @media (max-width: 992px) {
+    // 中等屏幕 - 侧边栏打开
+    @media (min-width: 768px) and (max-width: 1023px) {
       .chat-details-content,
       .message-box,
       .send-editor-container,
       .message-check-toolbox-wrap {
-        width: 70%;
-        max-width: 600px;
-        padding: 0 10px;
+        max-width: 36rem;
+        padding: 0 1rem;
       }
     }
     
-    @media (max-width: 768px) {
+    // 小屏幕 - 侧边栏打开时使用更窄宽度
+    @media (max-width: 767px) {
       .chat-details-content,
       .message-box,
       .send-editor-container,
       .message-check-toolbox-wrap {
-        width: 85%;
+        width: 100%;
         max-width: 100%;
-        min-width: 320px;
-        padding: 0 8px;
+        padding: 0 0.75rem;
       }
     }
     
+    // 超小屏幕 (700px 以下) - 侧边栏打开
+    @media (max-width: 699px) {
+      .chat-details-content,
+      .message-box,
+      .send-editor-container,
+      .message-check-toolbox-wrap {
+        width: 100%;
+        max-width: 100%;
+        padding: 0 0.625rem;
+      }
+    }
+    
+    // 极小屏幕 - 侧边栏打开
     @media (max-width: 480px) {
       .chat-details-content,
       .message-box,
       .send-editor-container,
       .message-check-toolbox-wrap {
-        width: 90%;
-        padding: 0 6px;
+        width: 100%;
+        padding: 0 0.5rem;
       }
     }
   }
@@ -340,9 +362,66 @@
   .send-editor-container,
   .message-check-toolbox-wrap,
   .message-box {
-    width: calc(100% - 60px);
-    min-width: 700px;
+    width: 100%;
+    max-width: calc(100% - 3rem);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    box-sizing: border-box;
   }
+  
+  // 大屏幕
+  @media (min-width: 1024px) {
+    .chat-details-content,
+    .send-editor-container,
+    .message-check-toolbox-wrap,
+    .message-box {
+      max-width: 52rem;
+    }
+  }
+  
+  // 中等屏幕
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .chat-details-content,
+    .send-editor-container,
+    .message-check-toolbox-wrap,
+    .message-box {
+      max-width: 46rem;
+      padding: 0 1.25rem;
+    }
+  }
+  
+  // 小屏幕
+  @media (max-width: 767px) {
+    .chat-details-content,
+    .send-editor-container,
+    .message-check-toolbox-wrap,
+    .message-box {
+      max-width: 100%;
+      padding: 0 1rem;
+    }
+  }
+  
+  // 超小屏幕 (700px 以下)
+  @media (max-width: 699px) {
+    .chat-details-content,
+    .send-editor-container,
+    .message-check-toolbox-wrap,
+    .message-box {
+      max-width: 100%;
+      padding: 0 0.75rem;
+    }
+  }
+  
+  // 极小屏幕
+  @media (max-width: 480px) {
+    .chat-details-content,
+    .send-editor-container,
+    .message-check-toolbox-wrap,
+    .message-box {
+      padding: 0 0.5rem;
+    }
+  }
+  
   .chat-left-close {
     .chat-details-content,
     .message-box,
