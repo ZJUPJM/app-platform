@@ -19,6 +19,7 @@ import {
 import {
   ChangeAccessInfoReducer,
   ChangeRerankParamReducer,
+  KnowledgeFlatReducer,
   UpdateGroupIdAndConfigIdReducer,
   UpdateInputParamReducer,
   UpdateKnowledgeReducer,
@@ -39,6 +40,7 @@ export const knowledgeRetrievalComponent = (jadeConfig, shape) => {
   addReducer(builtInReducers, UpdateOptionReducer());
   addReducer(builtInReducers, UpdateKnowledgeReducer());
   addReducer(builtInReducers, UpdateGroupIdAndConfigIdReducer());
+  addReducer(builtInReducers, KnowledgeFlatReducer());
   addReducer(builtInReducers, ChangeRerankParamReducer());
   addReducer(builtInReducers, ChangeAccessInfoReducer());
 

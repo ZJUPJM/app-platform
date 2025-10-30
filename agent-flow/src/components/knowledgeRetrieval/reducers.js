@@ -72,6 +72,98 @@ export const UpdateOptionReducer = () => {
   return self;
 };
 
+export const KnowledgeFlatReducer = () => {
+  const self = {};
+  self.type = 'updateKnowledgeFlat';
+
+  self.reduce = (config, action) => {
+    const newConfig = { ...config };
+
+    // 🟡 1. 如果传了 groupId → 更新它，且变更时清空 knowledgeRepos
+    if (action.groupId !== undefined) {
+      updateGroupId(newConfig, action.groupId);
+    }
+
+    // 🟡 2. 如果传了 knowledgeConfigId → 更新它
+    if (action.knowledgeConfigId !== undefined) {
+      updateKnowledgeConfigId(newConfig, action.knowledgeConfigId);
+    }
+
+    // 🟡 3. 如果传了 knowledgeRepos → 转换并设置
+    if (action.knowledgeRepos !== undefined) {
+      updateKnowledgeRepos(newConfig, action.knowledgeRepos);
+    }
+
+    return newConfig;
+  };
+
+  // =============== 内部方法：专注当前业务 ===============
+
+  const updateGroupId = (config, newGroupId) => {
+    const option = getOptionParam(config);
+    let groupId = findParamInOption(option, 'groupId');
+
+    if (!groupId) {
+      groupId = JSON.parse(JSON.stringify(DEFAULT_KNOWLEDGE_REPO_GROUP_STRUCT));
+      option.value.push(groupId);
+    }
+
+    // 🧹 联动：groupId 变更 → 清空 knowledgeRepos
+    if (groupId.value !== newGroupId) {
+      clearKnowledgeRepos(config);
+    }
+
+    groupId.value = newGroupId;
+  };
+
+  const updateKnowledgeConfigId = (config, newConfigId) => {
+    const option = getOptionParam(config);
+    let knowledgeConfigId = findParamInOption(option, 'knowledgeConfigId');
+
+    if (!knowledgeConfigId) {
+      knowledgeConfigId = JSON.parse(JSON.stringify(DEFAULT_KNOWLEDGE_RETRIEVAL_NODE_KNOWLEDGE_CONFIG_ID));
+      option.value.push(knowledgeConfigId);
+    }
+
+    knowledgeConfigId.value = newConfigId;
+  };
+
+  const updateKnowledgeRepos = (config, repos) => {
+    const knowledgeRepos = config.inputParams.find(ip => ip.name === 'knowledgeRepos');
+    if (!knowledgeRepos) return;
+
+    knowledgeRepos.value = repos.map(v => ({
+      id: uuidv4(),
+      type: DATA_TYPES.OBJECT,
+      from: FROM_TYPE.EXPAND,
+      value: Object.keys(v).map(k => ({
+        id: uuidv4(),
+        from: FROM_TYPE.INPUT,
+        name: k,
+        type: toConfigType(v[k]),
+        value: v[k],
+      })),
+    }));
+  };
+
+  const clearKnowledgeRepos = (config) => {
+    const knowledgeRepos = config.inputParams.find(ip => ip.name === 'knowledgeRepos');
+    if (knowledgeRepos) {
+      knowledgeRepos.value = [];
+    }
+  };
+
+  const getOptionParam = (config) => {
+    return config.inputParams.find(ip => ip.name === 'option');
+  };
+
+  const findParamInOption = (option, paramName) => {
+    return option?.value?.find(v => v.name === paramName);
+  };
+
+  return self;
+};
+
 /**
  * updateKnowledge 事件处理器.
  *
