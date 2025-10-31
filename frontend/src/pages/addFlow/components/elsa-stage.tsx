@@ -201,12 +201,11 @@ const Stage = (props) => {
       agent.onKnowledgeBaseSelect((args) => {
         let { selectedKnowledgeBases, onSelect} = args;
         const latestConfig = store.getState().chatCommonStore.knowledgeConfig;
+        connectKnowledgeEvent.current = args;
         if (!latestConfig) {
-          connectKnowledgeEvent.current = args;
           connectKnowledgeRef.current.openModal();
         } else {
-          setGroupId(latestConfig.groupId);
-          setKnowledgeConfigId(latestConfig.knowledgeConfigId);
+          updateKnowledgeOption(latestConfig.groupId, latestConfig.knowledgeConfigId);
           modalRef.current.showModal(selectedKnowledgeBases, latestConfig.groupId, latestConfig.knowledgeConfigId);
         }
         knowledgeCallback.current = onSelect;
