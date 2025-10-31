@@ -31,11 +31,11 @@ export const useValidation = (tenantId: string, _logPrefix: string = 'Validation
     }
 
     try {
-      // 后端可用性检查（节点结构）
-      const graphOperator = createGraphOperator(JSON.stringify(data.flowGraph.appearance));
-      const formValidate = graphOperator.getFormsToValidateInfo();
-      const res: any = await getCheckList(tenantId, formValidate);
-      let backendNodes = res?.data || [];
+      // 后端可用性检查（节点结构）- 临时禁用后端校验
+      // const graphOperator = createGraphOperator(JSON.stringify(data.flowGraph.appearance));
+      // const formValidate = graphOperator.getFormsToValidateInfo();
+      // const res: any = await getCheckList(tenantId, formValidate);
+      let backendNodes: any[] = []; // 不触发后端校验，只使用前端校验
 
       // 是否为工作流模式
       const isWorkFlowMode = isWorkFlow ?? (get(data, 'configFormProperties[0].name') === 'workflow');
