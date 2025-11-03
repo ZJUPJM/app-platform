@@ -121,7 +121,7 @@ public class AppIntegrationTest {
         when(this.domainDivisionService.getUserGroupId()).thenReturn("g1");
         ListResult<AppPublishData> apps = this.appService.getApps(appQuery);
         assertThat(apps.getCount()).isEqualTo(2);
-        assertThat(apps.getData().get(1).getTags()).isEqualTo(new HashSet<>(Arrays.asList("HUGGINGFACE", "FIT")));
+        assertThat(apps.getData().get(1).getTags()).isEqualTo(new HashSet<>(Arrays.asList("HUGGINGFACE")));
     }
 
     @Test
