@@ -43,18 +43,13 @@ baseAxios.interceptors.response.use(
   (error) => {
     if (error.response.status === 401) {
       // 尝试刷新 token
-      getRefreshToken().then((refreshResponse: any) => {
+      return getRefreshToken().then((refreshResponse: any) => {
         // 如果刷新成功（状态码为 200），刷新页面
         if (refreshResponse.code === 200 || refreshResponse.code === 0 || refreshResponse.code === undefined) {
           window.location.reload();
         } else {
-          // 刷新失败，执行原逻辑
-          store.dispatch(setLoginStatus(false));
-          if (error.response.headers["fit-redirect-to-prefix"]) {
-            window.location.href = error.response.headers["fit-redirect-to-prefix"] + encodeURIComponent(window.location.href);
-          } else {
-            Message({ type: 'error', content: '登录失效且headers里面没有跳转登录的url' });
-          }
+          // 刷新失败，reject, 让下游进入catch(refreshError)
+          return Promise.reject(refreshResponse);
         }
       }).catch((refreshError: any) => {
         // 刷新 token 请求失败，执行原逻辑
@@ -64,6 +59,7 @@ baseAxios.interceptors.response.use(
         } else {
           Message({ type: 'error', content: '登录失效且headers里面没有跳转登录的url' });
         }
+        return Promise.reject(refreshError);
       });
     } else if (error.response.status === 403) {
       if (location.pathname.includes('/chat/') && !location.pathname.includes('/app/') && error.config.url.indexOf('/chat/') !== -1){
