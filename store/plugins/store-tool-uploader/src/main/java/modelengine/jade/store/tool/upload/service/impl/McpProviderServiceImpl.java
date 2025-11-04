@@ -6,9 +6,9 @@
 
 package modelengine.jade.store.tool.upload.service.impl;
 
+import static modelengine.fel.tool.ToolSchema.NAME;
 import static modelengine.fitframework.inspection.Validation.notBlank;
 import static modelengine.fitframework.inspection.Validation.notNull;
-import static modelengine.fel.tool.ToolSchema.NAME;
 
 import modelengine.fel.tool.mcp.client.McpClient;
 import modelengine.fel.tool.mcp.client.McpClientFactory;
@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -227,7 +226,7 @@ public class McpProviderServiceImpl implements McpProviderService {
      */
     private PluginData buildMcpPluginData(McpProviderRequest request, List<Tool> mcpTools, String userId) {
         String pluginId = generatePluginId(request.getServerIdentifier());
-        String userGroupId = null;
+        String userGroupId = "*";
         if (this.isEnableDomainDivision) {
             userGroupId = this.domainDivisionService.getUserGroupId();
         }
