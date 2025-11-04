@@ -346,9 +346,31 @@ public class McpProviderServiceImpl implements McpProviderService {
         List<DefinitionData> definitions = mcpTools.stream().map(tool -> {
             DefinitionData def = new DefinitionData();
             def.setName(tool.getName());
-            Map<String, Object> schema = new HashMap<>(tool.getInputSchema());
+            def.setGroupName(serverIdentifier);  // 设置 groupName
+            
+            // 构建完整的 schema 结构
+            Map<String, Object> schema = new HashMap<>();
             schema.put(NAME, tool.getName());
-            schema.put(DESCRIPTION, tool.getDescription());
+            schema.put(DESCRIPTION, tool.getDescription() != null ? tool.getDescription() : "");
+            
+            // 构建 parameters 结构
+            Map<String, Object> inputSchema = tool.getInputSchema();
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("type", inputSchema.getOrDefault("type", "object"));
+            parameters.put("properties", inputSchema.getOrDefault("properties", new HashMap<>()));
+            parameters.put("required", inputSchema.getOrDefault("required", new ArrayList<>()));
+            schema.put("parameters", parameters);
+            
+            // 构建 order
+            Map<String, Object> properties = (Map<String, Object>) inputSchema.getOrDefault("properties", new HashMap<>());
+            schema.put("order", new ArrayList<>(properties.keySet()));
+            
+            // 构建 return
+            Map<String, Object> returnSchema = new HashMap<>();
+            returnSchema.put("type", "string");
+            returnSchema.put("convertor", "");
+            schema.put("return", returnSchema);
+            
             def.setSchema(schema);
             return def;
         }).collect(Collectors.toList());
@@ -373,16 +395,42 @@ public class McpProviderServiceImpl implements McpProviderService {
             ToolData toolData = new ToolData();
             toolData.setName(tool.getName());
             toolData.setUniqueName(serverIdentifier + "_" + tool.getName());
-            toolData.setDescription(tool.getDescription());
+            toolData.setDescription(tool.getDescription() != null ? tool.getDescription() : "");
             toolData.setDefName(tool.getName());
             toolData.setDefGroupName(serverIdentifier);
             toolData.setGroupName(serverIdentifier);
-            toolData.setSchema(new HashMap<>(tool.getInputSchema()));
             
+            // 构建完整的 schema 结构（与定义一致）
+            Map<String, Object> inputSchema = tool.getInputSchema();
+            Map<String, Object> schema = new HashMap<>();
+            schema.put(NAME, tool.getName());
+            schema.put(DESCRIPTION, tool.getDescription() != null ? tool.getDescription() : "");
+            
+            // 构建 parameters 结构
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("type", inputSchema.getOrDefault("type", "object"));
+            parameters.put("properties", inputSchema.getOrDefault("properties", new HashMap<>()));
+            parameters.put("required", inputSchema.getOrDefault("required", new ArrayList<>()));
+            schema.put("parameters", parameters);
+            
+            // 构建 order
+            Map<String, Object> properties = (Map<String, Object>) inputSchema.getOrDefault("properties", new HashMap<>());
+            schema.put("order", new ArrayList<>(properties.keySet()));
+            
+            // 构建 return
+            Map<String, Object> returnSchema = new HashMap<>();
+            returnSchema.put("type", "string");
+            returnSchema.put("convertor", "");
+            schema.put("return", returnSchema);
+            
+            toolData.setSchema(schema);
+            
+            // 设置 extensions
             Map<String, Object> extensions = new HashMap<>();
             extensions.put("tags", Arrays.asList(MCP));
             toolData.setExtensions(extensions);
             
+            // 设置 runnables
             Map<String, Object> runnables = new HashMap<>();
             runnables.put(MCP, "mcp-tool-" + tool.getName());
             toolData.setRunnables(runnables);
