@@ -247,8 +247,8 @@ public class McpProviderServiceImpl implements McpProviderService {
         pluginData.setToolGroupDataList(toolGroups);
         pluginData.setUserGroupId(userGroupId);
 
-        // 构建插件工具数据列表
-        List<PluginToolData> pluginToolDataList = PluginProcessor.buildPluginToolDatas(toolGroups, userGroupId, pluginId);
+        // 构建插件工具数据列表（需要包含完整的字段）
+        List<PluginToolData> pluginToolDataList = buildMcpPluginToolDatas(toolGroups, userGroupId, pluginId, userId);
         pluginData.setPluginToolDataList(pluginToolDataList);
 
         // 设置扩展信息
@@ -273,6 +273,64 @@ public class McpProviderServiceImpl implements McpProviderService {
         pluginData.setExtension(extension);
 
         return pluginData;
+    }
+
+    /**
+     * 构建 MCP 插件工具数据列表。
+     *
+     * @param toolGroupDatas 表示工具组数据的 {@link List}{@code <}{@link ToolGroupData}{@code >}。
+     * @param userGroupId 表示用户组 ID 的 {@link String}。
+     * @param pluginId 表示插件 ID 的 {@link String}。
+     * @param userId 表示用户 ID 的 {@link String}。
+     * @return 表示插件工具数据列表的 {@link List}{@code <}{@link PluginToolData}{@code >}。
+     */
+    private List<PluginToolData> buildMcpPluginToolDatas(List<ToolGroupData> toolGroupDatas, 
+            String userGroupId, String pluginId, String userId) {
+        return toolGroupDatas.stream()
+                .flatMap(toolGroupData -> toolGroupData.getTools().stream())
+                .map(toolData -> buildMcpPluginToolData(toolData, userGroupId, pluginId, userId))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 构建单个 MCP 插件工具数据。
+     *
+     * @param toolData 表示工具数据的 {@link ToolData}。
+     * @param userGroupId 表示用户组 ID 的 {@link String}。
+     * @param pluginId 表示插件 ID 的 {@link String}。
+     * @param userId 表示用户 ID 的 {@link String}。
+     * @return 表示插件工具数据的 {@link PluginToolData}。
+     */
+    private PluginToolData buildMcpPluginToolData(ToolData toolData, String userGroupId, 
+            String pluginId, String userId) {
+        PluginToolData pluginToolData = new PluginToolData();
+        
+        // 从 ToolData 继承的字段
+        pluginToolData.setName(toolData.getName());
+        pluginToolData.setUniqueName(toolData.getUniqueName());
+        pluginToolData.setDescription(toolData.getDescription());
+        pluginToolData.setGroupName(toolData.getGroupName());
+        pluginToolData.setDefName(toolData.getDefName());
+        pluginToolData.setDefGroupName(toolData.getDefGroupName());
+        pluginToolData.setSchema(toolData.getSchema());
+        pluginToolData.setRunnables(toolData.getRunnables());
+        pluginToolData.setExtensions(toolData.getExtensions());
+        pluginToolData.setVersion(toolData.getVersion());
+        pluginToolData.setLatest(toolData.getLatest());
+        
+        // StoreToolData 的字段
+        pluginToolData.setCreator(userId);
+        pluginToolData.setModifier(userId);
+        if (toolData.getExtensions() != null && toolData.getExtensions().get("tags") != null) {
+            List<String> tagsList = (List<String>) toolData.getExtensions().get("tags");
+            pluginToolData.setTags(tagsList.stream().collect(Collectors.toSet()));
+        }
+        
+        // PluginToolData 的字段
+        pluginToolData.setPluginId(pluginId);
+        pluginToolData.setUserGroupId(userGroupId);
+        
+        return pluginToolData;
     }
 
     /**
