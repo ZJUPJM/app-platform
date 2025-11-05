@@ -3,6 +3,24 @@
   flex-direction: column;
   border-radius: 0 0 8px 8px;
   background: #fff !important;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  // 让 Spin 组件占据剩余空间
+  .ant-spin-nested-loading {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .ant-spin-nested-loading > .ant-spin-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
   .market-search {
     width: 100%;
     display: none;
@@ -25,8 +43,10 @@
     }
   }
   .market-card {
-    height: calc(100vh - 320px);
-    overflow: auto;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
@@ -64,6 +84,7 @@
   }
   .market-page {
     padding-top: 16px;
+    flex-shrink: 0;
   }
   .market-empty {
     height: 100%;

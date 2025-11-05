@@ -360,7 +360,8 @@ const AppLayout: React.FC = () => {
     return location.pathname.includes('/chat/') ||
            location.pathname.includes('/home') ||
            location.pathname.includes('/app') ||
-           location.pathname.includes('/app-develop');
+           location.pathname.includes('/app-develop') ||
+           location.pathname.includes('/tools');
   }
   const isSpaMode = () => {
     return  (process.env.NODE_ENV !== 'development' && process.env.PACKAGE_MODE !== 'common')

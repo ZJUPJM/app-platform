@@ -35,8 +35,8 @@ export const sourceTabs = [
   { key: 'ALL', label: i18n.t('all') },
   { key: 'HTTP', label: 'Http' },
   // { key: 'MCP', label: 'MCP' },
-  { key: 'CUSTOM', label: i18n.t('customPlugin') },
   { key: 'WATERFLOW', label: i18n.t('workflow') },
+  { key: 'CUSTOM', label: i18n.t('customPlugin') },
 ];
 
 export const paramsColumns = [

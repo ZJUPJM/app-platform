@@ -26,6 +26,7 @@
     justify-content: center;
     align-items: center;
     pointer-events: auto;
+    margin-left: 16px;
     img {
       width: 32px;
       height: 32px;
@@ -113,6 +114,8 @@
     display: flex;
     align-items: center;
     pointer-events: auto;
+    margin-right: 16px;
+    gap: 8px;
     .header-grid-btn {
       display: flex;
       align-items: center;
@@ -183,6 +186,7 @@
   .publish-btn {
     color: #fff;
     background-color: #047bfc;
+    margin-left: 8px;
   }
   .publish-btn:disabled {
     background-color: rgba(0, 0, 0, 0.04);
