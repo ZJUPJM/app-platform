@@ -321,11 +321,6 @@ public class McpProviderServiceImpl implements McpProviderService {
         pluginToolData.setVersion(toolData.getVersion());
         pluginToolData.setLatest(toolData.getLatest());
         
-        log.info("Built PluginToolData: uniqueName={}, extensions keys={}, extensions content={}", 
-                toolData.getUniqueName(), 
-                toolData.getExtensions() != null ? toolData.getExtensions().keySet() : "null",
-                toolData.getExtensions());
-        
         // StoreToolData 的字段
         pluginToolData.setCreator(userId);
         pluginToolData.setModifier(userId);
