@@ -552,23 +552,32 @@ public class McpProviderServiceImpl implements McpProviderService {
         response.setUpdatedAt(System.currentTimeMillis() / 1000);
         
         // 转换工具列表
-        List<McpToolInfo> toolInfos = mcpTools.isEmpty() 
-            ? pluginData.getToolGroupDataList().stream()
-                .flatMap(toolGroup -> toolGroup.getTools().stream())
-                .map(toolData -> {
-                    McpToolInfo toolInfo = new McpToolInfo();
-                    toolInfo.setAuthor(pluginData.getCreator());
-                    toolInfo.setName(toolData.getName());
-                    toolInfo.setLabel(buildMultiLangMap(toolData.getName()));
-                    toolInfo.setDescription(buildMultiLangMap(toolData.getDescription()));
-                    toolInfo.setParameters(Collections.emptyList());
-                    toolInfo.setLabels(Collections.emptyList());
-                    toolInfo.setOutputSchema(Collections.emptyMap());
-                    return toolInfo;
-                }).collect(Collectors.toList())
-            : mcpTools.stream()
-                .map(tool -> McpToolConverter.convertToToolInfo(tool, pluginData.getCreator()))
-                .collect(Collectors.toList());
+        List<McpToolInfo> toolInfos;
+        if (!mcpTools.isEmpty()) {
+            // 使用传入的 MCP 工具列表（创建时）
+            toolInfos = mcpTools.stream()
+                    .map(tool -> McpToolConverter.convertToToolInfo(tool, pluginData.getCreator()))
+                    .collect(Collectors.toList());
+        } else if (pluginData.getToolGroupDataList() != null && !pluginData.getToolGroupDataList().isEmpty()) {
+            // 从数据库读取的工具组列表（查询时）
+            toolInfos = pluginData.getToolGroupDataList().stream()
+                    .filter(toolGroup -> toolGroup.getTools() != null)
+                    .flatMap(toolGroup -> toolGroup.getTools().stream())
+                    .map(toolData -> {
+                        McpToolInfo toolInfo = new McpToolInfo();
+                        toolInfo.setAuthor(pluginData.getCreator());
+                        toolInfo.setName(toolData.getName());
+                        toolInfo.setLabel(buildMultiLangMap(toolData.getName()));
+                        toolInfo.setDescription(buildMultiLangMap(toolData.getDescription()));
+                        toolInfo.setParameters(Collections.emptyList());
+                        toolInfo.setLabels(Collections.emptyList());
+                        toolInfo.setOutputSchema(Collections.emptyMap());
+                        return toolInfo;
+                    }).collect(Collectors.toList());
+        } else {
+            // 无法获取工具列表，返回空列表
+            toolInfos = Collections.emptyList();
+        }
         
         response.setTools(toolInfos);
         
