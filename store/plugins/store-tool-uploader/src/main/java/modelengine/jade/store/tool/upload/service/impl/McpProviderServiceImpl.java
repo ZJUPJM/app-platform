@@ -232,9 +232,12 @@ public class McpProviderServiceImpl implements McpProviderService {
             userGroupId = this.domainDivisionService.getUserGroupId();
         }
 
+        // 构建 MCP 服务器配置
+        Map<String, Object> mcpServerConfig = buildMcpServerConfig(request);
+
         // 构建定义组和工具组
         List<DefinitionGroupData> defGroups = buildDefinitionGroups(mcpTools, request.getServerIdentifier());
-        List<ToolGroupData> toolGroups = buildToolGroups(mcpTools, request.getServerIdentifier());
+        List<ToolGroupData> toolGroups = buildToolGroups(mcpTools, request.getServerIdentifier(), mcpServerConfig);
 
         // 构建插件数据
         PluginData pluginData = new PluginData();
@@ -381,13 +384,34 @@ public class McpProviderServiceImpl implements McpProviderService {
     }
 
     /**
+     * 构建 MCP 服务器配置。
+     *
+     * @param request 表示请求的 {@link McpProviderRequest}。
+     * @return 表示服务器配置的 {@link Map}{@code <}{@link String}{@code , }{@link Object}{@code >}。
+     */
+    private Map<String, Object> buildMcpServerConfig(McpProviderRequest request) {
+        Map<String, Object> serverConfig = new HashMap<>();
+        serverConfig.put("url", request.getMcpServerUrl());
+        if (request.getHeaders() != null) {
+            serverConfig.put("headers", new HashMap<>(request.getHeaders()));
+        }
+        if (request.getConfig() != null) {
+            serverConfig.put("sseReadTimeout", request.getConfig().getSseReadTimeout());
+            serverConfig.put("timeout", request.getConfig().getTimeout());
+        }
+        return serverConfig;
+    }
+
+    /**
      * 构建工具组列表。
      *
      * @param mcpTools 表示 MCP 工具列表的 {@link List}{@code <}{@link Tool}{@code >}。
      * @param serverIdentifier 表示服务器标识符的 {@link String}。
+     * @param mcpServerConfig 表示 MCP 服务器配置的 {@link Map}{@code <}{@link String}{@code , }{@link Object}{@code >}。
      * @return 表示工具组列表的 {@link List}{@code <}{@link ToolGroupData}{@code >}。
      */
-    private List<ToolGroupData> buildToolGroups(List<Tool> mcpTools, String serverIdentifier) {
+    private List<ToolGroupData> buildToolGroups(List<Tool> mcpTools, String serverIdentifier, 
+            Map<String, Object> mcpServerConfig) {
         ToolGroupData toolGroup = new ToolGroupData();
         toolGroup.setName(serverIdentifier);
         toolGroup.setDefGroupName(serverIdentifier);
@@ -411,7 +435,7 @@ public class McpProviderServiceImpl implements McpProviderService {
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("type", inputSchema.getOrDefault("type", "object"));
             parameters.put("properties", inputSchema.getOrDefault("properties", new HashMap<>()));
-            parameters.put("required", inputSchema.getOrDefault("required", new ArrayList<>()));
+            parameters.put("required", inputSchema.getOrDefault("required", Collections.emptyList()));
             schema.put("parameters", parameters);
             
             // 构建 order
@@ -426,9 +450,11 @@ public class McpProviderServiceImpl implements McpProviderService {
             
             toolData.setSchema(schema);
             
-            // 设置 extensions
+            // 设置 extensions - 包含 MCP 服务器配置
             Map<String, Object> extensions = new HashMap<>();
             extensions.put("tags", Arrays.asList(MCP));
+            extensions.put("mcpServer", mcpServerConfig);  // ✅ 添加 MCP 服务器配置
+            extensions.put("toolRealName", tool.getName());  // ✅ 添加工具真实名称
             toolData.setExtensions(extensions);
             
             // 设置 runnables
