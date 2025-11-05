@@ -30,6 +30,7 @@ import java.util.Map;
  */
 public class McpTool implements Tool {
     private static final Logger log = Logger.get(McpTool.class);
+    // 使用与 AippConst 相同的常量值
     private static final String MCP_SERVER_KEY = "mcpServer";
     private static final String MCP_SERVER_URL_KEY = "url";
     private static final String TOOL_REAL_NAME = "toolRealName";
@@ -82,7 +83,15 @@ public class McpTool implements Tool {
         
         // 从 extensions 中获取 MCP 服务器配置
         Map<String, Object> extensions = this.toolInfo.extensions();
-        if (extensions == null || !extensions.containsKey(MCP_SERVER_KEY)) {
+        log.info("Tool extensions: {}", extensions);
+        
+        if (extensions == null) {
+            log.error("Tool extensions is null for tool: {}", this.toolInfo.uniqueName());
+            throw new IllegalStateException("Tool extensions is null.");
+        }
+        
+        if (!extensions.containsKey(MCP_SERVER_KEY)) {
+            log.error("MCP_SERVER_KEY not found in extensions. Available keys: {}", extensions.keySet());
             throw new IllegalStateException("MCP server configuration not found in tool extensions.");
         }
         

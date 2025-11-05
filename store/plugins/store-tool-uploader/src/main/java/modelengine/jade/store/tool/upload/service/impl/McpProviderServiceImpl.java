@@ -321,6 +321,11 @@ public class McpProviderServiceImpl implements McpProviderService {
         pluginToolData.setVersion(toolData.getVersion());
         pluginToolData.setLatest(toolData.getLatest());
         
+        log.info("Built PluginToolData: uniqueName={}, extensions keys={}, extensions content={}", 
+                toolData.getUniqueName(), 
+                toolData.getExtensions() != null ? toolData.getExtensions().keySet() : "null",
+                toolData.getExtensions());
+        
         // StoreToolData 的字段
         pluginToolData.setCreator(userId);
         pluginToolData.setModifier(userId);
@@ -456,6 +461,9 @@ public class McpProviderServiceImpl implements McpProviderService {
             extensions.put("mcpServer", mcpServerConfig);  // ✅ 添加 MCP 服务器配置
             extensions.put("toolRealName", tool.getName());  // ✅ 添加工具真实名称
             toolData.setExtensions(extensions);
+            
+            log.info("Built tool: name={}, uniqueName={}, extensions keys={}", 
+                    tool.getName(), toolData.getUniqueName(), extensions.keySet());
             
             // 设置 runnables
             Map<String, Object> runnables = new HashMap<>();
