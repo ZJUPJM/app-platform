@@ -122,15 +122,19 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
       console.log('Test connection request body:', requestBody); // 调试日志
       
       const apiResult: any = await testMCPServiceConnection(tenantId, requestBody);
-      const isSuccess = apiResult?.code === 200;
+      
+      // 判断成功：有 tools 数据或者 code 是成功码
+      const hasTools = apiResult?.data?.tools && apiResult.data.tools.length > 0;
+      const isSuccess = hasTools || apiResult?.code === 200 || apiResult?.code === 0;
+      
       setTestResult({
         success: isSuccess,
         message: isSuccess ? '连接测试成功' : (apiResult?.msg || '连接测试失败'),
-        details: apiResult?.data?.tools ? `发现 ${apiResult.data.tools.length} 个可用工具` : (isSuccess ? '服务连接正常，配置参数有效' : '无法连接到指定端点，请检查URL和配置参数')
+        details: hasTools ? `发现 ${apiResult.data.tools.length} 个可用工具` : (isSuccess ? '服务连接正常，配置参数有效' : '无法连接到指定端点，请检查URL和配置参数')
       });
       
       if (isSuccess) {
-        message.success('连接测试成功');
+        message.success(`连接测试成功${hasTools ? `，发现 ${apiResult.data.tools.length} 个可用工具` : ''}`);
         setCurrentStep(currentStep + 1); // 测试成功后自动进入下一步
       } else {
         message.error(apiResult?.msg || '连接测试失败');
