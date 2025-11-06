@@ -24,6 +24,7 @@ import {
 export const useValidation = (tenantId: string, _logPrefix: string = 'Validation') => {
   const dispatch = useAppDispatch();
   const appValidateInfo = useAppSelector((state) => state.appStore.validateInfo);
+  const appInfo = useAppSelector((state) => state.appStore.appInfo);
 
   const checkValidity = useCallback(async (data: any, isWorkFlow?: boolean) => {
     if (!data?.flowGraph?.appearance) {
@@ -74,7 +75,7 @@ export const useValidation = (tenantId: string, _logPrefix: string = 'Validation
     } catch (error) {
       throw error;
     }
-  }, [tenantId, dispatch, appValidateInfo]);
+  }, [tenantId, dispatch, appValidateInfo, appInfo]);
 
   return { checkValidity };
 };

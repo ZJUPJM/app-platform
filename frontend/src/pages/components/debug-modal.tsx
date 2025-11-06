@@ -54,9 +54,17 @@ const DebugModal = ({ isWorkFlow, showElsa, mashupClick, closeDebug }) => {
   };
 
   const getPrompt = (item, isWorkFlow) => {
-    // 前端表单校验错误直接显示错误消息
+    // 前端表单校验错误显示字段名和具体错误信息
     if (item.source === 'frontend' && item.errorMessage) {
-      return item.errorMessage;
+      const parts = [];
+      // 添加节点字段名（优先使用 fieldName，如果没有则使用 configName 作为后备）
+      const fieldName = item.fieldName || item.configName || '';
+      if (fieldName) {
+        parts.push(fieldName);
+      }
+      // 添加具体错误信息
+      parts.push(item.errorMessage);
+      return parts.join('');
     }
     
     // 后端可用性校验错误

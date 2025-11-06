@@ -28,6 +28,7 @@ import {updateFlowInfo} from '@/shared/http/aipp';
 import {getAddFlowConfig, getEvaluateConfig} from '@/shared/http/appBuilder';
 import {useAppDispatch, useAppSelector} from '@/store/hook';
 import {setValidateInfo} from '@/store/appInfo/appInfo';
+import {useValidation} from '@/shared/hooks/useValidation';
 import {setTestStatus, setTestTime} from '@/store/flowTest/flowTest';
 import {FlowContext, RenderContext} from '../../aippIndex/context';
 import CreateTestSet from '../../appDetail/evaluate/testSet/createTestset/createTestSet';
@@ -97,6 +98,20 @@ const Stage = (props) => {
   const formCallback = useRef<any>();
   const currentApp = useRef<any>();
   const currentChange = useRef<any>(false);
+  
+  // 使用统一的校验 Hook
+  const { checkValidity } = useValidation(tenantId || '', 'elsa-stage');
+  
+  // 防抖的校验函数，避免频繁触发
+  const debouncedCheckValidityRef = useRef<any>(null);
+  if (!debouncedCheckValidityRef.current) {
+    debouncedCheckValidityRef.current = debounce((data: any) => {
+      if (data?.flowGraph?.appearance && (window as any).agent) {
+        checkValidity(data);
+      }
+    }, 500);
+  }
+  const debouncedCheckValidity = debouncedCheckValidityRef.current;
   const modalRef = useRef<any>();
   const openModalRef = useRef<any>();
   const searchCallback = useRef<any>();
@@ -186,6 +201,12 @@ const Stage = (props) => {
       agent.onChange((dirtyAction) => {
         if (dirtyAction.action === 'jade_node_config_change') {
           handleFlowConfigChange();
+          // 节点配置改变时，自动触发校验（使用防抖避免频繁触发）
+          const currentData = {
+            flowGraph: { appearance: agent.serialize() },
+            configFormProperties: appInfo?.configFormProperties || []
+          };
+          debouncedCheckValidity(currentData);
         }
         currentChange.current = true;
         handleChange(CONFIGS[configIndex].params.appId);
