@@ -103,7 +103,9 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
   const handleTestConnection = async () => {
     try {
       setLoading(true);
-      const values = form.getFieldsValue();
+      const values = form.getFieldsValue(true); // 获取所有字段值，包括其他步骤的
+      
+      console.log('Form values:', values); // 调试日志
       
       // 构建测试连接的请求体
       const requestBody = {
@@ -115,6 +117,8 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
           timeout: values.timeout || 30
         }
       };
+      
+      console.log('Test connection request body:', requestBody); // 调试日志
       
       const apiResult: any = await testMCPServiceConnection(tenantId, requestBody);
       const isSuccess = apiResult?.code === 200;
@@ -145,7 +149,9 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
   const handleFinish = async () => {
     try {
       setLoading(true);
-      const values = form.getFieldsValue();
+      const values = form.getFieldsValue(true); // 获取所有字段值
+      
+      console.log('Form values:', values); // 调试日志
       
       // 构建创建 MCP 插件的请求体
       const requestBody = {
@@ -158,6 +164,8 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
           timeout: values.timeout || 30
         }
       };
+      
+      console.log('Create MCP request body:', requestBody); // 调试日志
       
       const result = await addManualMCPService(tenantId, requestBody);
 
