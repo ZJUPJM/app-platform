@@ -107,13 +107,14 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
       
       console.log('Form values:', values); // 调试日志
       
-      // 构建测试连接的请求体
+      // 构建测试连接的请求体（使用 camelCase）
       const requestBody = {
-        mcp_server_url: values.endpoint,
-        server_identifier: values.name ? values.name.replace(/\s+/g, '_').toLowerCase() : 'test_server',
+        name: values.name || 'Test MCP Server',
+        mcpServerUrl: values.endpoint,
+        serverIdentifier: values.name ? values.name.replace(/\s+/g, '_').toLowerCase() : 'test_server',
         headers: values.headers || {},
         config: {
-          sse_read_timeout: values.sseReadTimeout || 300,
+          sseReadTimeout: values.sseReadTimeout || 300,
           timeout: values.timeout || 30
         }
       };
@@ -153,14 +154,14 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
       
       console.log('Form values:', values); // 调试日志
       
-      // 构建创建 MCP 插件的请求体
+      // 构建创建 MCP 插件的请求体（使用 camelCase）
       const requestBody = {
         name: values.name,
-        mcp_server_url: values.endpoint,
-        server_identifier: values.name ? values.name.replace(/\s+/g, '_').toLowerCase() : 'mcp_server',
+        mcpServerUrl: values.endpoint,
+        serverIdentifier: values.name ? values.name.replace(/\s+/g, '_').toLowerCase() : 'mcp_server',
         headers: values.headers || {},
         config: {
-          sse_read_timeout: values.sseReadTimeout || 300,
+          sseReadTimeout: values.sseReadTimeout || 300,
           timeout: values.timeout || 30
         }
       };
