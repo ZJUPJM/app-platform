@@ -104,18 +104,32 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
     try {
       setLoading(true);
       const values = form.getFieldsValue();
-      const apiResult: any = await testMCPServiceConnection(
-        tenantId,
-        values.endpoint,
-        values.config
-      );
-      const isSuccess = apiResult?.code === 0 || apiResult?.success === true;
+      
+      // 构建测试连接的请求体
+      const requestBody = {
+        mcp_server_url: values.endpoint,
+        server_identifier: values.name ? values.name.replace(/\s+/g, '_').toLowerCase() : 'test_server',
+        headers: values.headers || {},
+        config: {
+          sse_read_timeout: values.sseReadTimeout || 300,
+          timeout: values.timeout || 30
+        }
+      };
+      
+      const apiResult: any = await testMCPServiceConnection(tenantId, requestBody);
+      const isSuccess = apiResult?.code === 200;
       setTestResult({
         success: isSuccess,
         message: isSuccess ? '连接测试成功' : (apiResult?.msg || '连接测试失败'),
-        details: apiResult?.data?.details || apiResult?.detail || (isSuccess ? '服务连接正常，配置参数有效' : '无法连接到指定端点，请检查URL和配置参数')
+        details: apiResult?.data?.tools ? `发现 ${apiResult.data.tools.length} 个可用工具` : (isSuccess ? '服务连接正常，配置参数有效' : '无法连接到指定端点，请检查URL和配置参数')
       });
-      isSuccess ? message.success('连接测试成功') : message.error(apiResult?.msg || '连接测试失败');
+      
+      if (isSuccess) {
+        message.success('连接测试成功');
+        setCurrentStep(currentStep + 1); // 测试成功后自动进入下一步
+      } else {
+        message.error(apiResult?.msg || '连接测试失败');
+      }
     } catch (error) {
       setTestResult({
         success: false,
@@ -132,26 +146,33 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
     try {
       setLoading(true);
       const values = form.getFieldsValue();
-      await addManualMCPService(tenantId, {
+      
+      // 构建创建 MCP 插件的请求体
+      const requestBody = {
         name: values.name,
-        description: values.description,
-        endpoint: values.endpoint,
-        category: values.category,
-        config: values.config,
-        timeout: values.timeout,
-        retryCount: values.retryCount,
-      });
+        mcp_server_url: values.endpoint,
+        server_identifier: values.name ? values.name.replace(/\s+/g, '_').toLowerCase() : 'mcp_server',
+        headers: values.headers || {},
+        config: {
+          sse_read_timeout: values.sseReadTimeout || 300,
+          timeout: values.timeout || 30
+        }
+      };
+      
+      const result = await addManualMCPService(tenantId, requestBody);
 
-      if (onServiceAdd) {
+      if (onServiceAdd && result?.data) {
         onServiceAdd({
-          id: Date.now().toString(),
+          id: result.data.id,
           name: values.name,
           description: values.description,
           endpoint: values.endpoint,
-          category: values.category,
-          config: values.config || {},
-          source: 'moda-manual',
-          status: 'disconnected',
+          config: {
+            sse_read_timeout: values.sseReadTimeout || 300,
+            timeout: values.timeout || 30
+          },
+          source: 'mcp',
+          status: 'active',
           createTime: new Date().toLocaleString()
         });
       }
@@ -161,7 +182,7 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
       setCurrentStep(0);
       form.resetFields();
     } catch (error) {
-      message.error('导入MCP服务失败');
+      message.error('导入MCP服务失败: ' + ((error as any)?.message || ''));
     } finally {
       setLoading(false);
     }
@@ -191,102 +212,74 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
               </Form.Item>
               
               <Form.Item
-                name="description"
-                label="服务描述"
-                rules={[{ required: true, message: '请输入服务描述' }]}
-              >
-                <Input.TextArea 
-                  placeholder="请输入MCP服务描述" 
-                  rows={3}
-                />
-              </Form.Item>
-              
-              <Form.Item
                 name="endpoint"
-                label="服务端点"
+                label="服务端点 URL"
                 rules={[
                   { required: true, message: '请输入服务端点' },
                   { type: 'url', message: '请输入有效的URL地址' }
                 ]}
+                tooltip="MCP 服务器的完整 URL 地址，例如: https://mcp.api-inference.modelscope.net/xxx/sse"
               >
-                <Input placeholder="https://mcp.modelscope.cn/your-service" />
-              </Form.Item>
-              
-              <Form.Item
-                name="category"
-                label="服务分类"
-                rules={[{ required: true, message: '请选择服务分类' }]}
-              >
-                <Select placeholder="请选择服务分类">
-                  <Select.Option value="AI模型">AI模型</Select.Option>
-                  <Select.Option value="数据服务">数据服务</Select.Option>
-                  <Select.Option value="开发工具">开发工具</Select.Option>
-                  <Select.Option value="文件操作">文件操作</Select.Option>
-                  <Select.Option value="网络服务">网络服务</Select.Option>
-                  <Select.Option value="业务服务">业务服务</Select.Option>
-                  <Select.Option value="监控运维">监控运维</Select.Option>
-                  <Select.Option value="专业领域">专业领域</Select.Option>
-                </Select>
+                <Input placeholder="https://mcp.api-inference.modelscope.net/xxx/sse" />
               </Form.Item>
             </Form>
           </div>
         );
 
       case 1:
-        const configTemplate = form.getFieldValue('config') || {};
         return (
           <div>
             <Alert
               message="服务配置参数"
-              description="根据服务类型配置相应的参数。这些参数将用于与MCP服务进行交互。"
+              description="配置 MCP 服务的连接参数，包括认证信息和超时设置。"
               type="info"
               showIcon
               style={{ marginBottom: '16px' }}
             />
             
             <Form form={form} layout="vertical">
-              {Object.entries(configTemplate).map(([key, schema]: [string, any]) => (
-                <Form.Item
-                  key={key}
-                  name={['config', key]}
-                  label={key}
-                  rules={[{ required: schema.required, message: `请输入${key}` }]}
-                >
-                  {schema.type === 'select' ? (
-                    <Select placeholder={`请选择${key}`}>
-                      {schema.options.map((option: string) => (
-                        <Select.Option key={option} value={option}>{option}</Select.Option>
-                      ))}
-                    </Select>
-                  ) : schema.type === 'number' ? (
-                    <InputNumber
-                      min={schema.min}
-                      max={schema.max}
-                      placeholder={`请输入${key}`}
-                      style={{ width: '100%' }}
-                    />
-                  ) : schema.type === 'boolean' ? (
-                    <Switch />
-                  ) : (
-                    <Input placeholder={`请输入${key}`} />
-                  )}
-                </Form.Item>
-              ))}
-              
               <Form.Item
-                name="timeout"
-                label="连接超时时间(秒)"
-                initialValue={30}
+                name={['headers', 'Authorization']}
+                label={
+                  <span>
+                    Authorization Header &nbsp;
+                    <Tooltip title="用于 MCP 服务器认证，例如: Bearer your-token">
+                      <InfoCircleOutlined />
+                    </Tooltip>
+                  </span>
+                }
               >
-                <InputNumber min={5} max={300} style={{ width: '100%' }} />
+                <Input placeholder="Bearer your-token" />
               </Form.Item>
               
               <Form.Item
-                name="retryCount"
-                label="重试次数"
-                initialValue={3}
+                name="sseReadTimeout"
+                label={
+                  <span>
+                    SSE 读取超时时间(秒) &nbsp;
+                    <Tooltip title="Server-Sent Events 长连接的读取超时时间">
+                      <InfoCircleOutlined />
+                    </Tooltip>
+                  </span>
+                }
+                initialValue={300}
               >
-                <InputNumber min={0} max={10} style={{ width: '100%' }} />
+                <InputNumber min={30} max={600} style={{ width: '100%' }} />
+              </Form.Item>
+              
+              <Form.Item
+                name="timeout"
+                label={
+                  <span>
+                    普通请求超时时间(秒) &nbsp;
+                    <Tooltip title="普通 HTTP 请求的超时时间">
+                      <InfoCircleOutlined />
+                    </Tooltip>
+                  </span>
+                }
+                initialValue={30}
+              >
+                <InputNumber min={5} max={120} style={{ width: '100%' }} />
               </Form.Item>
             </Form>
           </div>
@@ -345,24 +338,32 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
                   <div><strong>服务名称：</strong>{values.name}</div>
                 </Col>
                 <Col span={12}>
-                  <div><strong>服务分类：</strong><Tag color="blue">{values.category}</Tag></div>
-                </Col>
-                <Col span={24}>
-                  <div><strong>服务描述：</strong>{values.description}</div>
+                  <div><strong>服务标识：</strong>{values.name ? values.name.replace(/\s+/g, '_').toLowerCase() : 'mcp_server'}</div>
                 </Col>
                 <Col span={24}>
                   <div><strong>服务端点：</strong>{values.endpoint}</div>
                 </Col>
-                {values.config && Object.keys(values.config).length > 0 && (
+                <Col span={12}>
+                  <div><strong>SSE 超时：</strong>{values.sseReadTimeout || 300} 秒</div>
+                </Col>
+                <Col span={12}>
+                  <div><strong>请求超时：</strong>{values.timeout || 30} 秒</div>
+                </Col>
+                {values.headers?.Authorization && (
                   <Col span={24}>
-                    <div><strong>配置参数：</strong></div>
-                    <div style={{ marginTop: '8px' }}>
-                      {Object.entries(values.config).map(([key, value]) => (
-                        <Tag key={key} style={{ marginBottom: '4px' }}>
-                          {key}: {String(value)}
-                        </Tag>
-                      ))}
+                    <div><strong>认证信息：</strong>
+                      <Tag color="green">已配置</Tag>
                     </div>
+                  </Col>
+                )}
+                {testResult?.success && testResult.details && (
+                  <Col span={24}>
+                    <Alert
+                      message="测试结果"
+                      description={testResult.details}
+                      type="success"
+                      showIcon
+                    />
                   </Col>
                 )}
               </Row>

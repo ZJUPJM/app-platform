@@ -6,7 +6,7 @@
 
 import { get, post, put, del } from './http';
 
-const MCP_URL = '/api/mcp';
+const MCP_URL = '/api/jober/plugins/mcp';
 
 // MCP服务接口
 export interface MCPService {
@@ -136,28 +136,15 @@ export function getModaServiceExamples(serviceId: string) {
 }
 
 // 手动配置添加MCP服务
-export function addManualMCPService(tenantId: string, serviceData: {
-  name: string;
-  description: string;
-  endpoint: string;
-  category: string;
-  config?: any;
-  timeout?: number;
-  retryCount?: number;
-}) {
-  return post(`${MCP_URL}/services/manual`, {
-    tenantId,
-    ...serviceData
-  });
+export function addManualMCPService(tenantId: string, serviceData: any) {
+  // 调用后端接口：POST /api/jober/plugins/mcp
+  return post(`${MCP_URL}`, serviceData);
 }
 
 // 测试MCP服务连接
-export function testMCPServiceConnection(tenantId: string, endpoint: string, config?: any) {
-  return post(`${MCP_URL}/services/test-connection`, {
-    tenantId,
-    endpoint,
-    config
-  });
+export function testMCPServiceConnection(tenantId: string, requestBody: any) {
+  // 调用后端接口：POST /api/jober/plugins/mcp/test-connection
+  return post(`${MCP_URL}/test-connection`, requestBody);
 }
 
 // 获取MCP服务配置模板
