@@ -140,7 +140,8 @@ export function addManualMCPService(tenantId: string, serviceData: any) {
 // 测试MCP服务连接
 export function testMCPServiceConnection(tenantId: string, requestBody: any) {
   // 调用后端接口：POST /api/jober/plugins/mcp/test-connection
-  return post(`${MCP_URL}/test-connection`, requestBody);
+  // 添加 skipErrorHandler 配置，跳过全局错误处理
+  return post(`${MCP_URL}/test-connection`, requestBody, { skipErrorHandler: true } as any);
 }
 
 // 获取MCP服务配置模板
