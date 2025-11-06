@@ -81,19 +81,20 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
       console.log('response.data type:', typeof response?.data); // 调试日志
       
       // 根据实际响应结构提取数据数组
-      // 可能的结构：
-      // 1. response = { data: { data: [...], code: 0 } }  (axios 自动解包)
-      // 2. response = { data: [...], code: 0 }
+      // 后端返回结构: { data: { items: [...], pagination: {...} }, code: 0 }
       let dataArray = [];
       
-      if (Array.isArray(response?.data?.data)) {
-        // 情况1: response.data.data 是数组
+      if (Array.isArray(response?.data?.items)) {
+        // response.data.items 是数组（后端实际结构）
+        dataArray = response.data.items;
+      } else if (Array.isArray(response?.data?.data)) {
+        // response.data.data 是数组
         dataArray = response.data.data;
       } else if (Array.isArray(response?.data)) {
-        // 情况2: response.data 是数组
+        // response.data 是数组
         dataArray = response.data;
       } else if (Array.isArray(response)) {
-        // 情况3: response 本身是数组
+        // response 本身是数组
         dataArray = response;
       } else {
         console.error('Unexpected response structure:', response);
