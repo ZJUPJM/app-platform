@@ -119,18 +119,17 @@ public class UploadPluginController {
      * 创建 MCP 工具提供者。
      *
      * @param request 表示创建请求的 {@link McpProviderRequest}。
-     * @param userId 表示用户 ID 的 {@link String}。
      * @return 表示格式化之后的返回消息的 {@link Result}{@code <}{@link McpProviderResponse}{@code >}。
      */
     @CarverSpan("operation.store.mcp.create")
     @PostMapping(path = "/mcp", description = "创建 MCP 工具提供者")
     @CreateSource
     public Result<McpProviderResponse> createMcpProvider(
-            @RequestBody @SpanAttr("name:$.name") McpProviderRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) String userId) {
+            @RequestBody @SpanAttr("name:$.name") McpProviderRequest request) {
         notNull(request, "The MCP provider request cannot be null.");
-        String effectiveUserId = notBlank(userId, "The user ID cannot be blank.");
-        McpProviderResponse response = this.mcpProviderService.createMcpProvider(request, effectiveUserId);
+        // 使用默认用户（全局共享）
+        String userId = "system";
+        McpProviderResponse response = this.mcpProviderService.createMcpProvider(request, userId);
         return Result.ok(response, 1);
     }
 
@@ -139,19 +138,17 @@ public class UploadPluginController {
      *
      * @param providerId 表示提供者 ID 的 {@link String}。
      * @param request 表示更新请求的 {@link McpProviderRequest}。
-     * @param userId 表示用户 ID 的 {@link String}。
      * @return 表示格式化之后的返回消息的 {@link Result}{@code <}{@link McpProviderResponse}{@code >}。
      */
     @CarverSpan("operation.store.mcp.update")
     @PutMapping(path = "/mcp/{providerId}", description = "更新 MCP 工具提供者")
     public Result<McpProviderResponse> updateMcpProvider(
             @PathVariable("providerId") @SpanAttr("providerId") String providerId,
-            @RequestBody McpProviderRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) String userId) {
+            @RequestBody McpProviderRequest request) {
         notBlank(providerId, "The provider ID cannot be blank.");
         notNull(request, "The MCP provider request cannot be null.");
-        String effectiveUserId = notBlank(userId, "The user ID cannot be blank.");
-        McpProviderResponse response = this.mcpProviderService.updateMcpProvider(providerId, request, effectiveUserId);
+        String userId = "system";
+        McpProviderResponse response = this.mcpProviderService.updateMcpProvider(providerId, request, userId);
         return Result.ok(response, 1);
     }
 
@@ -159,33 +156,29 @@ public class UploadPluginController {
      * 删除 MCP 工具提供者。
      *
      * @param providerId 表示提供者 ID 的 {@link String}。
-     * @param userId 表示用户 ID 的 {@link String}。
      * @return 表示格式化之后的返回消息的 {@link Result}{@code <}{@link String}{@code >}。
      */
     @CarverSpan("operation.store.mcp.delete")
     @DeleteMapping(path = "/mcp/{providerId}", description = "删除 MCP 工具提供者")
     @PluginValidation
     public Result<String> deleteMcpProvider(
-            @PathVariable("providerId") @SpanAttr("providerId") String providerId,
-            @RequestHeader(value = "X-User-Id", required = false) String userId) {
+            @PathVariable("providerId") @SpanAttr("providerId") String providerId) {
         notBlank(providerId, "The provider ID cannot be blank.");
-        String effectiveUserId = notBlank(userId, "The user ID cannot be blank.");
-        int deleteNum = this.mcpProviderService.deleteMcpProvider(providerId, effectiveUserId);
+        String userId = "system";
+        int deleteNum = this.mcpProviderService.deleteMcpProvider(providerId, userId);
         return Result.ok(null, deleteNum);
     }
 
     /**
      * 获取 MCP 工具提供者列表。
      *
-     * @param userId 表示用户 ID 的 {@link String}。
      * @return 表示格式化之后的返回消息的 {@link Result}{@code <}{@link Map}{@code <}{@link String}{@code , }{@link Object}{@code >}{@code >}。
      */
     @CarverSpan("operation.store.mcp.list")
     @GetMapping(path = "/mcp", description = "获取 MCP 工具提供者列表")
-    public Result<Map<String, Object>> listMcpProviders(
-            @RequestHeader(value = "X-User-Id", required = false) String userId) {
-        String effectiveUserId = notBlank(userId, "The user ID cannot be blank.");
-        List<McpProviderResponse> providers = this.mcpProviderService.listMcpProviders(effectiveUserId);
+    public Result<Map<String, Object>> listMcpProviders() {
+        String userId = "system";
+        List<McpProviderResponse> providers = this.mcpProviderService.listMcpProviders(userId);
         
         Map<String, Object> result = new HashMap<>();
         result.put("items", providers);
@@ -203,17 +196,15 @@ public class UploadPluginController {
      * 获取 MCP 工具提供者详情。
      *
      * @param providerId 表示提供者 ID 的 {@link String}。
-     * @param userId 表示用户 ID 的 {@link String}。
      * @return 表示格式化之后的返回消息的 {@link Result}{@code <}{@link McpProviderResponse}{@code >}。
      */
     @CarverSpan("operation.store.mcp.get")
     @GetMapping(path = "/mcp/{providerId}", description = "获取 MCP 工具提供者详情")
     public Result<McpProviderResponse> getMcpProvider(
-            @PathVariable("providerId") @SpanAttr("providerId") String providerId,
-            @RequestHeader(value = "X-User-Id", required = false) String userId) {
+            @PathVariable("providerId") @SpanAttr("providerId") String providerId) {
         notBlank(providerId, "The provider ID cannot be blank.");
-        String effectiveUserId = notBlank(userId, "The user ID cannot be blank.");
-        McpProviderResponse response = this.mcpProviderService.getMcpProvider(providerId, effectiveUserId);
+        String userId = "system";
+        McpProviderResponse response = this.mcpProviderService.getMcpProvider(providerId, userId);
         return Result.ok(response, 1);
     }
 
