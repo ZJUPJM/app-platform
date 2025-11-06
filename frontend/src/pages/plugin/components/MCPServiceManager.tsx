@@ -33,7 +33,8 @@ import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '@/store/hook';
 import { 
   getMCPServices, 
-  testMCPConnection, 
+  getMCPService,
+  testMCPServiceConnection, 
   deleteMCPService 
 } from '@/shared/http/mcp';
 import { TENANT_ID } from '../../chatPreview/components/send-editor/common/config';
@@ -75,8 +76,24 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
     setLoading(true);
     try {
       const response: any = await getMCPServices(tenantId);
-      setServices(response?.data || []);
+      console.log('MCP services response:', response); // 调试日志
+      
+      // 转换后端数据格式为前端期望的格式
+      const transformedServices = (response?.data || []).map((item: any) => ({
+        id: item.pluginId,
+        name: item.pluginName,
+        description: item.extension?.description || item.pluginName,
+        endpoint: item.extension?.serverUrl || '',
+        status: item.deployStatus === 'RELEASED' ? 'connected' : 'disconnected',
+        lastTestTime: item.modifier ? new Date().toLocaleString() : undefined,
+        createTime: new Date().toLocaleString(),
+        source: 'moda'
+      }));
+      
+      console.log('Transformed services:', transformedServices); // 调试日志
+      setServices(transformedServices);
     } catch (error) {
+      console.error('Failed to load MCP services:', error);
       message.error('加载MCP服务失败');
     } finally {
       setLoading(false);
@@ -85,35 +102,51 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
 
 
   // 处理手动配置服务导入
-  const handleManualServiceAdd = (service: any) => {
-    const newService: MCPService = {
-      id: service.id,
-      name: service.name,
-      description: service.description,
-      endpoint: service.endpoint,
-      status: service.status || 'disconnected',
-      createTime: service.createTime,
-      source: 'moda-manual'
-    };
-    
-    setServices(prev => [newService, ...prev]);
-    message.success(`手动配置的MCP服务 ${service.name} 导入成功`);
+  const handleManualServiceAdd = async (service: any) => {
+    message.success(`MCP服务 ${service.name} 添加成功`);
+    // 重新加载服务列表以获取最新数据
+    await loadServices();
   };
 
   const handleTestConnection = async (service: MCPService) => {
     setTestingServices(prev => new Set(prev).add(service.id));
     try {
-      await testMCPConnection(tenantId, service.id);
+      // 先获取服务详情以获取完整配置
+      const serviceDetail: any = await getMCPService(tenantId, service.id);
+      const extension = serviceDetail?.data?.extension || {};
+      
+      // 构建测试请求体
+      const requestBody = {
+        name: service.name,
+        mcpServerUrl: service.endpoint,
+        serverIdentifier: extension.serverIdentifier || service.name.replace(/\s+/g, '_').toLowerCase(),
+        headers: extension.headers || {},
+        config: extension.config || {
+          sseReadTimeout: 300,
+          timeout: 30
+        }
+      };
+      
+      // 调用测试连接接口
+      const result: any = await testMCPServiceConnection(tenantId, requestBody);
+      const hasTools = result?.data?.tools && result.data.tools.length > 0;
+      const isSuccess = hasTools || result?.code === 200 || result?.code === 0;
+      
       setServices(prev => prev.map(s => 
         s.id === service.id 
           ? { 
               ...s, 
-              status: 'connected',
+              status: isSuccess ? 'connected' : 'disconnected',
               lastTestTime: new Date().toLocaleString()
             }
           : s
       ));
-      message.success('连接测试成功');
+      
+      if (isSuccess) {
+        message.success(`连接测试成功${hasTools ? `，发现 ${result.data.tools.length} 个可用工具` : ''}`);
+      } else {
+        message.error('连接测试失败');
+      }
     } catch (error) {
       setServices(prev => prev.map(s => 
         s.id === service.id 

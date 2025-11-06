@@ -42,32 +42,28 @@ export function getMCPServices(tenantId: string, params?: {
   status?: string;
   source?: string;
 }) {
-  return get(`${MCP_URL}/services`, {
-    tenantId,
+  // 调用后端接口：GET /api/jober/plugins/mcp
+  return get(`${MCP_URL}`, {
     ...params
   });
 }
 
 // 获取单个MCP服务详情
 export function getMCPService(tenantId: string, serviceId: string) {
-  return get(`${MCP_URL}/services/${serviceId}`, {
-    tenantId
-  });
+  // 调用后端接口：GET /api/jober/plugins/mcp/{providerId}
+  return get(`${MCP_URL}/${serviceId}`);
 }
 
 // 更新MCP服务
 export function updateMCPService(tenantId: string, serviceId: string, data: Partial<MCPService>) {
-  return put(`${MCP_URL}/services/${serviceId}`, {
-    tenantId,
-    ...data
-  });
+  // 调用后端接口：PUT /api/jober/plugins/mcp/{providerId}
+  return put(`${MCP_URL}/${serviceId}`, data);
 }
 
 // 删除MCP服务
 export function deleteMCPService(tenantId: string, serviceId: string) {
-  return del(`${MCP_URL}/services/${serviceId}`, {
-    tenantId
-  });
+  // 调用后端接口：DELETE /api/jober/plugins/mcp/{providerId}
+  return del(`${MCP_URL}/${serviceId}`);
 }
 
 // 测试MCP服务连接

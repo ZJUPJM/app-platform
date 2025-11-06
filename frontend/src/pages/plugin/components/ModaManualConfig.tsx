@@ -172,20 +172,22 @@ const ModaManualConfig: React.FC<ModaManualConfigProps> = ({ onServiceAdd }) => 
       
       console.log('Create MCP request body:', requestBody); // 调试日志
       
-      const result = await addManualMCPService(tenantId, requestBody);
+      const result: any = await addManualMCPService(tenantId, requestBody);
+
+      console.log('Create MCP result:', result); // 调试日志
 
       if (onServiceAdd && result?.data) {
         onServiceAdd({
-          id: result.data.id,
-          name: values.name,
-          description: values.description,
-          endpoint: values.endpoint,
-          config: {
-            sse_read_timeout: values.sseReadTimeout || 300,
+          id: result.data.pluginId || result.data.id, // 后端返回的是 pluginId
+          name: result.data.pluginName || values.name,
+          description: result.data.extension?.description || values.name,
+          endpoint: result.data.extension?.serverUrl || values.endpoint,
+          config: result.data.extension?.config || {
+            sseReadTimeout: values.sseReadTimeout || 300,
             timeout: values.timeout || 30
           },
-          source: 'mcp',
-          status: 'active',
+          source: 'moda',
+          status: 'connected',
           createTime: new Date().toLocaleString()
         });
       }
