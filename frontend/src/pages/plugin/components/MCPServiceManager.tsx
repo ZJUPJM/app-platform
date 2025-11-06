@@ -76,10 +76,34 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
     setLoading(true);
     try {
       const response: any = await getMCPServices(tenantId);
-      console.log('MCP services response:', response); // 调试日志
+      console.log('MCP services raw response:', response); // 调试日志
+      console.log('response.data:', response?.data); // 调试日志
+      console.log('response.data type:', typeof response?.data); // 调试日志
+      
+      // 根据实际响应结构提取数据数组
+      // 可能的结构：
+      // 1. response = { data: { data: [...], code: 0 } }  (axios 自动解包)
+      // 2. response = { data: [...], code: 0 }
+      let dataArray = [];
+      
+      if (Array.isArray(response?.data?.data)) {
+        // 情况1: response.data.data 是数组
+        dataArray = response.data.data;
+      } else if (Array.isArray(response?.data)) {
+        // 情况2: response.data 是数组
+        dataArray = response.data;
+      } else if (Array.isArray(response)) {
+        // 情况3: response 本身是数组
+        dataArray = response;
+      } else {
+        console.error('Unexpected response structure:', response);
+        dataArray = [];
+      }
+      
+      console.log('Extracted data array:', dataArray); // 调试日志
       
       // 转换后端数据格式为前端期望的格式
-      const transformedServices = (response?.data || []).map((item: any) => ({
+      const transformedServices = dataArray.map((item: any) => ({
         id: item.pluginId,
         name: item.pluginName,
         description: item.extension?.description || item.pluginName,
