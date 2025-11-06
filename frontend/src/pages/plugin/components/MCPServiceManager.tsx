@@ -105,13 +105,13 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
       
       // 转换后端数据格式为前端期望的格式
       const transformedServices = dataArray.map((item: any) => ({
-        id: item.pluginId,
-        name: item.pluginName,
-        description: item.extension?.description || item.pluginName,
-        endpoint: item.extension?.serverUrl || '',
+        id: item.id,
+        name: item.name,
+        description: item.description.en_US,
+        endpoint: item.serverUrl,
         status: item.deployStatus === 'RELEASED' ? 'connected' : 'disconnected',
-        lastTestTime: item.modifier ? new Date().toLocaleString() : undefined,
-        createTime: new Date().toLocaleString(),
+        lastTestTime: undefined,
+        createTime: item.updatedAt,
         source: 'moda'
       }));
       
@@ -304,8 +304,8 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
   ];
 
   const filteredServices = services.filter(service =>
-    service.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    service.description.toLowerCase().includes(searchText.toLowerCase())
+    (service.name || '').toLowerCase().includes(searchText.toLowerCase()) ||
+    (service.description || '').toLowerCase().includes(searchText.toLowerCase())
   );
 
   const [isConfigModalVisible, setIsConfigModalVisible] = useState(false);
