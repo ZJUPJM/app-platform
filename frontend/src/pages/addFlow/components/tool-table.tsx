@@ -43,7 +43,7 @@ const ToolTable = (props: any) => {
     searchName,
   } = props;
   const [getPluginData, setGetPluginData] = useState<any>([]);
-  const modalTypes = ['pluginButtonTool', 'llmTool', 'loop'];
+  const modalTypes = ['pluginButtonTool', 'loop'];
   let checkedToolList: any = [];
 
   const confirm = (item: any) => {
