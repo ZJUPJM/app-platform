@@ -30,6 +30,7 @@ import Mine from '@/assets/images/pluginModal/mine.png';
 import All from '@/assets/images/pluginModal/all.png';
 import Tool from '@/assets/images/pluginModal/tool.png';
 import Http from '@/assets/images/pluginModal/http.png';
+import Mcp from '@/assets/images/pluginModal/agent.png';
 import HuggingFace from '@/assets/images/pluginModal/hugging-face.png';
 import LangChain from '@/assets/images/pluginModal/lang-chain.png';
 import LlamaIndex from '@/assets/images/pluginModal/llama-index.png';
@@ -248,6 +249,8 @@ const ToolDrawer = (props) => {
         return Tool;
       case 'HTTP':
         return Http;
+      case 'MCP':
+        return Mcp;
       case 'HUGGINGFACE':
         return HuggingFace;
       case 'LLAMAINDEX':

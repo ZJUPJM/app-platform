@@ -62,12 +62,13 @@ export const minePluginCategories = [
   { key: 'APP', label: i18n.t('all') },
   { key: 'CUSTOM', label: i18n.t('tool') },
   { key: 'HTTP', label: 'Http' },
+  { key: 'MCP', label: 'MCP' },
   // { key: 'LANGCHAIN', label: 'LangChain' },
   // { key: 'LLAMAINDEX', label: 'LlamaIndex' },
   { key: 'WATERFLOW', label: i18n.t('workFlow') },
 ];
 
-export const generalPluginCategories = ['APP', 'CUSTOM', 'HTTP', 'HUGGINGFACE', 'LLAMAINDEX', 'LANGCHAIN', 'WATERFLOW'];
+export const generalPluginCategories = ['APP', 'CUSTOM', 'HTTP', 'MCP', 'HUGGINGFACE', 'LLAMAINDEX', 'LANGCHAIN', 'WATERFLOW'];
 
 export const chatbotPluginCategories = ['CHATBOT', 'AGENT', 'WORKFLOW'];
 
