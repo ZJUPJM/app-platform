@@ -17,7 +17,8 @@ import {
   Space, 
   Popconfirm,
   Tooltip,
-  Spin
+  Spin,
+  Pagination
 } from 'antd';
 import { 
   PlusOutlined, 
@@ -39,6 +40,7 @@ import {
 } from '@/shared/http/mcp';
 import { TENANT_ID } from '../../chatPreview/components/send-editor/common/config';
 import ModaManualConfig from './ModaManualConfig';
+import './MCPServiceManager.scss';
 
 interface MCPService {
   id: string;
@@ -63,6 +65,8 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [testingServices, setTestingServices] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // 删除本地模拟数据，改为真实接口
 
@@ -70,6 +74,11 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
   useEffect(() => {
     loadServices();
   }, []);
+
+  // 当搜索文本改变时，重置到第一页
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText]);
 
 
   const loadServices = async () => {
@@ -216,10 +225,11 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
       title: '服务名称',
       dataIndex: 'name',
       key: 'name',
+      width: 200,
       render: (text: string, record: MCPService) => (
         <div>
-          <div style={{ fontWeight: 500, marginBottom: '4px' }}>{text}</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>{record.description}</div>
+          <div style={{ fontWeight: 500, color: '#1a1a1a', fontSize: '14px' }}>{text}</div>
+          {/* <div style={{ fontSize: '12px', color: '#808080', marginTop: '4px' }}>{record.description}</div> */}
         </div>
       ),
     },
@@ -227,25 +237,42 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
       title: '端点地址',
       dataIndex: 'endpoint',
       key: 'endpoint',
+      width: 300,
+      ellipsis: true,
       render: (text: string) => (
-        <span style={{ fontFamily: 'monospace', fontSize: '12px' }}>{text}</span>
+        <span style={{ 
+          fontFamily: 'Consolas, Monaco, "Courier New", monospace', 
+          fontSize: '12px',
+          color: '#1a1a1a'
+        }}>{text}</span>
+      ),
+    },
+    {
+      title: '最后测试时间',
+      dataIndex: 'lastTestTime',
+      key: 'lastTestTime',
+      width: 120,
+      render: (time: string) => (
+        <span style={{ fontSize: '12px', color: '#808080' }}>{time || '未测试'}</span>
       ),
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
+      width: 120,
+      align: 'center' as const,
       render: (status: string) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
           {status === 'connected' ? (
             <>
-              <CheckCircleOutlined style={{ color: '#52c41a' }} />
-              <span style={{ color: '#52c41a' }}>已连接</span>
+              <CheckCircleOutlined style={{ color: '#00b336', fontSize: '14px' }} />
+              <span style={{ color: '#00b336', fontSize: '12px' }}>已连接</span>
             </>
           ) : (
             <>
-              <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
-              <span style={{ color: '#ff4d4f' }}>未连接</span>
+              <CloseCircleOutlined style={{ color: '#ff4d4f', fontSize: '14px' }} />
+              <span style={{ color: '#ff4d4f', fontSize: '12px' }}>未连接</span>
             </>
           )}
         </div>
@@ -255,31 +282,44 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
       title: '来源',
       dataIndex: 'source',
       key: 'source',
+      width: 120,
+      align: 'center' as const,
       render: (source: string) => (
-        <Tag color="default" style={{ backgroundColor: '#f5f5f5', color: '#666', border: 'none' }}>
+        <Tag 
+          color="default" 
+          style={{ 
+            backgroundColor: '#f5f5f5', 
+            color: '#595959', 
+            border: '1px solid #d9d9d9',
+            borderRadius: '4px',
+            fontSize: '12px',
+            padding: '2px 8px',
+            margin: 0
+          }}
+        >
           {source === 'moda' ? '魔搭社区' : '自定义'}
         </Tag>
       ),
     },
     {
-      title: '最后测试时间',
-      dataIndex: 'lastTestTime',
-      key: 'lastTestTime',
-      render: (time: string) => (
-        <span style={{ fontSize: '12px', color: '#666' }}>{time || '未测试'}</span>
-      ),
-    },
-    {
       title: '操作',
       key: 'action',
-      render: (_, record: MCPService) => (
-        <Space size="small">
+      width: 120,
+      align: 'center' as const,
+      fixed: 'right' as const,
+      render: (_: any, record: MCPService) => (
+        <Space size="middle">
           <Button
             type="link"
             icon={<LinkOutlined />}
             onClick={() => handleTestConnection(record)}
             loading={testingServices.has(record.id)}
-            style={{ padding: '0', height: 'auto' }}
+            style={{ 
+              padding: '0 4px', 
+              height: 'auto',
+              fontSize: '12px',
+              color: '#2673e5'
+            }}
           >
             测试
           </Button>
@@ -293,7 +333,11 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
               type="link" 
               danger 
               icon={<DeleteOutlined />}
-              style={{ padding: '0', height: 'auto' }}
+              style={{ 
+                padding: '0 4px', 
+                height: 'auto',
+                fontSize: '12px'
+              }}
             >
               删除
             </Button>
@@ -308,6 +352,11 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
     (service.description || '').toLowerCase().includes(searchText.toLowerCase())
   );
 
+  // 计算分页数据
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedServices = filteredServices.slice(startIndex, endIndex);
+
   const [isConfigModalVisible, setIsConfigModalVisible] = useState(false);
 
   const handleAddModaService = () => {
@@ -319,24 +368,50 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
 
       {/* 添加服务按钮 */}
       <div style={{ marginBottom: '16px' }}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAddModaService}>
+        <Button 
+          type="primary" 
+          icon={<PlusOutlined />} 
+          onClick={handleAddModaService}
+          style={{
+            height: '32px',
+            fontSize: '12px',
+            borderRadius: '4px'
+          }}
+        >
           添加魔搭社区服务
         </Button>
       </div>
 
       {/* 服务列表表格 */}
-      <div style={{ background: '#fff', borderRadius: '8px'}}>
+      <div className="mcp-service-table-wrapper">
         <Table
           columns={columns}
-          dataSource={filteredServices}
+          dataSource={paginatedServices}
           rowKey="id"
           loading={loading}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: false,
-            showTotal: (total) => `共${total}个服务`,
-            size: 'small'
+          pagination={false}
+          scroll={{ x: 'max-content' }}
+          size="middle"
+        />
+      </div>
+
+      {/* 分页器 */}
+      <div className="mcp-service-pagination-wrapper">
+        <Pagination
+          current={currentPage}
+          pageSize={pageSize}
+          total={filteredServices.length}
+          showSizeChanger
+          showQuickJumper={false}
+          showTotal={(total) => `共 ${total} 个服务`}
+          pageSizeOptions={['10', '20', '50', '100']}
+          onChange={(page, size) => {
+            setCurrentPage(page);
+            setPageSize(size);
+          }}
+          onShowSizeChange={(current, size) => {
+            setCurrentPage(1);
+            setPageSize(size);
           }}
         />
       </div>
@@ -357,13 +432,6 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
           }}
         />
       </Modal>
-
-      <style jsx>{`
-        .selected-service {
-          border-color: #1890ff !important;
-          background-color: #f0f8ff;
-        }
-      `}</style>
     </div>
   );
 };
