@@ -19,6 +19,7 @@ import modelengine.fel.tool.model.transfer.ToolData;
 import modelengine.fel.tool.model.transfer.ToolGroupData;
 import modelengine.fit.jade.aipp.domain.division.service.DomainDivisionService;
 import modelengine.fitframework.annotation.Component;
+import modelengine.fitframework.annotation.Fit;
 import modelengine.fitframework.annotation.Value;
 import modelengine.fitframework.log.Logger;
 import modelengine.fitframework.util.MapBuilder;
@@ -34,7 +35,6 @@ import modelengine.jade.store.tool.upload.dto.McpProviderRequest;
 import modelengine.jade.store.tool.upload.dto.McpProviderResponse;
 import modelengine.jade.store.tool.upload.dto.McpToolInfo;
 import modelengine.jade.store.tool.upload.service.McpProviderService;
-import modelengine.jade.store.tool.upload.support.processor.PluginProcessor;
 import modelengine.jade.store.tool.upload.util.McpToolConverter;
 import modelengine.jade.store.tool.upload.util.McpUtils;
 
@@ -85,7 +85,7 @@ public class McpProviderServiceImpl implements McpProviderService {
      * @param domainDivisionService 表示分域服务的 {@link DomainDivisionService}。
      * @param isEnableDomainDivision 表示是否启用分域的 {@code boolean}。
      */
-    public McpProviderServiceImpl(McpClientFactory mcpClientFactory, PluginService pluginService,
+    public McpProviderServiceImpl(@Fit(alias = "streamable") McpClientFactory mcpClientFactory, PluginService pluginService,
             DomainDivisionService domainDivisionService,
             @Value("${domain-division.isEnable}") boolean isEnableDomainDivision) {
         this.mcpClientFactory = notNull(mcpClientFactory, "The MCP client factory cannot be null.");
