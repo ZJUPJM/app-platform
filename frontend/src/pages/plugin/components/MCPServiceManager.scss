@@ -77,18 +77,19 @@
   }
 }
 
-.mcp-service-pagination-wrapper {
-  margin-top: 16px;
-  display: flex;
-  justify-content: flex-end;
-
-  .ant-pagination {
-    font-size: 12px;
-  }
-}
 
 .selected-service {
   border-color: #2673e5 !important;
   background-color: #f0f8ff;
+}
+
+// 去掉分页器左右箭头按钮的边框
+.market-page {
+  .ant-pagination {
+    .ant-pagination-prev .ant-pagination-item-link,
+    .ant-pagination-next .ant-pagination-item-link {
+      border: none !important;
+    }
+  }
 }
 

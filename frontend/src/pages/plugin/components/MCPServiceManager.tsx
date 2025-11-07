@@ -396,24 +396,26 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
       </div>
 
       {/* 分页器 */}
-      <div className="mcp-service-pagination-wrapper">
-        <Pagination
-          current={currentPage}
-          pageSize={pageSize}
-          total={filteredServices.length}
-          showSizeChanger
-          showQuickJumper={false}
-          showTotal={(total) => `共 ${total} 个服务`}
-          pageSizeOptions={['10', '20', '50', '100']}
-          onChange={(page, size) => {
-            setCurrentPage(page);
-            setPageSize(size);
-          }}
-          onShowSizeChange={(current, size) => {
-            setCurrentPage(1);
-            setPageSize(size);
-          }}
-        />
+      <div className="market-page">
+        <div className="page-component">
+          <span>共 {filteredServices.length} 个服务</span>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={filteredServices.length}
+            showSizeChanger
+            showQuickJumper
+            pageSizeOptions={['10', '20', '50', '100']}
+            onChange={(page, size) => {
+              setCurrentPage(page);
+              setPageSize(size);
+            }}
+            onShowSizeChange={(current, size) => {
+              setCurrentPage(1);
+              setPageSize(size);
+            }}
+          />
+        </div>
       </div>
 
       {/* 魔搭社区服务配置模态框 */}
