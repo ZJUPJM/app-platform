@@ -34,7 +34,7 @@ export const IconMap = {
 export const sourceTabs = [
   { key: 'ALL', label: i18n.t('all') },
   { key: 'HTTP', label: 'Http' },
-  // { key: 'MCP', label: 'MCP' },
+  { key: 'MCP', label: 'MCP' },
   { key: 'CUSTOM', label: i18n.t('customPlugin') },
   { key: 'WATERFLOW', label: i18n.t('workflow') },
 ];
