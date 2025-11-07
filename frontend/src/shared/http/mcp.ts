@@ -6,7 +6,7 @@
 
 import { get, post, put, del } from './http';
 
-const MCP_URL = '/api/mcp';
+const MCP_URL = '/api/jober/plugins/mcp';
 
 // MCP服务接口
 export interface MCPService {
@@ -42,32 +42,28 @@ export function getMCPServices(tenantId: string, params?: {
   status?: string;
   source?: string;
 }) {
-  return get(`${MCP_URL}/services`, {
-    tenantId,
+  // 调用后端接口：GET /api/jober/plugins/mcp
+  return get(`${MCP_URL}`, {
     ...params
   });
 }
 
 // 获取单个MCP服务详情
 export function getMCPService(tenantId: string, serviceId: string) {
-  return get(`${MCP_URL}/services/${serviceId}`, {
-    tenantId
-  });
+  // 调用后端接口：GET /api/jober/plugins/mcp/{providerId}
+  return get(`${MCP_URL}/${serviceId}`);
 }
 
 // 更新MCP服务
 export function updateMCPService(tenantId: string, serviceId: string, data: Partial<MCPService>) {
-  return put(`${MCP_URL}/services/${serviceId}`, {
-    tenantId,
-    ...data
-  });
+  // 调用后端接口：PUT /api/jober/plugins/mcp/{providerId}
+  return put(`${MCP_URL}/${serviceId}`, data);
 }
 
 // 删除MCP服务
 export function deleteMCPService(tenantId: string, serviceId: string) {
-  return del(`${MCP_URL}/services/${serviceId}`, {
-    tenantId
-  });
+  // 调用后端接口：DELETE /api/jober/plugins/mcp/{providerId}
+  return del(`${MCP_URL}/${serviceId}`);
 }
 
 // 测试MCP服务连接
@@ -136,28 +132,16 @@ export function getModaServiceExamples(serviceId: string) {
 }
 
 // 手动配置添加MCP服务
-export function addManualMCPService(tenantId: string, serviceData: {
-  name: string;
-  description: string;
-  endpoint: string;
-  category: string;
-  config?: any;
-  timeout?: number;
-  retryCount?: number;
-}) {
-  return post(`${MCP_URL}/services/manual`, {
-    tenantId,
-    ...serviceData
-  });
+export function addManualMCPService(tenantId: string, serviceData: any) {
+  // 调用后端接口：POST /api/jober/plugins/mcp
+  return post(`${MCP_URL}`, serviceData);
 }
 
 // 测试MCP服务连接
-export function testMCPServiceConnection(tenantId: string, endpoint: string, config?: any) {
-  return post(`${MCP_URL}/services/test-connection`, {
-    tenantId,
-    endpoint,
-    config
-  });
+export function testMCPServiceConnection(tenantId: string, requestBody: any) {
+  // 调用后端接口：POST /api/jober/plugins/mcp/test-connection
+  // 添加 skipErrorHandler 配置，跳过全局错误处理
+  return post(`${MCP_URL}/test-connection`, requestBody, { skipErrorHandler: true } as any);
 }
 
 // 获取MCP服务配置模板

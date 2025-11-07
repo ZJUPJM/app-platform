@@ -11,3 +11,8 @@ store:
       toolsPath: '/var/store/tools/'
 domain-division:
   isEnable: false
+
+mcp:
+  client:
+    request:
+      timeout-seconds: 300

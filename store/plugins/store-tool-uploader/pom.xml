@@ -60,6 +60,22 @@
             <version>${fit.version}</version>
         </dependency>
 
+        <!-- MCP -->
+        <dependency>
+            <groupId>org.fitframework.fel</groupId>
+            <artifactId>tool-mcp-client-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.modelcontextprotocol.sdk</groupId>
+            <artifactId>mcp</artifactId>
+            <version>0.15.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

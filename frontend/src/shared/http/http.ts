@@ -37,7 +37,10 @@ baseAxios.interceptors.response.use(
     if (response.data.code === undefined || response.data.code === 0 || response.data.code === 200 || response.data.code === '0') {
       return Promise.resolve(response.data);
     }
-    Message({ type: 'error', content: response.data.msg || response.data.detail || i18n.t('requestFailed') });
+    // 检查是否跳过错误处理
+    if (!(response.config as any)?.skipErrorHandler) {
+      Message({ type: 'error', content: response.data.msg || response.data.detail || i18n.t('requestFailed') });
+    }
     return Promise.resolve(response.data);
   },
   (error) => {
@@ -100,7 +103,7 @@ export const get = (url, params = {}, _object = {}) => {
 
 export const post = (url, data, _object = {}) => {
   return new Promise((resolve, reject) => {
-    baseAxios.post(url, data, { headers: _object }).then(
+    baseAxios.post(url, data, { headers: _object, ...(_object as any) }).then(
       (response) => {
         //关闭进度条
         resolve(response);
@@ -196,7 +199,13 @@ export const download = (url, params = {}, _object = {}) => {
 };
 
 const msag = (err) => {
-  const { response } = err
+  const { response, config } = err
+  
+  // 检查是否跳过错误处理
+  if ((config as any)?.skipErrorHandler) {
+    return;
+  }
+  
   if (response) {
     const status = response.status;
     Message({ type: 'error', content: ERROR_CODES[status] || err.message || i18n.t('requestFailed')});
