@@ -75,6 +75,51 @@
   .ant-empty {
     margin: 40px 0;
   }
+
+  /* 按列序设置百分比宽度并启用固定布局，确保随容器自适应 */
+  .ant-table {
+    table {
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    /* 列顺序：1 服务名称、2 端点地址、3 最后测试时间、4 状态、5 来源、6 操作 */
+    colgroup {
+      col:nth-child(1) { width: 24%; }
+      col:nth-child(2) { width: 34%; }
+      col:nth-child(3) { width: 14%; }
+      col:nth-child(4) { width: 10%; }
+      col:nth-child(5) { width: 8%; }
+      col:nth-child(6) { width: 10%; }
+    }
+
+    /* 与 colgroup 保持一致，增强兼容性 */
+    thead > tr > th:nth-child(1),
+    tbody > tr > td:nth-child(1) { width: 24%; }
+
+    thead > tr > th:nth-child(2),
+    tbody > tr > td:nth-child(2) { width: 34%; }
+
+    thead > tr > th:nth-child(3),
+    tbody > tr > td:nth-child(3) { width: 14%; }
+
+    thead > tr > th:nth-child(4),
+    tbody > tr > td:nth-child(4) { width: 10%; }
+
+    thead > tr > th:nth-child(5),
+    tbody > tr > td:nth-child(5) { width: 8%; }
+
+    thead > tr > th:nth-child(6),
+    tbody > tr > td:nth-child(6) { width: 10%; }
+
+    /* 长文本列省略号（服务名称、端点地址） */
+    tbody > tr > td:nth-child(1),
+    tbody > tr > td:nth-child(2) {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 }
 
 

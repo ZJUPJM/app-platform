@@ -225,7 +225,6 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
       title: '服务名称',
       dataIndex: 'name',
       key: 'name',
-      width: 200,
       render: (text: string, record: MCPService) => (
         <div>
           <div style={{ fontWeight: 500, color: '#1a1a1a', fontSize: '14px' }}>{text}</div>
@@ -237,7 +236,6 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
       title: '端点地址',
       dataIndex: 'endpoint',
       key: 'endpoint',
-      width: 300,
       ellipsis: true,
       render: (text: string) => (
         <span style={{ 
@@ -251,7 +249,6 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
       title: '最后测试时间',
       dataIndex: 'lastTestTime',
       key: 'lastTestTime',
-      width: 120,
       render: (time: string) => (
         <span style={{ fontSize: '12px', color: '#808080' }}>{time || '未测试'}</span>
       ),
@@ -260,7 +257,6 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      width: 120,
       align: 'center' as const,
       render: (status: string) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
@@ -282,7 +278,6 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
       title: '来源',
       dataIndex: 'source',
       key: 'source',
-      width: 120,
       align: 'center' as const,
       render: (source: string) => (
         <Tag 
@@ -304,11 +299,9 @@ const MCPServiceManager: React.FC<MCPServiceManagerProps> = ({ onServiceSelect }
     {
       title: '操作',
       key: 'action',
-      width: 120,
       align: 'center' as const,
-      fixed: 'right' as const,
       render: (_: any, record: MCPService) => (
-        <Space size="middle">
+        <Space size="small">
           <Button
             type="link"
             icon={<LinkOutlined />}
