@@ -107,6 +107,8 @@
 }
 .apps_root-spa {
   height: calc(100vh - 50px);
+  min-width: 0;
+  width: 100%;
 }
 .app-fullpage-spa {
   height: calc(100vh - 50px);
