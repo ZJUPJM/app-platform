@@ -169,19 +169,57 @@ const ToolDrawer = (props) => {
   const workflowAdd = () => {
     const workFlowList: any = [];
     const fitList: any = [];
-    checkedList.current.forEach((item) => {
-      if (item.tags.includes('WATERFLOW')) {
+    
+    if (!checkedList.current || checkedList.current.length === 0) {
+      return;
+    }
+    
+    // 过滤掉字符串类型的项，只处理对象类型的工具
+    // 在 addSkill 模式下，checkedList.current 可能包含字符串（uniqueName）和对象（工具对象）
+    // 我们只处理对象类型的工具，字符串类型的项应该已经被处理过了
+    const validTools = checkedList.current.filter((item) => {
+      const isString = typeof item === 'string';
+      const isObject = typeof item === 'object' && item !== null && !Array.isArray(item);
+      
+      if (isString) {
+        return false;
+      }
+      
+      if (!isObject) {
+        return false;
+      }
+      
+      // 确保对象有 uniqueName 属性
+      if (!item.uniqueName) {
+        return false;
+      }
+      
+      return true;
+    });
+    
+    validTools.forEach((item) => {
+      // 安全地检查 tags，处理 tags 可能为 undefined、null 或不是数组的情况
+      const tags = item?.tags || [];
+      const isArray = Array.isArray(tags);
+      
+      if (isArray && tags.includes('WATERFLOW')) {
         workFlowList.push({ ...item, type: 'waterflow' });
       } else {
         fitList.push({ ...item, type: 'tool' });
       }
     });
+    
     const workFlowId = workFlowList.map((item) => item.uniqueName);
     const fitId = fitList.map((item) => item.uniqueName);
+    
     if (type === 'addSkill') {
-      confirmCallBack(workFlowList, fitList);
+      if (typeof confirmCallBack === 'function') {
+        confirmCallBack(workFlowList, fitList);
+      }
     } else {
-      confirmCallBack(workFlowId, fitId);
+      if (typeof confirmCallBack === 'function') {
+        confirmCallBack(workFlowId, fitId);
+      }
     }
   };
 

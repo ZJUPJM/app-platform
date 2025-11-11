@@ -4,7 +4,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Collapse, Button, Divider, Tag } from 'antd';
 import { getPluginDetail, getChatbotPluginDetail } from '@/shared/http/plugin';
 import { useTranslation } from 'react-i18next';
@@ -43,8 +43,11 @@ const ToolTable = (props: any) => {
     searchName,
   } = props;
   const [getPluginData, setGetPluginData] = useState<any>([]);
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const modalTypes = ['pluginButtonTool', 'loop'];
   let checkedToolList: any = [];
+  // 用于标记是否正在进行批量添加操作
+  const isBatchAddingRef = useRef(false);
 
   const confirm = (item: any) => {
     const pluginInfo = pluginData?.mapType ? [pluginData] : getPluginData;
@@ -83,8 +86,94 @@ const ToolTable = (props: any) => {
     }
   };
 
+  // 批量添加处理函数
+  const handleBatchAdd = () => {
+    // 标记正在进行批量添加操作
+    isBatchAddingRef.current = true;
+    
+    const unselectedTools = getPluginData.filter((item: any) => !item.isChecked);
+    
+    if (unselectedTools.length === 0) {
+      isBatchAddingRef.current = false;
+      return;
+    }
+    
+    // 获取当前插件的 pluginId，用于过滤工具
+    const currentPluginId = pluginData?.pluginId;
+    
+    // 在 addSkill 模式下，我们需要确保只处理当前插件的工具
+    // 先过滤掉字符串类型的项，然后只添加当前插件的工具
+    if (type === 'addSkill') {
+      // 过滤掉字符串类型的项（这些是之前添加的其他插件的工具）
+      const objectTools = checkedList.current.filter((item: any) => {
+        return typeof item === 'object' && item !== null && !Array.isArray(item);
+      });
+      
+      // 进一步过滤，只保留当前插件的工具
+      // 工具对象的 pluginId 可能直接存在，也可能需要从父插件对象中获取
+      const currentPluginTools = objectTools.filter((item: any) => {
+        const itemPluginId = item?.pluginId || item?.pluginData?.pluginId;
+        return itemPluginId === currentPluginId;
+      });
+      
+      // 重置 checkedList.current，只保留当前插件的工具
+      checkedList.current = [...currentPluginTools];
+    }
+    
+    // 添加当前未选中的工具
+    unselectedTools.forEach((item: any) => {
+      // 确保工具属于当前插件
+      // 如果工具对象没有 pluginId，则从父插件对象中获取
+      const itemPluginId = item?.pluginId || pluginData?.pluginId;
+      
+      if (itemPluginId === currentPluginId) {
+        // 确保工具对象有 pluginId 属性
+        if (!item.pluginId) {
+          item.pluginId = currentPluginId;
+        }
+        item.isChecked = true;
+        checkedList.current.push(item);
+      }
+    });
+    
+    // 保存当前的 panelKey，确保面板保持展开
+    const currentPanelKey = pluginData.appCategory ? pluginData.uniqueName : pluginData.pluginId;
+    
+    // 更新 UI 状态
+    let newData = deepClone(getPluginData);
+    newData.forEach((ite: any) => {
+      if (!ite.isChecked) {
+        ite.isChecked = true;
+      }
+    });
+    setGetPluginData(newData);
+    
+    // 确保面板保持展开状态
+    // 如果当前 panelKey 不在 expandedKeys 中，则添加它
+    if (!expandedKeys.includes(currentPanelKey)) {
+      setExpandedKeys([...expandedKeys, currentPanelKey]);
+    }
+    
+    // 调用添加方法
+    if (type === 'addSkill') {
+      workflowAdd();
+    }
+    
+    // 延迟重置批量添加标志，确保父组件重新渲染完成后再重置
+    // 这样可以避免父组件重新渲染时触发的 onChange 关闭面板
+    setTimeout(() => {
+      isBatchAddingRef.current = false;
+    }, 500);
+  };
+
   // 通用HTML
   const fncHTML = (item: any, toolType: string) => {
+    const panelKey = pluginData.appCategory ? pluginData.uniqueName : pluginData.pluginId;
+    const isMcpPlugin = pluginData.extension?.type === 'mcp';
+    const isExpanded = expandedKeys.includes(panelKey);
+    const hasUnselectedTools = getPluginData.some((tool: any) => !tool.isChecked);
+    const showBatchAdd = isMcpPlugin && isExpanded && toolType === 'panel' && type === 'addSkill' && getPluginData.length > 0 && hasUnselectedTools;
+    
     return (
       <div className='tool-table'>
         <div className='tool-table-header'>
@@ -127,8 +216,17 @@ const ToolTable = (props: any) => {
                 {toolType === 'panel' ? item.extension.description : item.description}
               </div>
             </div>
-            {(toolType === ToolType.TOOL || toolType === ToolType.WATERFLOW) && (
-              <div>
+            <div className='tool-table-actions'>
+              {showBatchAdd && (
+                <Button
+                  type='primary'
+                  onClick={handleBatchAdd}
+                  className='batch-add-button'
+                >
+                  {t('批量添加') || 'batchAdd'}
+                </Button>
+              )}
+              {(toolType === ToolType.TOOL || toolType === ToolType.WATERFLOW) && (
                 <Button
                   disabled={type === 'addSkill' ? item.isChecked : false}
                   onClick={() => confirm(item.uniqueName)}
@@ -148,8 +246,8 @@ const ToolTable = (props: any) => {
                     t('additions')
                   )}
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -157,7 +255,25 @@ const ToolTable = (props: any) => {
   };
 
   const onChange = async (e: any) => {
-    let param = e.toString();
+    const panelKey = pluginData.appCategory ? pluginData.uniqueName : pluginData.pluginId;
+    
+    // 更新展开状态 - Collapse 的 onChange 接收的是展开 key 的数组
+    const expandedArray = Array.isArray(e) ? e : (e ? [e] : []);
+    const isCurrentlyExpanded = expandedArray.includes(panelKey);
+    const isTryingToClose = !isCurrentlyExpanded && expandedKeys.includes(panelKey);
+    
+    // 如果正在进行批量添加操作，且尝试关闭当前面板，则阻止关闭
+    if (isBatchAddingRef.current && isTryingToClose) {
+      // 保持面板展开状态
+      setExpandedKeys([...expandedKeys.filter(key => key !== panelKey), panelKey]);
+      return;
+    }
+    
+    // 更新展开状态
+    setExpandedKeys(expandedArray);
+    
+    let param = expandedArray.length > 0 ? panelKey : '';
+    
     if (type === 'addSkill') {
       checkData.forEach((item: any) => {
         checkedToolList.push(item.name);
@@ -181,15 +297,23 @@ const ToolTable = (props: any) => {
           setGetPluginData(newRes);
         }
       }
-    } catch {}
+    } catch (error) {
+      // 静默处理错误
+    }
   };
 
+  const panelKey = pluginData.appCategory ? pluginData.uniqueName : pluginData.pluginId;
+  
   return (
     <>
-      <Collapse expandIconPosition='end' onChange={onChange}>
+      <Collapse 
+        expandIconPosition='end' 
+        onChange={onChange}
+        activeKey={expandedKeys}
+      >
         <Collapse.Panel
           header={fncHTML(pluginData, 'panel')}
-          key={pluginData.appCategory ? pluginData.uniqueName : pluginData.pluginId}
+          key={panelKey}
         >
           {getPluginData.map((item: any, index: any) => {
             return (

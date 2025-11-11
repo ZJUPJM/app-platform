@@ -74,5 +74,16 @@
         color: white;
       }
     }
+
+    .tool-table-actions {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      margin-left: 16px;
+
+      .batch-add-button {
+        white-space: nowrap;
+      }
+    }
   }
 }

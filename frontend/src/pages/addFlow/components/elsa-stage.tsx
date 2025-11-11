@@ -393,6 +393,32 @@ const Stage = (props) => {
     }
   }
 
+  // 批量添加技能回调
+  const confirmCallBack = (workFlowList, fitList) => {
+    if (!Array.isArray(workFlowList) || !Array.isArray(fitList)) {
+      return;
+    }
+    
+    const toolList = fitList.concat(workFlowList);
+    
+    const uniqueNameList = toolList.map((item) => {
+      return item.uniqueName;
+    }).filter(name => name);
+    
+    setSkillList(uniqueNameList);
+    
+    // 为每个工具调用 pluginCallback.current，将工具添加到画布
+    if (pluginCallback.current && typeof pluginCallback.current === 'function') {
+      toolList.forEach((tool) => {
+        try {
+          pluginCallback.current(tool);
+        } catch (error) {
+          // 静默处理错误
+        }
+      });
+    }
+  }
+
   // 自定义表单选中
   const formConfirm = (item) => {
     formCallback.current(item);
@@ -556,6 +582,7 @@ const Stage = (props) => {
       checkData={skillList}
       modalType={modalTypes}
       type='addSkill'
+      confirmCallBack={confirmCallBack}
     />
     {/* 创建测试集 */}
     <CreateTestSet
