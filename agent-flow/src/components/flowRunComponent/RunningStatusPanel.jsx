@@ -81,6 +81,11 @@ const RunningStatusPanel = forwardRef(function ({shape, shapeStatus, onReportSho
         });
     };
 
+    // 如果节点未运行，不显示面板
+    if (shapeStatus.runStatus === NODE_STATUS.UN_RUNNING) {
+        return null;
+    }
+
     return (<>
         <div className={'running-status-panel'} style={getStyles()}>
             <Row style={{width: '95%', height: 20, marginLeft: MARGIN.left, marginTop: (MARGIN.top - 20) / 2}} justify="space-between" align="middle">
