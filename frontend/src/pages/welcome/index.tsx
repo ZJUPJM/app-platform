@@ -51,7 +51,7 @@ const WelcomePage: React.FC = () => {
       <Header className="welcome-header">
         <div className="welcome-header-content">
           <div className="welcome-logo">
-            <img src="https://modelengine-ai.net/assets/logo.302a9865.png" alt="Brand Logo" className="brand-img" />
+            <img src="https://modelengine-ai.net/assets/logo.302a9865.png" alt="品牌标识" className="brand-img" />
             <img src={AidoIcon} alt="AiDo" className="logo-img" />
           </div>
           {/* 顶部右侧操作：GitHub / Documentation / Get Started */}
@@ -64,41 +64,41 @@ const WelcomePage: React.FC = () => {
             </a>
             <a className="link-action" href="https://github.com/ModelEngine-Group/app-platform#readme" target="_blank" rel="noreferrer">
               <span className="icon docs" aria-hidden="true"></span>
-              <span>Documentation</span>
+              <span>文档</span>
             </a>
             <Button type="primary" className="btn-get-started" onClick={() => history.push('/home')}>
               <span className="icon bolt" aria-hidden="true"></span>
-              Get Started
+              立即体验
             </Button>
           </div>
         </div>
       </Header>
       <Content className="welcome-content">
         <div className="hero">
-          <h1 className="hero-title">Build AI Applications <span className="hero-em">Your Way</span></h1>
-          <p className="hero-sub">Create intelligent applications with natural language, visual workflows, or code. Debug, monitor, and evaluate with powerful built-in tools.</p>
+          <h1 className="hero-title">按你的方式构建 <span className="hero-em">AI 应用</span></h1>
+          <p className="hero-sub">使用自然语言、可视化流程或代码快速打造智能体和AI应用，并借助内置工具完成调试、部署、监控与评测等端到端生命周期管理</p>
           <div className="hero-cta">
             <Button type="primary" size="large" className="btn-start" onClick={() => history.push('/home')}>
               <span className="icon bolt" aria-hidden="true"></span>
-              Start Building
+              开始构建
             </Button>
             <a href="https://github.com/ModelEngine-Group/app-platform#readme" target="_blank" rel="noreferrer">
-              <Button size="large" className="btn-docs">View Docs</Button>
+              <Button size="large" className="btn-docs">查看文档</Button>
             </a>
           </div>
         </div>
 
         <div className="sections">
-          <h2 className="section-title">Three Ways to Create</h2>
+          <h2 className="section-title">三种创建方式</h2>
           <Row gutter={[16, 16]}>
             <Col xs={24} md={8}>
               <Card bordered={false} className="card-dark">
                 <div className="card-icon chat">
                   <svg className="h-12 w-12 text-primary mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                 </div>
-                <div className="card-title">Natural Language</div>
+                <div className="card-title">自然语言</div>
                 <div className="card-sub">NL2Agent</div>
-                <div className="card-desc">Describe your application in plain language and let AI transform your ideas into working applications instantly.</div>
+                <div className="card-desc">适用于动态变化、开放性强的任务场景，能够自主规划、多步决策并调用外部工具完成目标。</div>
               </Card>
             </Col>
             <Col xs={24} md={8}>
@@ -106,9 +106,9 @@ const WelcomePage: React.FC = () => {
                 <div className="card-icon workflow">
                   <svg className="h-12 w-12 text-secondary mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5" stroke-width="1.5"></circle><circle cx="18" cy="6" r="2.5" stroke-width="1.5"></circle><circle cx="18" cy="18" r="2.5" stroke-width="1.5"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.5 11l6.5-4M8.5 13l6.5 4"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 7.5l1.5-.5 .5 1.5M14 16.5l1.5.5.5-1.5"></path></svg>
                 </div>
-                <div className="card-title">Visual Workflow</div>
-                <div className="card-sub">Low-Code Builder</div>
-                <div className="card-desc">Drag and drop components to design AI workflows visually. Perfect for rapid prototyping and iteration.</div>
+                <div className="card-title">可视化流程</div>
+                <div className="card-sub">低代码构建器</div>
+                <div className="card-desc">适用于标准化、确定性强的业务流程，对步骤可控性、可复现性与合规性要求高的场景。</div>
               </Card>
             </Col>
             <Col xs={24} md={8}>
@@ -116,49 +116,49 @@ const WelcomePage: React.FC = () => {
                 <div className="card-icon code">
                   <svg className="h-12 w-12 text-accent mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
                 </div>
-                <div className="card-title">Code Framework</div>
-                <div className="card-sub">FEL Programming</div>
-                <div className="card-desc">Full programmatic control with our powerful framework. Build complex AI applications with complete flexibility.</div>
+                <div className="card-title">代码框架</div>
+                <div className="card-sub">FEL 编程</div>
+                <div className="card-desc">适合用于多步骤、复杂任务处理，以及已验证市场可行、正准备走向生产化的应用场景，特别是在需要高性能与高可靠性的任务编排场景。</div>
               </Card>
             </Col>
           </Row>
 
-          <h2 className="section-title mt">Powerful Features</h2>
+          <h2 className="section-title mt">核心能力</h2>
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12}>
               <Card bordered={false} className="card-dark">
-                <div className="card-title">Debug & Monitor</div>
-                <div className="card-desc">Real-time debugging and monitoring tools to track application performance and behavior.</div>
+                <div className="card-title">调试与监控</div>
+                <div className="card-desc">提供实时调试与监控工具，用于追踪应用性能和行为，方便快速定位解决问题。</div>
               </Card>
             </Col>
             <Col xs={24} md={12}>
               <Card bordered={false} className="card-dark">
-                <div className="card-title">Knowledge Base</div>
-                <div className="card-desc">Connect your own knowledge bases and enterprise data sources seamlessly.</div>
+                <div className="card-title">知识库</div>
+                <div className="card-desc">提供内置的 ModelEngine 向量化知识库，同时支持接入三方知识库，如百度千帆知识库，也可以无缝接入用户自定义的知识库等。</div>
               </Card>
             </Col>
             <Col xs={24} md={12}>
               <Card bordered={false} className="card-dark">
-                <div className="card-title">Evaluation Tools</div>
-                <div className="card-desc">Comprehensive evaluation framework to measure and improve application quality.</div>
+                <div className="card-title">评测体系</div>
+                <div className="card-desc">提供全面的评价体系，用于衡量应用效果并指导持续迭代，提升应用质量与用户体验。</div>
               </Card>
             </Col>
             <Col xs={24} md={12}>
               <Card bordered={false} className="card-dark">
-                <div className="card-title">Custom Interactions</div>
-                <div className="card-desc">Design custom interaction patterns beyond traditional chat interfaces.</div>
+                <div className="card-title">自定义交互</div>
+                <div className="card-desc">突破传统聊天界面限制，支持将表单输入、数据图表等UI组件灵活嵌入对话流中。构建面向任务的操作界面，实现真正以用户为中心的交互体验。</div>
               </Card>
             </Col>
             <Col xs={24} md={12}>
               <Card bordered={false} className="card-dark">
-                <div className="card-title">External Models</div>
-                <div className="card-desc">Integrate with any external large language model provider for maximum flexibility.</div>
+                <div className="card-title">外部模型</div>
+                <div className="card-desc">内置主流大模型适配层，亦可通过标准化 API 连接私有模型与第三方推理服务。实现灵活的模型选择与切换。</div>
               </Card>
             </Col>
             <Col xs={24} md={12}>
               <Card bordered={false} className="card-dark">
-                <div className="card-title">Workflow Orchestration</div>
-                <div className="card-desc">Orchestrate complex AI workflows with ease using our visual builder.</div>
+                <div className="card-title">流程编排</div>
+                <div className="card-desc">通过拖拽式可视化编辑器，轻松编排设计复杂的人工智能工作流。</div>
               </Card>
             </Col>
           </Row>
