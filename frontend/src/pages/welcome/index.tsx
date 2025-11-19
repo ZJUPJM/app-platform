@@ -127,26 +127,8 @@ const WelcomePage: React.FC = () => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12}>
               <Card bordered={false} className="card-dark">
-                <div className="card-title">调试与监控</div>
-                <div className="card-desc">提供实时调试与监控工具，用于追踪应用性能和行为，方便快速定位解决问题。</div>
-              </Card>
-            </Col>
-            <Col xs={24} md={12}>
-              <Card bordered={false} className="card-dark">
                 <div className="card-title">知识库</div>
                 <div className="card-desc">提供内置的 ModelEngine 向量化知识库，同时支持接入三方知识库，如百度千帆知识库，也可以无缝接入用户自定义的知识库等。</div>
-              </Card>
-            </Col>
-            <Col xs={24} md={12}>
-              <Card bordered={false} className="card-dark">
-                <div className="card-title">评测体系</div>
-                <div className="card-desc">提供全面的评价体系，用于衡量应用效果并指导持续迭代，提升应用质量与用户体验。</div>
-              </Card>
-            </Col>
-            <Col xs={24} md={12}>
-              <Card bordered={false} className="card-dark">
-                <div className="card-title">自定义交互</div>
-                <div className="card-desc">突破传统聊天界面限制，支持将表单输入、数据图表等UI组件灵活嵌入对话流中。构建面向任务的操作界面，实现真正以用户为中心的交互体验。</div>
               </Card>
             </Col>
             <Col xs={24} md={12}>
@@ -159,6 +141,24 @@ const WelcomePage: React.FC = () => {
               <Card bordered={false} className="card-dark">
                 <div className="card-title">流程编排</div>
                 <div className="card-desc">通过拖拽式可视化编辑器，轻松编排设计复杂的人工智能工作流。</div>
+              </Card>
+            </Col>
+            <Col xs={24} md={12}>
+              <Card bordered={false} className="card-dark">
+                <div className="card-title">自定义交互</div>
+                <div className="card-desc">突破传统聊天界面限制，支持将表单输入、数据图表等UI组件灵活嵌入对话流中。构建面向任务的操作界面，实现真正以用户为中心的交互体验。</div>
+              </Card>
+            </Col>
+            <Col xs={24} md={12}>
+              <Card bordered={false} className="card-dark">
+                <div className="card-title">调试与监控</div>
+                <div className="card-desc">提供实时调试与监控工具，用于追踪应用性能和行为，方便快速定位解决问题。</div>
+              </Card>
+            </Col>
+            <Col xs={24} md={12}>
+              <Card bordered={false} className="card-dark">
+                <div className="card-title">评测体系</div>
+                <div className="card-desc">提供全面的评价体系，用于衡量应用效果并指导持续迭代，提升应用质量与用户体验。</div>
               </Card>
             </Col>
           </Row>
