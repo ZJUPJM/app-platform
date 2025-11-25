@@ -39,6 +39,7 @@ import { handleLogout } from '@/components/userAuthButton';
 import { getUsername } from '@/shared/http/aipp';
 import HistorySidebar from './history-sidebar';
 import ChatHistorySidebar from './chat-history-sidebar';
+import Settings from '@/pages/settings';
 import './style.scoped.scss';
 import './user-dropdown.scss';
 
@@ -168,7 +169,7 @@ const AppLayout: React.FC = () => {
   // 用户信息下拉菜单项
   const userMenuItems = [
     {
-      key: 'github',
+      key: 'settings',
       label: (
         <div className="user-menu-item">
           <svg
@@ -184,10 +185,11 @@ const AppLayout: React.FC = () => {
             aria-hidden="true"
             className="user-menu-icon"
           >
-            <title>GitHub</title>
-            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            <title>Settings</title>
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
           </svg>
-          <span className="user-menu-text">开源地址</span>
+          <span className="user-menu-text">{t('settings')}</span>
         </div>
       ),
     },
@@ -547,10 +549,13 @@ const AppLayout: React.FC = () => {
                     menu={{
                       items: userMenuItems,
                       onClick: ({ key }) => {
-                        if (key === 'logout') {
+                        if (key === 'settings') {
+                          const params = new URLSearchParams(location.search);
+                          params.set('action', 'showSettings');
+                          params.set('tab', 'provider');
+                          navigate(`${location.pathname}?${params.toString()}`);
+                        } else if (key === 'logout') {
                           handleLogout(setLoading);
-                        } else if (key === 'github') {
-                          window.open('https://github.com/ModelEngine-Group/app-platform', '_blank');
                         }
                       }
                     }}
@@ -601,6 +606,7 @@ const AppLayout: React.FC = () => {
             </Content>
           </Provider>
         </Layout>
+        <Settings />
       </Layout>
     </HistoryProvider>
   );
