@@ -39,4 +39,14 @@
         DELETE FROM t_app_engine_model
         WHERE model_id = #{modelId}
     </delete>
+
+    <update id="updateModel" parameterType="modelengine.fit.jade.aipp.model.po.ModelPo">
+        UPDATE t_app_engine_model
+        SET name = #{name},
+            base_url = #{baseUrl},
+            type = #{type},
+            updated_by = #{updatedBy},
+            updated_at = NOW()
+        WHERE model_id = #{modelId}
+    </update>
 </mapper>

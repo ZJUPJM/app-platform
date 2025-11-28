@@ -16,6 +16,7 @@ import GenerateIcon from '@/assets/images/ai/generate_icon.png';
 import FullScreenIcon from '@/assets/images/ai/full_screen_icon.png';
 
 const LLM = (props) => {
+  console.log('🚀 LLM Component rendering');
   const { t } = useTranslation();
   const { updateData, llmRef, form, validateItem, readOnly } = props;
   const [showControl, setShowControl] = useState(true);
@@ -47,8 +48,11 @@ const LLM = (props) => {
   };
 
   const handleGetModels = (open) => {
+    console.log('handleGetModels called, open:', open);
     if (!open) return;
+    console.log('Fetching models...');
     getModels().then((res) => {
+      console.log('Models fetched:', res);
       const models = res.models.map((model) => {
         return {
           ...model,
@@ -56,6 +60,20 @@ const LLM = (props) => {
         }
       })
       setModels(models);
+
+      // 如果表单的model字段为空，自动设置为默认模型
+      const currentModel = form.getFieldValue('model');
+      console.log('Current model value:', currentModel);
+      console.log('Models with isDefault:', models.map(m => ({ id: m.id, isDefault: m.isDefault })));
+
+      if (!currentModel) {
+        const defaultModel = models.find(m => m.isDefault);
+        console.log('Found default model:', defaultModel);
+        if (defaultModel) {
+          form.setFieldValue('model', defaultModel.id);
+          updateData({ model: defaultModel.id, accessInfo: { serviceName: defaultModel.serviceName, tag: defaultModel.tag } });
+        }
+      }
     })
   }
 
@@ -135,6 +153,9 @@ const LLM = (props) => {
   };
 
   useEffect(() => {
+    console.log('=== LLM Component useEffect triggered ===');
+    console.log('Form instance:', form);
+    console.log('Initial model value:', form.getFieldValue('model'));
     handleGetModels(true);
   }, [])
 

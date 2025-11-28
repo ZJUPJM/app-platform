@@ -109,4 +109,18 @@ public interface UserModelRepo {
      * @return 模型信息的 {@link ModelPo}。
      */
     ModelPo getModel(String modelId);
+
+    /**
+     * 更新模型信息。
+     *
+     * @param modelPo 表示要更新的模型数据的 {@link ModelPo}。
+     */
+    void updateModel(ModelPo modelPo);
+
+    /**
+     * 更新用户模型关联信息。
+     *
+     * @param userModelPo 表示要更新的用户模型数据的 {@link UserModelPo}。
+     */
+    void updateUserModel(UserModelPo userModelPo);
 }

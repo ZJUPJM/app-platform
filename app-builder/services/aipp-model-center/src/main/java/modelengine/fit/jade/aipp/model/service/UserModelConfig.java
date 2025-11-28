@@ -74,4 +74,24 @@ public interface UserModelConfig {
     @Genericable(id = "modelengine.fit.jade.aipp.model.service.switchDefaultModel")
     String switchDefaultModel(@Property(description = "用户id", required = true) String userId,
             @Property(description = "默认模型id", required = true) String modelId);
+
+    /**
+     * 更新用户模型信息。
+     *
+     * @param userId 表示用户标识的 {@link String}。
+     * @param modelId 表示待更新的模型标识的 {@link String}。
+     * @param apiKey 表示更新后的 API Key 的 {@link String}。
+     * @param modelName 表示更新后的模型名称的 {@link String}。
+     * @param baseUrl 表示更新后的模型访问地址的 {@link String}。
+     * @param type 表示更新后的模型类型的 {@link String}。
+     * @return 更新结果提示信息的 {@link String}。
+     */
+    @ToolMethod(name = "update_user_model", description = "更新用户模型信息")
+    @Genericable(id = "modelengine.fit.jade.aipp.model.service.updateUserModel")
+    String updateUserModel(@Property(description = "用户id", required = true) String userId,
+            @Property(description = "模型id", required = true) String modelId,
+            @Property(description = "模型访问的 API Key", required = true) String apiKey,
+            @Property(description = "模型名称", required = true) String modelName,
+            @Property(description = "模型访问地址", required = true) String baseUrl,
+            @Property(description = "模型类型", required = true) String type);
 }

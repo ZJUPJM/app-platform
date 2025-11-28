@@ -85,6 +85,7 @@ public class UserModelConfigService implements UserModelConfig {
                     .baseUrl(model != null ? model.getBaseUrl() : null)
                     .isDefault(userModel.getIsDefault())
                     .type(model != null ? model.getType() : null)
+                    .apiKey(userModel.getApiKey())
                     .build();
         }).collect(Collectors.toList());
     }
@@ -121,7 +122,7 @@ public class UserModelConfigService implements UserModelConfig {
                 .updatedBy(userId)
                 .build();
         this.userModelRepo.insertUserModel(userModelPo);
-        return "添加模型成功。";
+        return modelId;
     }
 
     @Override
@@ -178,6 +179,49 @@ public class UserModelConfigService implements UserModelConfig {
         if (rows == 0) {
             return "未查到对应模型。";
         }
-        return String.format("已切换%s为默认模型。", this.userModelRepo.getModel(modelId).getName());
+        ModelPo model = this.userModelRepo.getModel(modelId);
+        String modelName = model != null ? model.getName() : modelId;
+        return String.format("已切换%s为默认模型。", modelName);
+    }
+
+    @Override
+    @Fitable(id = FITABLE_ID)
+    @ToolMethod(name = "更新模型", description = "更新用户模型信息", extensions = {
+            @Attribute(key = "tags", value = "FIT"), @Attribute(key = "tags", value = "MODEL")
+    })
+    @Property(description = "更新用户模型信息")
+    public String updateUserModel(String userId, String modelId, String apiKey, String modelName, String baseUrl,
+            String type) {
+        log.info("start update user model for {}.", userId);
+
+        // 检查模型是否属于该用户
+        List<UserModelPo> userModels = this.userModelRepo.listUserModelsByUserId(userId);
+        UserModelPo userModel = userModels.stream()
+                .filter(m -> Objects.equals(m.getModelId(), modelId))
+                .findFirst()
+                .orElse(null);
+
+        if (userModel == null) {
+            return "更新失败，该模型不属于当前用户。";
+        }
+
+        // 更新 ModelPo
+        ModelPo modelPo = this.userModelRepo.getModel(modelId);
+        if (modelPo == null) {
+            return "更新失败，模型不存在。";
+        }
+
+        modelPo.setName(modelName);
+        modelPo.setBaseUrl(baseUrl);
+        modelPo.setType(type);
+        modelPo.setUpdatedBy(userId);
+        this.userModelRepo.updateModel(modelPo);
+
+        // 更新 UserModelPo (API Key)
+        userModel.setApiKey(apiKey);
+        userModel.setUpdatedBy(userId);
+        this.userModelRepo.updateUserModel(userModel);
+
+        return "模型更新成功。";
     }
 }

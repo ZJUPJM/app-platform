@@ -7,6 +7,8 @@
 package modelengine.fit.jade.aipp.model.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import modelengine.fit.jade.aipp.model.dto.UserModelDetailDto;
 import modelengine.fit.jade.aipp.model.enums.ModelType;
@@ -82,7 +84,8 @@ public class UserModelConfigServiceTest {
 
         String result = userModelConfigService.addUserModel(userId, apiKey, modelName,
                 baseUrl, ModelType.CHAT_COMPLETIONS.value());
-        assertEquals("添加模型成功。", result);
+        assertNotNull(result);
+        assertTrue(result.length() == 32); // UUID without dashes
         Mockito.verify(userModelRepo, Mockito.times(1)).insertModel(ArgumentMatchers.any(ModelPo.class));
         Mockito.verify(userModelRepo, Mockito.times(1)).insertUserModel(ArgumentMatchers.any(UserModelPo.class));
     }

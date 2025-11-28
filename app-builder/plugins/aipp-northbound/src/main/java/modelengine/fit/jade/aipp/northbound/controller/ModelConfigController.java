@@ -42,6 +42,7 @@ public class ModelConfigController extends AbstractController {
     private static final String GENERICABLE_ADD = "modelengine.fit.jade.aipp.model.service.addUserModel";
     private static final String GENERICABLE_DELETE = "modelengine.fit.jade.aipp.model.service.deleteUserModel";
     private static final String GENERICABLE_SWITCH = "modelengine.fit.jade.aipp.model.service.switchDefaultModel";
+    private static final String GENERICABLE_UPDATE = "modelengine.fit.jade.aipp.model.service.updateUserModel";
 
     private final BrokerClient brokerClient;
 
@@ -91,31 +92,11 @@ public class ModelConfigController extends AbstractController {
             @RequestBody AddModelRequest request) {
         String userId = this.contextOf(httpRequest, tenantId).getOperator();
 
-        String result = this.brokerClient.getRouter(GENERICABLE_ADD)
+        String modelId = this.brokerClient.getRouter(GENERICABLE_ADD)
                 .route(new FitableIdFilter(FITABLE_ID))
                 .invoke(userId, request.getApiKey(), request.getModelName(), request.getBaseUrl(), request.getType());
 
-        // 如果需要设置为默认模型，则调用切换默认模型接口
-        if (request.getIsDefault() != null && request.getIsDefault()) {
-            // 获取刚添加的模型列表，找到最新的模型ID
-            List models = this.brokerClient.getRouter(GENERICABLE_GET_LIST)
-                    .route(new FitableIdFilter(FITABLE_ID))
-                    .invoke(userId);
-            if (!models.isEmpty()) {
-                // 假设返回的列表中最后一个是最新添加的
-                Object lastModel = models.get(models.size() - 1);
-                if (lastModel instanceof java.util.Map) {
-                    String modelId = (String) ((java.util.Map) lastModel).get("modelId");
-                    if (modelId != null) {
-                        this.brokerClient.getRouter(GENERICABLE_SWITCH)
-                                .route(new FitableIdFilter(FITABLE_ID))
-                                .invoke(userId, modelId);
-                    }
-                }
-            }
-        }
-
-        return Rsp.ok(result);
+        return Rsp.ok(modelId);
     }
 
     /**
@@ -158,6 +139,31 @@ public class ModelConfigController extends AbstractController {
         String result = this.brokerClient.getRouter(GENERICABLE_SWITCH)
                 .route(new FitableIdFilter(FITABLE_ID))
                 .invoke(userId, modelId);
+
+        return Rsp.ok(result);
+    }
+
+    /**
+     * 更新用户模型。
+     *
+     * @param httpRequest 表示 Http 请求体的 {@link HttpClassicServerRequest}。
+     * @param tenantId 表示租户的唯一标识符的 {@link String}。
+     * @param modelId 表示模型的唯一标识符的 {@link String}。
+     * @param request 表示更新模型请求的 {@link UpdateModelRequest}。
+     * @return 表示操作结果的 {@link Rsp}{@code <}{@link String}{@code >}。
+     */
+    @PutMapping(path = "/{modelId}", summary = "更新用户模型",
+            description = "该接口可以更新用户指定的模型配置。")
+    public Rsp<String> update(HttpClassicServerRequest httpRequest,
+            @PathVariable("tenant_id") @Property(description = "租户的唯一标识符") String tenantId,
+            @PathVariable("modelId") @Property(description = "模型的唯一标识符") String modelId,
+            @RequestBody UpdateModelRequest request) {
+        String userId = this.contextOf(httpRequest, tenantId).getOperator();
+
+        String result = this.brokerClient.getRouter(GENERICABLE_UPDATE)
+                .route(new FitableIdFilter(FITABLE_ID))
+                .invoke(userId, modelId, request.getApiKey(), request.getModelName(), request.getBaseUrl(),
+                        request.getType());
 
         return Rsp.ok(result);
     }
@@ -219,6 +225,55 @@ public class ModelConfigController extends AbstractController {
 
         public void setIsDefault(Boolean isDefault) {
             this.isDefault = isDefault;
+        }
+    }
+
+    /**
+     * 更新模型请求类。
+     */
+    public static class UpdateModelRequest {
+        @Property(description = "模型名称")
+        private String modelName;
+
+        @Property(description = "API Key")
+        private String apiKey;
+
+        @Property(description = "Base URL")
+        private String baseUrl;
+
+        @Property(description = "模型类型")
+        private String type;
+
+        public String getModelName() {
+            return this.modelName;
+        }
+
+        public void setModelName(String modelName) {
+            this.modelName = modelName;
+        }
+
+        public String getApiKey() {
+            return this.apiKey;
+        }
+
+        public void setApiKey(String apiKey) {
+            this.apiKey = apiKey;
+        }
+
+        public String getBaseUrl() {
+            return this.baseUrl;
+        }
+
+        public void setBaseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
+        }
+
+        public String getType() {
+            return this.type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
         }
     }
 }

@@ -49,4 +49,11 @@ public interface ModelMapper {
      * @param modelId 表示待删除模型标识的 {@link String}。
      */
     void deleteByModelId(String modelId);
+
+    /**
+     * 更新模型信息。
+     *
+     * @param model 表示待更新的模型信息的 {@link ModelPo}。
+     */
+    void updateModel(ModelPo model);
 }
