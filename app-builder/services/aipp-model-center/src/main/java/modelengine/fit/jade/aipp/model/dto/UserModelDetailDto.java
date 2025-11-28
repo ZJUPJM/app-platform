@@ -58,4 +58,9 @@ public class UserModelDetailDto {
      * 表示模型类型。
      */
     private String type;
+
+    /**
+     * 表示 API Key。
+     */
+    private String apiKey;
 }

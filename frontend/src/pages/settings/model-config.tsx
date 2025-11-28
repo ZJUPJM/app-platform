@@ -5,11 +5,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Table, Space, Modal, message, Select, Tag, Switch, Card } from 'antd';
+import { Form, Input, Button, Table, Space, Modal, message, Select, Tag, Switch, Card, Alert } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, StarFilled } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import type { ColumnsType } from 'antd/es/table';
-import { getUserModels, addUserModel, deleteUserModel, switchDefaultModel } from '@/shared/http/modelConfig';
+import { getUserModels, addUserModel, deleteUserModel, switchDefaultModel, updateUserModel } from '@/shared/http/modelConfig';
 import { useAppSelector } from '@/store/hook';
 import './model-config.scss';
 
@@ -85,9 +85,28 @@ const ModelConfigComponent: React.FC = () => {
       const values = await form.validateFields();
 
       if (editingModel) {
-        // 编辑模式：由于后端没有更新接口，先删除再添加
-        // 注意：这不是最佳实践，但可以工作
-        message.info('编辑功能暂未实现');
+        // 编辑模式
+        try {
+          const requestData = {
+            modelName: values.modelName,
+            apiKey: values.apiKey,
+            baseUrl: values.baseUrl,
+            type: values.modelType || 'chat_completions',
+          };
+
+          await updateUserModel(tenantId, editingModel.modelId!, requestData);
+
+          // 如果用户勾选了设为默认（仅针对非默认模型）
+          if (values.isDefault && !editingModel.isDefault) {
+            await switchDefaultModel(tenantId, editingModel.modelId!);
+          }
+
+          message.success(t('modelSaveSuccess'));
+        } catch (error) {
+          message.error(t('modelSaveFailed'));
+          console.error('Edit model failed:', error);
+          return;
+        }
       } else {
         // 创建新模型
         const requestData = {
@@ -95,9 +114,15 @@ const ModelConfigComponent: React.FC = () => {
           apiKey: values.apiKey,
           baseUrl: values.baseUrl,
           type: values.modelType || 'chat_completions',
-          isDefault: values.isDefault || false,
         };
-        await addUserModel(tenantId, requestData);
+        const result: any = await addUserModel(tenantId, requestData);
+
+        // 如果用户勾选了设为默认，在添加成功后调用切换默认接口
+        if (values.isDefault && result && result.data) {
+          const newModelId = result.data;
+          await switchDefaultModel(tenantId, newModelId);
+        }
+
         message.success(t('modelSaveSuccess'));
       }
 
@@ -140,23 +165,12 @@ const ModelConfigComponent: React.FC = () => {
       title: t('modelName'),
       dataIndex: 'modelName',
       key: 'modelName',
-      width: '25%',
+      width: '30%',
       render: (text: string, record: ModelConfig) => (
         <Space>
           <span style={{ fontWeight: 500 }}>{text}</span>
           {record.isDefault && <StarFilled style={{ color: '#faad14', fontSize: 14 }} />}
         </Space>
-      ),
-    },
-    {
-      title: t('apiKey'),
-      dataIndex: 'apiKey',
-      key: 'apiKey',
-      width: '20%',
-      render: (text: string) => (
-        <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#8c8c8c' }}>
-          {text ? '••••••••' + text.slice(-4) : ''}
-        </span>
       ),
     },
     {
@@ -173,13 +187,17 @@ const ModelConfigComponent: React.FC = () => {
       title: t('modelType'),
       dataIndex: 'modelType',
       key: 'modelType',
-      width: '15%',
-      render: (text: string) => <Tag color="blue">{text}</Tag>,
+      width: '20%',
+      render: (text: string) => (
+        <Tag color="blue" style={{ maxWidth: 'none', whiteSpace: 'normal' }}>
+          {text}
+        </Tag>
+      ),
     },
     {
       title: t('operate'),
       key: 'action',
-      width: '10%',
+      width: '20%',
       render: (_: any, record: ModelConfig) => (
         <Space size="small">
           <Button
@@ -294,13 +312,23 @@ const ModelConfigComponent: React.FC = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item
-            name="isDefault"
-            label={t('setAsDefault')}
-            valuePropName="checked"
-          >
-            <Switch />
-          </Form.Item>
+          {editingModel && editingModel.isDefault ? (
+            <Form.Item label={t('setAsDefault')}>
+              <Alert
+                message={t('defaultModelHint')}
+                type="info"
+                showIcon
+              />
+            </Form.Item>
+          ) : (
+            <Form.Item
+              name="isDefault"
+              label={t('setAsDefault')}
+              valuePropName="checked"
+            >
+              <Switch />
+            </Form.Item>
+          )}
         </Form>
       </Modal>
       </Card>

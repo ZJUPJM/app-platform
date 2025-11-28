@@ -57,13 +57,24 @@ public class CustomAippModelCenter implements AippModelCenterExtension {
     public ModelListDto fetchModelList(String type, String scene, OperationContext context) {
         LOG.info("[Custom][fetchModelList] operator={}, type={}, scene={}.", context.getOperator(), type, scene);
         List<ModelPo> modelList = this.userModelRepo.listModelsByUserId(context.getOperator(), type);
-        List<ModelPo> jadeModelList = this.userModelRepo.listModelsByUserId(this.jadeContext.getOperator(), type);
+
+        // 只有当前用户不是Jade时，才查询Jade的模型列表并合并
+        List<ModelPo> jadeModelList = Collections.emptyList();
+        if (!JADE.equals(context.getOperator())) {
+            jadeModelList = this.userModelRepo.listModelsByUserId(this.jadeContext.getOperator(), type);
+        }
+
         if (CollectionUtils.isEmpty(modelList) && CollectionUtils.isEmpty(jadeModelList)) {
             if (this.defaultModelCenter == null) {
                 return ModelListDto.builder().models(Collections.emptyList()).total(0).build();
             }
             return this.defaultModelCenter.fetchModelList(type, scene, context);
         }
+
+        // 获取当前用户的默认模型
+        ModelPo defaultModel = this.userModelRepo.getDefaultModel(context.getOperator(), type);
+        String defaultModelId = defaultModel != null ? defaultModel.getModelId() : null;
+
         // 这里自定义按照用户分类返回数据的tag需要特殊处理，tag中额外存入用户信息，先快速打通功能，赶上320。格式："tag,userId"
         List<ModelAccessInfo> modelDtoList = modelList.stream()
                 .map(po -> ModelAccessInfo.builder()
@@ -71,6 +82,7 @@ public class CustomAippModelCenter implements AippModelCenterExtension {
                         .baseUrl(po.getBaseUrl())
                         .tag(CustomTag.pack(context, po))
                         .type(po.getType())
+                        .isDefault(po.getModelId().equals(defaultModelId))
                         .build())
                 .collect(Collectors.toList());
         modelDtoList.addAll(jadeModelList.stream()
@@ -79,6 +91,7 @@ public class CustomAippModelCenter implements AippModelCenterExtension {
                         .baseUrl(po.getBaseUrl())
                         .tag(CustomTag.pack(this.jadeContext, po))
                         .type(po.getType())
+                        .isDefault(false) // Jade的模型对当前用户来说不是默认的
                         .build())
                 .toList());
         return ModelListDto.builder().models(modelDtoList).total(modelDtoList.size()).build();

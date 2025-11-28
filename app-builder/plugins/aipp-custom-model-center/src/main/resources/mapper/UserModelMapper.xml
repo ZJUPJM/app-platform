@@ -85,4 +85,12 @@
         SET is_default = CASE WHEN model_id = #{modelId} THEN 1 ELSE 0 END
         WHERE user_id = #{userId}
     </update>
+
+    <update id="updateUserModel" parameterType="modelengine.fit.jade.aipp.model.po.UserModelPo">
+        UPDATE t_app_engine_user_model
+        SET api_key = #{apiKey},
+            updated_by = #{updatedBy},
+            updated_at = NOW()
+        WHERE user_id = #{userId} AND model_id = #{modelId}
+    </update>
 </mapper>

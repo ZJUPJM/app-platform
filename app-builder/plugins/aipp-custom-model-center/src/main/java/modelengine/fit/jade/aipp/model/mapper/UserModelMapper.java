@@ -79,4 +79,11 @@ public interface UserModelMapper {
      * @return 成功更新的记录条数的 {@code int}。
      */
     int setDefault(@Param("userId") String userId, @Param("modelId") String modelId);
+
+    /**
+     * 更新用户模型绑定关系。
+     *
+     * @param userModel 表示待更新的用户模型关系对象的 {@link UserModelPo}。
+     */
+    void updateUserModel(UserModelPo userModel);
 }

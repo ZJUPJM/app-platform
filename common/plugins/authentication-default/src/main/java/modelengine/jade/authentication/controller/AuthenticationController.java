@@ -44,7 +44,7 @@ public class AuthenticationController {
         this.authenticationService.setUserGroups(userName, userGroups);
     }
 
-    @GetMapping(path = "v1/api/auth/username")
+    @GetMapping(path = "/v1/api/auth/username")
     public User handleUsername() {
         String username = Optional.ofNullable(UserContextHolder.get()).map(UserContext::getName).orElse("Guest");
         return User.builder().username(username).build();

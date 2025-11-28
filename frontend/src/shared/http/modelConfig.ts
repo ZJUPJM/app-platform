@@ -65,3 +65,21 @@ export const switchDefaultModel = (tenantId: string, modelId: string) => {
     });
   });
 };
+
+/**
+ * 更新用户模型
+ */
+export const updateUserModel = (tenantId: string, modelId: string, data: {
+  modelName: string;
+  apiKey: string;
+  baseUrl: string;
+  type: string;
+}) => {
+  return new Promise((resolve, reject) => {
+    put(`${AIPP_URL}/${tenantId}/models/${modelId}`, data).then((res) => {
+      resolve(res);
+    }, (error) => {
+      reject(error);
+    });
+  });
+};

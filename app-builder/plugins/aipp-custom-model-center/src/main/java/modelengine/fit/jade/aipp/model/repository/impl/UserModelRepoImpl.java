@@ -118,4 +118,14 @@ public class UserModelRepoImpl implements UserModelRepo {
     public ModelPo getModel(String modelId) {
         return this.modelMapper.getModel(modelId);
     }
+
+    @Override
+    public void updateModel(ModelPo modelPo) {
+        this.modelMapper.updateModel(modelPo);
+    }
+
+    @Override
+    public void updateUserModel(UserModelPo userModelPo) {
+        this.userModelMapper.updateUserModel(userModelPo);
+    }
 }

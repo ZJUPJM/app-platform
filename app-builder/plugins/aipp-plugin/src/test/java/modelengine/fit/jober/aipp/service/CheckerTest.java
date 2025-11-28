@@ -67,7 +67,7 @@ class CheckerTest {
                     + "\"uniqueName\":\"6834efb7-ba3d-f044-a875-4db8be8754b0\"}]}]}";
             AppCheckDto appCheckDto = JsonUtils.parseObject(testNode, AppCheckDto.class);
             when(pluginToolService.hasPluginTools(any())).thenReturn(Collections.singletonList(true));
-            ModelAccessInfo modelAccessInfo = new ModelAccessInfo("Fake Model", "INTERNAL", "", "", null);
+            ModelAccessInfo modelAccessInfo = new ModelAccessInfo("Fake Model", "INTERNAL", "", "", null, false);
             when(pluginToolService.hasPluginTools(any())).thenReturn(Arrays.asList(true, true));
             when(modelCenter.fetchModelList(any(), any(), any())).thenReturn(
                     new ModelListDto(Collections.singletonList(modelAccessInfo), 1));
@@ -95,7 +95,7 @@ class CheckerTest {
                     + "\"uniqueName\":\"c373a626-f671-6040-8051-808185e9e5b4\"}]}]}";
             AppCheckDto appCheckDto = JsonUtils.parseObject(testNode, AppCheckDto.class);
             when(pluginToolService.hasPluginTools(any())).thenReturn(Arrays.asList(false, false, false));
-            ModelAccessInfo modelAccessInfo = new ModelAccessInfo("Fake Model", "EXTERNAL", "", "", null);
+            ModelAccessInfo modelAccessInfo = new ModelAccessInfo("Fake Model", "EXTERNAL", "", "", null, false);
             when(modelCenter.fetchModelList(any(), any(), any())).thenReturn(
                     new ModelListDto(Collections.singletonList(modelAccessInfo), 1));
             List<CheckResult> results = this.llmNodeChecker.validate(appCheckDto, null);

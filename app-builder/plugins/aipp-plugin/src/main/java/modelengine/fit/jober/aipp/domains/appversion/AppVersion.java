@@ -772,8 +772,12 @@ public class AppVersion {
     private String[] getFirstModelInfo(OperationContext context) {
         ModelListDto modelList = this.aippModelCenter.fetchModelList(AippConst.CHAT_MODEL_TYPE, null, context);
         if (modelList != null && modelList.getModels() != null && !modelList.getModels().isEmpty()) {
-            ModelAccessInfo firstModel = modelList.getModels().get(0);
-            return new String[] {firstModel.getServiceName(), firstModel.getTag()};
+            // 优先使用默认模型，如果没有默认模型则使用第一个
+            ModelAccessInfo selectedModel = modelList.getModels().stream()
+                    .filter(m -> m.getIsDefault() != null && m.getIsDefault())
+                    .findFirst()
+                    .orElse(modelList.getModels().get(0));
+            return new String[] {selectedModel.getServiceName(), selectedModel.getTag()};
         } else {
             return new String[] {StringUtils.EMPTY, StringUtils.EMPTY};
         }

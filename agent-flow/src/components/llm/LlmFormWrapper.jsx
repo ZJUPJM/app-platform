@@ -8,7 +8,7 @@ import {ModelForm} from './ModelForm.jsx';
 import {JadeInputForm} from '../common/JadeInputForm.jsx';
 import {LlmOutput} from './LlmOutput.jsx';
 import './style.css';
-import {useDispatch, useShapeContext} from '@/components/DefaultRoot.jsx';
+import {useDispatch, useShapeContext, useFormContext} from '@/components/DefaultRoot.jsx';
 import React, {useEffect, useState} from 'react';
 import httpUtil from '../util/httpUtil.jsx';
 import PropTypes from 'prop-types';
@@ -33,6 +33,7 @@ LlmFormWrapper.propTypes = {
 export default function LlmFormWrapper({data, shapeStatus}) {
   const dispatch = useDispatch();
   const shape = useShapeContext();
+  const form = useFormContext();
   const {t} = useTranslation();
   let config;
   if (!shape || !shape.graph || !shape.graph.configs) {
@@ -164,13 +165,35 @@ export default function LlmFormWrapper({data, shapeStatus}) {
         // 没关系，继续.
       } else {
         // 发起网络请求获取 options 数据
-        httpUtil.get(`${config.urls.llmModelEndpoint}/fetch/model-list`, new Map(), (jsonData) => setModelOptions(jsonData.models.map(item => {
-          return {
-            value: `${item.serviceName}&&${item.tag}`,
-            label: item.serviceName,
-            title: t(item.tag),
-          };
-        })));
+        httpUtil.get(`${config.urls.llmModelEndpoint}/fetch/model-list`, new Map(), (jsonData) => {
+          const options = jsonData.models.map(item => {
+            return {
+              value: `${item.serviceName}&&${item.tag}`,
+              label: item.serviceName,
+              title: t(item.tag),
+              isDefault: item.isDefault,
+              serviceName: item.serviceName,
+              tag: item.tag,
+            };
+          });
+          setModelOptions(options);
+
+          // 如果当前模型值为空，自动设置为默认模型
+          if ((!modelData.model.value || modelData.model.value === '') && options.length > 0) {
+            const defaultModel = options.find(m => m.isDefault);
+            if (defaultModel) {
+              // 使用 dispatch 更新数据模型
+              dispatch({type: 'changeAccessInfoConfig', value: defaultModel.value});
+
+              // 使用 Form API 更新表单显示值
+              if (form) {
+                form.setFieldsValue({
+                  [`model-${shape.id}`]: defaultModel.value
+                });
+              }
+            }
+          }
+        });
       }
       if (!config.urls.toolListEndpoint) {
         // 没关系，继续.
