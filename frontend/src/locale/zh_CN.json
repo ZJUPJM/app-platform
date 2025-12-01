@@ -1795,7 +1795,7 @@
   "value": "值",
   "replyTextLabel": "回复内容",
   "settings": "设置",
-  "modelConfig": "模型配置",
+  "modelConfig": "模型供应商",
   "knowledgeConfig": "知识库配置",
   "modelName": "模型名称",
   "baseUrl": "Base URL",

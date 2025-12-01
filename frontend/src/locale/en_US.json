@@ -1754,7 +1754,7 @@
   "value": "Value",
   "replyTextLabel": "Reply Template",
   "settings": "Settings",
-  "modelConfig": "Model Configuration",
+  "modelConfig": "Model Providers",
   "knowledgeConfig": "Knowledge Base Configuration",
   "modelName": "Model Name",
   "baseUrl": "Base URL",
