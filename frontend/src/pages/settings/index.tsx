@@ -84,6 +84,7 @@ const Settings: React.FC = () => {
             items={tabItems}
             className="settings-tabs"
             size="large"
+            tabPosition="left"
           />
         </div>
       </div>
