@@ -5,12 +5,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Modal, message, Select, Card, List, Space, Tag, Badge, Alert } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, StarFilled, ApiOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Modal, message, Select, Card, List, Space, Tag, Badge, Alert, Switch } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ApiOutlined, LinkOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { getUserModels, addUserModel, deleteUserModel, switchDefaultModel, updateUserModel } from '@/shared/http/modelConfig';
 import { useAppSelector } from '@/store/hook';
 import './model-config.scss';
+import SiliconFlowLogo from '@/assets/images/providers/siliconflow.svg';
+import DeepSeekLogo from '@/assets/images/providers/deepseek.svg';
 
 interface ModelConfig {
   id?: string;
@@ -31,6 +33,7 @@ interface ModelProvider {
   baseUrl: string;
   description: string;
   color: string;
+  apiKeyUrl: string;
 }
 
 const MODEL_PROVIDERS: ModelProvider[] = [
@@ -38,10 +41,21 @@ const MODEL_PROVIDERS: ModelProvider[] = [
     id: 'siliconflow',
     name: 'SiliconFlow',
     nameCn: '硅基流动',
-    logo: '🚀',
+    logo: SiliconFlowLogo,
     baseUrl: 'https://api.siliconflow.cn/v1',
-    description: '高性能AI推理服务平台',
+    description: '硅基流动提供对各种模型（chat_completions、embeddings、rerank）的访问，可通过模型名称、模型类型、API密钥进行配置。',
     color: '#1890ff',
+    apiKeyUrl: 'https://cloud.siliconflow.cn/me/account/ak',
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    nameCn: '深度求索',
+    logo: DeepSeekLogo,
+    baseUrl: 'https://api.deepseek.com',
+    description: '深度求索提供的模型，可通过模型名称、模型类型、API密钥进行配置。',
+    color: '#1890ff',
+    apiKeyUrl: 'https://platform.deepseek.com/api_keys',
   },
 ];
 
@@ -215,12 +229,17 @@ const ModelConfigComponent: React.FC = () => {
               key={provider.id}
               className="provider-card"
               hoverable
-              style={{ borderColor: provider.color }}
             >
               <div className="provider-header">
                 <div className="provider-info">
-                  <span className="provider-logo" style={{ backgroundColor: `${provider.color}15` }}>
-                    {provider.logo}
+                  <span className="provider-logo">
+                    {typeof provider.logo === 'string' && (provider.logo.startsWith('http') || provider.logo.startsWith('data:')) ? (
+                      <img src={provider.logo} alt={provider.name} />
+                    ) : typeof provider.logo === 'string' ? (
+                      provider.logo
+                    ) : (
+                      <img src={provider.logo} alt={provider.name} />
+                    )}
                   </span>
                   <div className="provider-names">
                     <h3 className="provider-name">{provider.nameCn}</h3>
@@ -241,9 +260,6 @@ const ModelConfigComponent: React.FC = () => {
                       <List.Item
                         className="model-item"
                         actions={[
-                          model.isDefault && (
-                            <StarFilled style={{ color: '#faad14' }} key="default" />
-                          ),
                           <Button
                             type="text"
                             size="small"
@@ -268,6 +284,11 @@ const ModelConfigComponent: React.FC = () => {
                               <Tag color="blue" style={{ fontSize: 12 }}>
                                 {model.modelType}
                               </Tag>
+                              {model.isDefault && (
+                                <Tag color="gold" style={{ fontSize: 12 }}>
+                                  默认
+                                </Tag>
+                              )}
                             </Space>
                           }
                         />
@@ -299,11 +320,24 @@ const ModelConfigComponent: React.FC = () => {
       <Modal
         title={editingModel ? `编辑${selectedProvider?.nameCn}模型` : `添加${selectedProvider?.nameCn}模型`}
         open={isModalVisible}
-        onOk={handleOk}
         onCancel={handleCancel}
         width={600}
-        okText={t('confirm')}
-        cancelText={t('cancel')}
+        footer={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <a
+              href={selectedProvider?.apiKeyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: 13, color: selectedProvider?.color || '#1890ff' }}
+            >
+              从 {selectedProvider?.nameCn} 获取 API Key <LinkOutlined style={{ fontSize: 12 }} />
+            </a>
+            <Space>
+              <Button onClick={handleCancel}>{t('cancel')}</Button>
+              <Button type="primary" onClick={handleOk}>{t('confirm')}</Button>
+            </Space>
+          </div>
+        }
       >
         <Form
           form={form}
@@ -352,7 +386,7 @@ const ModelConfigComponent: React.FC = () => {
               label={t('setAsDefault')}
               valuePropName="checked"
             >
-              <input type="checkbox" />
+              <Switch />
             </Form.Item>
           )}
         </Form>
