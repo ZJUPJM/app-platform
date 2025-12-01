@@ -5,10 +5,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Table, Space, Modal, message, Select, Tag, Switch, Card, Alert } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, StarFilled } from '@ant-design/icons';
+import { Form, Input, Button, Modal, message, Select, Card, List, Space, Tag, Badge, Alert } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, StarFilled, ApiOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import type { ColumnsType } from 'antd/es/table';
 import { getUserModels, addUserModel, deleteUserModel, switchDefaultModel, updateUserModel } from '@/shared/http/modelConfig';
 import { useAppSelector } from '@/store/hook';
 import './model-config.scss';
@@ -21,8 +20,30 @@ interface ModelConfig {
   baseUrl: string;
   modelType: string;
   isDefault?: boolean;
-  type?: string;
+  provider?: string;
 }
+
+interface ModelProvider {
+  id: string;
+  name: string;
+  nameCn: string;
+  logo: string;
+  baseUrl: string;
+  description: string;
+  color: string;
+}
+
+const MODEL_PROVIDERS: ModelProvider[] = [
+  {
+    id: 'siliconflow',
+    name: 'SiliconFlow',
+    nameCn: '硅基流动',
+    logo: '🚀',
+    baseUrl: 'https://api.siliconflow.cn/v1',
+    description: '高性能AI推理服务平台',
+    color: '#1890ff',
+  },
+];
 
 const ModelConfigComponent: React.FC = () => {
   const { t } = useTranslation();
@@ -30,6 +51,7 @@ const ModelConfigComponent: React.FC = () => {
   const [models, setModels] = useState<ModelConfig[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingModel, setEditingModel] = useState<ModelConfig | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<ModelProvider | null>(null);
   const [loading, setLoading] = useState(false);
   const tenantId = useAppSelector((state) => state.appStore.tenantId);
 
@@ -53,6 +75,7 @@ const ModelConfigComponent: React.FC = () => {
           baseUrl: item.baseUrl,
           modelType: item.type,
           isDefault: item.isDefault === 1,
+          provider: getProviderByBaseUrl(item.baseUrl),
         }));
         setModels(formattedModels);
       }
@@ -63,24 +86,35 @@ const ModelConfigComponent: React.FC = () => {
     }
   };
 
-  const showAddModal = () => {
+  const getProviderByBaseUrl = (baseUrl: string): string => {
+    const provider = MODEL_PROVIDERS.find(p => p.baseUrl === baseUrl);
+    return provider ? provider.id : 'custom';
+  };
+
+  const showAddModal = (provider: ModelProvider) => {
+    setSelectedProvider(provider);
     setEditingModel(null);
     setIsModalVisible(true);
-    // 需要在 Modal 打开后才能设置字段值
     setTimeout(() => {
       form.resetFields();
-      form.setFieldsValue({ modelType: 'chat_completions', isDefault: false });
+      form.setFieldsValue({
+        modelType: 'chat_completions',
+        isDefault: false,
+        baseUrl: provider.baseUrl,
+      });
     }, 0);
   };
 
   const showEditModal = (record: ModelConfig) => {
+    const provider = MODEL_PROVIDERS.find(p => p.id === record.provider);
+    setSelectedProvider(provider || null);
     setEditingModel(record);
     form.setFieldsValue(record);
     setIsModalVisible(true);
   };
 
   const handleOk = async () => {
-    if (!tenantId) return;
+    if (!tenantId || !selectedProvider) return;
     try {
       const values = await form.validateFields();
 
@@ -90,7 +124,7 @@ const ModelConfigComponent: React.FC = () => {
           const requestData = {
             modelName: values.modelName,
             apiKey: values.apiKey,
-            baseUrl: values.baseUrl,
+            baseUrl: selectedProvider.baseUrl,
             type: values.modelType || 'chat_completions',
           };
 
@@ -112,7 +146,7 @@ const ModelConfigComponent: React.FC = () => {
         const requestData = {
           modelName: values.modelName,
           apiKey: values.apiKey,
-          baseUrl: values.baseUrl,
+          baseUrl: selectedProvider.baseUrl,
           type: values.modelType || 'chat_completions',
         };
         const result: any = await addUserModel(tenantId, requestData);
@@ -133,6 +167,13 @@ const ModelConfigComponent: React.FC = () => {
     }
   };
 
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    setSelectedProvider(null);
+    setEditingModel(null);
+    form.resetFields();
+  };
+
   const handleDelete = (record: ModelConfig) => {
     if (!tenantId) return;
     Modal.confirm({
@@ -150,154 +191,131 @@ const ModelConfigComponent: React.FC = () => {
   };
 
   const handleSetDefault = async (record: ModelConfig) => {
-    if (!tenantId) return;
+    if (!tenantId || record.isDefault) return;
     try {
       await switchDefaultModel(tenantId, record.modelId!);
-      message.success(t('modelSaveSuccess'));
+      message.success(t('defaultModelSet'));
       loadModels();
     } catch (error) {
-      console.error('Switch default failed:', error);
+      console.error('Set default failed:', error);
     }
   };
 
-  const columns: ColumnsType<ModelConfig> = [
-    {
-      title: t('modelName'),
-      dataIndex: 'modelName',
-      key: 'modelName',
-      width: '30%',
-      render: (text: string, record: ModelConfig) => (
-        <Space>
-          <span style={{ fontWeight: 500 }}>{text}</span>
-          {record.isDefault && <StarFilled style={{ color: '#faad14', fontSize: 14 }} />}
-        </Space>
-      ),
-    },
-    {
-      title: t('baseUrl'),
-      dataIndex: 'baseUrl',
-      key: 'baseUrl',
-      width: '30%',
-      ellipsis: true,
-      render: (text: string) => (
-        <span style={{ fontSize: 13, color: '#595959' }}>{text}</span>
-      ),
-    },
-    {
-      title: t('modelType'),
-      dataIndex: 'modelType',
-      key: 'modelType',
-      width: '20%',
-      render: (text: string) => (
-        <Tag color="blue" style={{ maxWidth: 'none', whiteSpace: 'normal' }}>
-          {text}
-        </Tag>
-      ),
-    },
-    {
-      title: t('operate'),
-      key: 'action',
-      width: '20%',
-      render: (_: any, record: ModelConfig) => (
-        <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => showEditModal(record)}
-          >
-            {t('edit')}
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record)}
-            disabled={record.isDefault}
-          >
-            {t('delete')}
-          </Button>
-        </Space>
-      ),
-    },
-  ];
+  const getProviderModels = (providerId: string) => {
+    return models.filter(m => m.provider === providerId);
+  };
 
   return (
-    <div className="model-config">
-      <Card
-        bordered={false}
-        className="model-config-card"
-        bodyStyle={{ padding: 0 }}
-      >
-        <div className="model-config-header">
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={showAddModal}
-            size="large"
-          >
-            {t('addModel')}
-          </Button>
-        </div>
-
-        <Table
-          columns={columns}
-          dataSource={models}
-          rowKey="id"
-          pagination={false}
-          loading={loading}
-          locale={{
-            emptyText: (
-              <div style={{ padding: '60px 0' }}>
-                <div style={{ fontSize: 14, color: '#8c8c8c', marginBottom: 8 }}>
-                  {t('noModelsConfigured')}
+    <div className="model-config-container">
+      <div className="provider-cards-grid">
+        {MODEL_PROVIDERS.map((provider) => {
+          const providerModels = getProviderModels(provider.id);
+          return (
+            <Card
+              key={provider.id}
+              className="provider-card"
+              hoverable
+              style={{ borderColor: provider.color }}
+            >
+              <div className="provider-header">
+                <div className="provider-info">
+                  <span className="provider-logo" style={{ backgroundColor: `${provider.color}15` }}>
+                    {provider.logo}
+                  </span>
+                  <div className="provider-names">
+                    <h3 className="provider-name">{provider.nameCn}</h3>
+                    <span className="provider-name-en">{provider.name}</span>
+                  </div>
                 </div>
-                <div style={{ fontSize: 13, color: '#bfbfbf' }}>
-                  {t('addFirstModel')}
-                </div>
+                <Badge count={providerModels.length} style={{ backgroundColor: provider.color }} />
               </div>
-            ),
-          }}
-        />
+
+              <p className="provider-description">{provider.description}</p>
+
+              <div className="provider-models">
+                {providerModels.length > 0 ? (
+                  <List
+                    size="small"
+                    dataSource={providerModels}
+                    renderItem={(model) => (
+                      <List.Item
+                        className="model-item"
+                        actions={[
+                          model.isDefault && (
+                            <StarFilled style={{ color: '#faad14' }} key="default" />
+                          ),
+                          <Button
+                            type="text"
+                            size="small"
+                            icon={<EditOutlined />}
+                            onClick={() => showEditModal(model)}
+                            key="edit"
+                          />,
+                          <Button
+                            type="text"
+                            size="small"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => handleDelete(model)}
+                            key="delete"
+                          />,
+                        ].filter(Boolean)}
+                      >
+                        <List.Item.Meta
+                          title={
+                            <Space>
+                              <span>{model.modelName}</span>
+                              <Tag color="blue" style={{ fontSize: 12 }}>
+                                {model.modelType}
+                              </Tag>
+                            </Space>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                ) : (
+                  <div className="empty-models">
+                    <ApiOutlined style={{ fontSize: 32, color: '#d9d9d9' }} />
+                    <p style={{ color: '#8c8c8c', marginTop: 8 }}>暂无模型配置</p>
+                  </div>
+                )}
+              </div>
+
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => showAddModal(provider)}
+                block
+                style={{ marginTop: 16, backgroundColor: provider.color, borderColor: provider.color }}
+              >
+                添加 {provider.nameCn} 模型
+              </Button>
+            </Card>
+          );
+        })}
+      </div>
 
       <Modal
-        title={editingModel ? t('editModel') : t('addModel')}
+        title={editingModel ? `编辑${selectedProvider?.nameCn}模型` : `添加${selectedProvider?.nameCn}模型`}
         open={isModalVisible}
         onOk={handleOk}
-        onCancel={() => setIsModalVisible(false)}
+        onCancel={handleCancel}
         width={600}
+        okText={t('confirm')}
+        cancelText={t('cancel')}
       >
         <Form
           form={form}
           layout="vertical"
-          initialValues={{ modelType: 'chat_completions' }}
+          style={{ marginTop: 24 }}
         >
           <Form.Item
             name="modelName"
             label={t('modelName')}
             rules={[{ required: true, message: t('modelNameRequired') }]}
           >
-            <Input placeholder={t('plsEnterName')} />
-          </Form.Item>
-
-          <Form.Item
-            name="apiKey"
-            label={t('apiKey')}
-            rules={[{ required: true, message: t('apiKeyRequired') }]}
-          >
-            <Input.Password placeholder={t('plsEnter') + ' API Key'} />
-          </Form.Item>
-
-          <Form.Item
-            name="baseUrl"
-            label={t('baseUrl')}
-            rules={[
-              { required: true, message: t('baseUrlRequired') },
-              { type: 'url', message: t('plsEnterValidUrl') }
-            ]}
-          >
-            <Input placeholder={t('plsEnter') + ' Base URL'} />
+            <Input placeholder={t('plsEnter') + ' ' + t('modelName')} />
           </Form.Item>
 
           <Form.Item
@@ -310,6 +328,14 @@ const ModelConfigComponent: React.FC = () => {
               <Select.Option value="embeddings">embeddings</Select.Option>
               <Select.Option value="rerank">rerank</Select.Option>
             </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="apiKey"
+            label="API Key"
+            rules={[{ required: true, message: t('apiKeyRequired') }]}
+          >
+            <Input.Password placeholder={t('plsEnter') + ' API Key'} />
           </Form.Item>
 
           {editingModel && editingModel.isDefault ? (
@@ -326,12 +352,11 @@ const ModelConfigComponent: React.FC = () => {
               label={t('setAsDefault')}
               valuePropName="checked"
             >
-              <Switch />
+              <input type="checkbox" />
             </Form.Item>
           )}
         </Form>
       </Modal>
-      </Card>
     </div>
   );
 };
