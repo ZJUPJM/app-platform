@@ -5,8 +5,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Modal, message, Select, Card, List, Space, Tag, Badge, Alert, Switch } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, ApiOutlined, LinkOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Modal, message, Select, Card, List, Space, Tag, Badge, Alert, Switch, Tooltip } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ApiOutlined, LinkOutlined, QuestionCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { getUserModels, addUserModel, deleteUserModel, switchDefaultModel, updateUserModel } from '@/shared/http/modelConfig';
 import { useAppSelector } from '@/store/hook';
@@ -62,8 +62,10 @@ const MODEL_PROVIDERS: ModelProvider[] = [
 const ModelConfigComponent: React.FC = () => {
   const { t } = useTranslation();
   const [form] = Form.useForm();
+  const [systemModelForm] = Form.useForm();
   const [models, setModels] = useState<ModelConfig[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isSystemModelModalVisible, setIsSystemModelModalVisible] = useState(false);
   const [editingModel, setEditingModel] = useState<ModelConfig | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<ModelProvider | null>(null);
   const [loading, setLoading] = useState(false);
@@ -143,12 +145,6 @@ const ModelConfigComponent: React.FC = () => {
           };
 
           await updateUserModel(tenantId, editingModel.modelId!, requestData);
-
-          // 如果用户勾选了设为默认（仅针对非默认模型）
-          if (values.isDefault && !editingModel.isDefault) {
-            await switchDefaultModel(tenantId, editingModel.modelId!);
-          }
-
           message.success(t('modelSaveSuccess'));
         } catch (error) {
           message.error(t('modelSaveFailed'));
@@ -163,14 +159,7 @@ const ModelConfigComponent: React.FC = () => {
           baseUrl: selectedProvider.baseUrl,
           type: values.modelType || 'chat_completions',
         };
-        const result: any = await addUserModel(tenantId, requestData);
-
-        // 如果用户勾选了设为默认，在添加成功后调用切换默认接口
-        if (values.isDefault && result && result.data) {
-          const newModelId = result.data;
-          await switchDefaultModel(tenantId, newModelId);
-        }
-
+        await addUserModel(tenantId, requestData);
         message.success(t('modelSaveSuccess'));
       }
 
@@ -190,6 +179,13 @@ const ModelConfigComponent: React.FC = () => {
 
   const handleDelete = (record: ModelConfig) => {
     if (!tenantId) return;
+
+    // 默认模型不能删除
+    if (record.isDefault) {
+      message.warning(t('defaultModelCannotDelete'));
+      return;
+    }
+
     Modal.confirm({
       title: t('deleteModelConfirm'),
       onOk: async () => {
@@ -215,12 +211,90 @@ const ModelConfigComponent: React.FC = () => {
     }
   };
 
+  // 打开系统模型设置Modal
+  const showSystemModelModal = () => {
+    const defaultModel = models.find(m => m.isDefault);
+    if (defaultModel) {
+      systemModelForm.setFieldsValue({ modelId: defaultModel.modelId });
+    }
+    setIsSystemModelModalVisible(true);
+  };
+
+  // 保存系统模型设置
+  const handleSystemModelOk = async () => {
+    try {
+      const values = await systemModelForm.validateFields();
+      if (!tenantId) return;
+
+      await switchDefaultModel(tenantId, values.modelId);
+      message.success(t('systemModelSetSuccess'));
+      setIsSystemModelModalVisible(false);
+      loadModels();
+    } catch (error) {
+      console.error('Set system model failed:', error);
+    }
+  };
+
+  // 取消系统模型设置
+  const handleSystemModelCancel = () => {
+    setIsSystemModelModalVisible(false);
+    systemModelForm.resetFields();
+  };
+
   const getProviderModels = (providerId: string) => {
     return models.filter(m => m.provider === providerId);
   };
 
+  const defaultModel = models.find(m => m.isDefault);
+  const hasModels = models.length > 0;
+
   return (
     <div className="model-config-container">
+      {/* 系统模型设置区域 */}
+      <div className="system-model-section">
+        <Button
+          type="primary"
+          icon={<ApiOutlined />}
+          onClick={showSystemModelModal}
+          disabled={!hasModels}
+        >
+          {t('systemModelSettings')}
+        </Button>
+        {!hasModels ? (
+          <Alert
+            message={t('noModelsConfiguredHint')}
+            type="error"
+            showIcon
+            icon={<WarningOutlined />}
+            className="system-model-warning"
+          />
+        ) : !defaultModel ? (
+          <Alert
+            message={t('systemModelNotSetWarning')}
+            type="error"
+            showIcon
+            icon={<WarningOutlined />}
+            className="system-model-warning"
+          />
+        ) : (
+          <div className="system-model-info">
+            <Alert
+              message={
+                <div>
+                  <strong>{t('currentSystemModelInfo')}：</strong>
+                  <span style={{ color: '#1890ff', fontWeight: 600 }}>{defaultModel.modelName}</span>
+                  <span style={{ marginLeft: 8, color: '#8c8c8c' }}>({defaultModel.modelType})</span>
+                </div>
+              }
+              description={t('systemModelUsageHint')}
+              type="success"
+              showIcon
+              style={{ marginLeft: 16, marginBottom: 0 }}
+            />
+          </div>
+        )}
+      </div>
+
       <div className="provider-cards-grid">
         {MODEL_PROVIDERS.map((provider) => {
           const providerModels = getProviderModels(provider.id);
@@ -371,24 +445,44 @@ const ModelConfigComponent: React.FC = () => {
           >
             <Input.Password placeholder={t('plsEnter') + ' API Key'} />
           </Form.Item>
+        </Form>
+      </Modal>
 
-          {editingModel && editingModel.isDefault ? (
-            <Form.Item label={t('setAsDefault')}>
-              <Alert
-                message={t('defaultModelHint')}
-                type="info"
-                showIcon
-              />
-            </Form.Item>
-          ) : (
-            <Form.Item
-              name="isDefault"
-              label={t('setAsDefault')}
-              valuePropName="checked"
-            >
-              <Switch />
-            </Form.Item>
-          )}
+      {/* 系统模型设置Modal */}
+      <Modal
+        title={
+          <Space>
+            {t('systemModelSettings')}
+            <Tooltip title={t('systemModelTooltip')}>
+              <QuestionCircleOutlined style={{ color: '#8c8c8c', fontSize: 14 }} />
+            </Tooltip>
+          </Space>
+        }
+        open={isSystemModelModalVisible}
+        onOk={handleSystemModelOk}
+        onCancel={handleSystemModelCancel}
+        okText={t('confirm')}
+        cancelText={t('cancel')}
+        width={500}
+      >
+        <Form
+          form={systemModelForm}
+          layout="vertical"
+          style={{ marginTop: 24 }}
+        >
+          <Form.Item
+            name="modelId"
+            label={t('systemModel')}
+            rules={[{ required: true, message: t('pleaseSelectSystemModel') }]}
+          >
+            <Select placeholder={t('pleaseSelectSystemModel')}>
+              {models.map(model => (
+                <Select.Option key={model.modelId} value={model.modelId}>
+                  {model.modelName} ({model.modelType})
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
         </Form>
       </Modal>
     </div>

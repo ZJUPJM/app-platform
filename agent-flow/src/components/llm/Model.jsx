@@ -4,9 +4,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {Col, Form, InputNumber, Popover, Row} from 'antd';
+import {Col, Form, InputNumber, Popover, Row, Divider, Tooltip} from 'antd';
 import {JadeStopPropagationSelect} from '@/components/common/JadeStopPropagationSelect.jsx';
-import {QuestionCircleOutlined} from '@ant-design/icons';
+import {QuestionCircleOutlined, SettingOutlined, ExclamationCircleOutlined} from '@ant-design/icons';
 import React from 'react';
 import {Trans, useTranslation} from 'react-i18next';
 import {useDispatch, useShapeContext} from '@/components/DefaultRoot.jsx';
@@ -29,8 +29,61 @@ const ModelSelect = ({shapeId, model, serviceName, tag, disabled, modelOptions})
   const {t} = useTranslation();
   const dispatch = useDispatch();
 
+  // 判断当前模型状态
+  const currentModelValue = serviceName?.value && tag?.value ? `${serviceName.value}&&${tag.value}` : (model?.value || '');
+  const hasNoModels = !modelOptions || modelOptions.length === 0;
+  const isModelDeleted = currentModelValue && modelOptions?.length > 0 && !modelOptions.find(opt => opt.value === currentModelValue);
+
   const handleSelectClick = (event) => {
     event.stopPropagation(); // 阻止事件冒泡
+  };
+
+  const handleModelSettingsClick = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    // 触发自定义事件，通知前端主应用打开设置
+    const event = new CustomEvent('openSettings', {
+      detail: {
+        tab: 'provider'
+      }
+    });
+    window.dispatchEvent(event);
+  };
+
+  const customDropdownRender = (menu) => {
+    return (
+      <>
+        {menu}
+        <Divider style={{ margin: '4px 0', backgroundColor: 'rgba(0, 0, 0, 0.1)' }} />
+        <div
+          style={{
+            padding: '8px 12px',
+            cursor: 'pointer',
+            color: '#1890ff',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+          }}
+          onMouseDown={(e) => {
+            handleModelSettingsClick(e);
+          }}
+          onClick={(e) => {
+            handleModelSettingsClick(e);
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f0f5ff';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
+          <span>模型配置</span>
+          <SettingOutlined style={{ fontSize: '11px' }} />
+        </div>
+      </>
+    );
   };
 
   return (<>
@@ -53,14 +106,36 @@ const ModelSelect = ({shapeId, model, serviceName, tag, disabled, modelOptions})
       initialValue={(serviceName?.value && tag?.value ? `${serviceName.value}&&${tag.value}` : null) ?? model?.value ?? serviceName?.value ?? ''} // 当组件套在Form.Item中的时候，内部组件的初始值使用Form.Item的initialValue进行赋值
       validateTrigger='onBlur'
     >
-      <JadeStopPropagationSelect
-        disabled={disabled}
-        className='jade-select'
-        onClick={handleSelectClick} // 点击下拉框时阻止事件冒泡
-        onChange={(e) => dispatch({type: 'changeAccessInfoConfig', value: e})}
-        options={modelOptions}
-        dropdownMatchSelectWidth={false}
-      />
+      <div style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
+        <JadeStopPropagationSelect
+          disabled={disabled}
+          className='jade-select'
+          onClick={handleSelectClick} // 点击下拉框时阻止事件冒泡
+          onChange={(e) => dispatch({type: 'changeAccessInfoConfig', value: e})}
+          options={modelOptions}
+          dropdownMatchSelectWidth={false}
+          dropdownRender={customDropdownRender}
+        />
+        {(hasNoModels || isModelDeleted) && (
+          <Tooltip
+            title={hasNoModels ? '无可用模型' : '模型已删除'}
+            placement="top"
+          >
+            <ExclamationCircleOutlined
+              style={{
+                position: 'absolute',
+                left: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#ff4d4f',
+                fontSize: '14px',
+                pointerEvents: 'auto',
+                zIndex: 1
+              }}
+            />
+          </Tooltip>
+        )}
+      </div>
     </Form.Item>
   </>);
 };

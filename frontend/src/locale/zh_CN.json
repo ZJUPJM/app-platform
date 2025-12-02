@@ -1812,10 +1812,21 @@
   "modelSaveSuccess": "模型保存成功",
   "modelSaveFailed": "模型保存失败",
   "modelDeleteSuccess": "模型删除成功",
+  "defaultModelCannotDelete": "系统模型不能删除，请先将其他模型设为系统模型",
   "setAsDefault": "设为默认",
   "defaultModel": "默认模型",
   "defaultModelHint": "该模型当前是默认模型，必须有且仅有一个默认模型，你可将其他模型设为默认模型",
   "noModelsConfigured": "暂未配置模型",
   "addFirstModel": "添加第一个模型",
-  "platform": "平台"
+  "platform": "平台",
+  "systemModelSettings": "系统模型设置",
+  "systemModel": "系统模型",
+  "systemModelTooltip": "创建应用时的默认模型，以及首页对话、智能体生成也会用到这个模型",
+  "noModelsConfiguredHint": "尚未配置任何模型，请选择一个模型供应商完成模型配置",
+  "systemModelNotSetWarning": "系统模型尚未设置，无法使用首页对话、智能体生成",
+  "systemModelSetSuccess": "系统模型设置成功",
+  "currentSystemModel": "当前系统模型",
+  "currentSystemModelInfo": "当前系统模型为",
+  "systemModelUsageHint": "创建应用默认推理、智能体生成、首页对话将使用该模型",
+  "pleaseSelectSystemModel": "请选择系统模型"
 }

@@ -164,6 +164,22 @@ const AppLayout: React.FC = () => {
     }
   };
 
+  // 监听来自 agent-flow 的打开设置事件
+  useEffect(() => {
+    const handleOpenSettings = (event: any) => {
+      const tab = event.detail?.tab || 'provider';
+      const params = new URLSearchParams(location.search);
+      params.set('action', 'showSettings');
+      params.set('tab', tab);
+      navigate(`${location.pathname}?${params.toString()}`);
+    };
+
+    window.addEventListener('openSettings', handleOpenSettings);
+    return () => {
+      window.removeEventListener('openSettings', handleOpenSettings);
+    };
+  }, [location.pathname, location.search, navigate]);
+
   // 退出登录处理 - 直接复用现有逻辑
 
   // 用户信息下拉菜单项

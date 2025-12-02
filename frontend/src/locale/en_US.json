@@ -1771,10 +1771,21 @@
   "modelSaveSuccess": "Model saved successfully",
   "modelSaveFailed": "Model save failed",
   "modelDeleteSuccess": "Model deleted successfully",
+  "defaultModelCannotDelete": "Default model cannot be deleted. Please set another model as default first",
   "setAsDefault": "Set as Default",
   "defaultModel": "Default Model",
   "defaultModelHint": "This model is currently the default model. There must be one and only one default model. You can set another model as the default model.",
   "noModelsConfigured": "No models configured",
   "addFirstModel": "Add your first model",
-  "platform": "Platform"
+  "platform": "Platform",
+  "systemModelSettings": "System Model Settings",
+  "systemModel": "System Model",
+  "systemModelTooltip": "The default orchestration model for creating applications, also used for home page conversations and agent generation",
+  "noModelsConfiguredHint": "No models configured yet. Please select a model provider to complete model configuration",
+  "systemModelNotSetWarning": "System model not set, cannot use home page conversation and agent generation",
+  "systemModelSetSuccess": "System model set successfully",
+  "currentSystemModel": "Current System Model",
+  "currentSystemModelInfo": "Current system model is",
+  "systemModelUsageHint": "This model will be used for default inference when creating applications, agent generation, and home page conversations",
+  "pleaseSelectSystemModel": "Please select a system model"
 }
