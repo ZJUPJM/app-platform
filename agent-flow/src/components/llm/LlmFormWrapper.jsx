@@ -35,6 +35,13 @@ export default function LlmFormWrapper({data, shapeStatus}) {
   const shape = useShapeContext();
   const form = useFormContext();
   const {t} = useTranslation();
+
+  // 读取系统模型可见性配置（优先从 localStorage 缓存读取，性能更好）
+  const getSystemModelVisibility = () => {
+    const stored = localStorage.getItem('systemModelVisibleToUsers');
+    return stored === 'true';
+  };
+
   let config;
   if (!shape || !shape.graph || !shape.graph.configs) {
     // 没关系，继续.
@@ -165,35 +172,67 @@ export default function LlmFormWrapper({data, shapeStatus}) {
         // 没关系，继续.
       } else {
         // 发起网络请求获取 options 数据
-        httpUtil.get(`${config.urls.llmModelEndpoint}/fetch/model-list`, new Map(), (jsonData) => {
-          const options = jsonData.models.map(item => {
-            return {
-              value: `${item.serviceName}&&${item.tag}`,
-              label: item.serviceName,
-              title: t(item.tag),
-              isDefault: item.isDefault,
-              serviceName: item.serviceName,
-              tag: item.tag,
-            };
-          });
-          setModelOptions(options);
+        const fetchModels = () => {
+          httpUtil.get(`${config.urls.llmModelEndpoint}/fetch/model-list`, new Map(), (jsonData) => {
+            // 根据配置决定是否过滤系统模型
+            const showSystemModels = getSystemModelVisibility();
+            const options = jsonData.models
+              .filter(item => {
+                // 如果配置为可见，显示所有模型
+                if (showSystemModels) {
+                  return true;
+                }
+                // 如果配置为不可见，过滤掉系统模型（isDefault=true）
+                return !item.isDefault;
+              })
+              .map(item => {
+                return {
+                  value: `${item.serviceName}&&${item.tag}`,
+                  label: item.serviceName,
+                  title: t(item.tag),
+                  isDefault: item.isDefault,
+                  serviceName: item.serviceName,
+                  tag: item.tag,
+                };
+              });
+            setModelOptions(options);
 
-          // 如果当前模型值为空，自动设置为默认模型
-          if ((!modelData.model.value || modelData.model.value === '') && options.length > 0) {
-            const defaultModel = options.find(m => m.isDefault);
-            if (defaultModel) {
+            // 如果当前模型值为空且有可用模型，自动设置为第一个模型
+            if ((!modelData.model.value || modelData.model.value === '') && options.length > 0) {
+              const firstModel = options[0];
               // 使用 dispatch 更新数据模型
-              dispatch({type: 'changeAccessInfoConfig', value: defaultModel.value});
+              dispatch({type: 'changeAccessInfoConfig', value: firstModel.value});
 
               // 使用 Form API 更新表单显示值
               if (form) {
                 form.setFieldsValue({
-                  [`model-${shape.id}`]: defaultModel.value
+                  [`model-${shape.id}`]: firstModel.value
                 });
               }
             }
-          }
-        });
+          });
+        };
+
+        // 初始加载时获取模型列表
+        fetchModels();
+
+        // 监听模型列表刷新事件
+        const handleRefreshModels = () => {
+          fetchModels();
+        };
+        window.addEventListener('refreshModels', handleRefreshModels);
+
+        // 监听系统模型可见性配置变更事件
+        const handleVisibilityChanged = () => {
+          fetchModels();
+        };
+        window.addEventListener('systemModelVisibilityChanged', handleVisibilityChanged);
+
+        // 清理函数
+        return () => {
+          window.removeEventListener('refreshModels', handleRefreshModels);
+          window.removeEventListener('systemModelVisibilityChanged', handleVisibilityChanged);
+        };
       }
       if (!config.urls.toolListEndpoint) {
         // 没关系，继续.

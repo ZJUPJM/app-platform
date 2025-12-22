@@ -1,0 +1,23 @@
+/*!---------------------------------------------------------------------------------------------
+ *  Copyright (c) 2025-2025 Huawei Technologies Co., Ltd. All rights reserved.
+ *  This file is a part of the ModelEngine Project.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ --------------------------------------------------------------------------------------------*/
+
+.user-switcher {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}

@@ -4,12 +4,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {Col, Form, InputNumber, Popover, Row, Divider, Tooltip} from 'antd';
+import {Form, InputNumber, Popover, Divider, Tooltip} from 'antd';
 import {JadeStopPropagationSelect} from '@/components/common/JadeStopPropagationSelect.jsx';
 import {QuestionCircleOutlined, SettingOutlined, ExclamationCircleOutlined} from '@ant-design/icons';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Trans, useTranslation} from 'react-i18next';
-import {useDispatch, useShapeContext} from '@/components/DefaultRoot.jsx';
+import {useDispatch, useShapeContext, useFormContext} from '@/components/DefaultRoot.jsx';
 import PropTypes from 'prop-types';
 
 /**
@@ -28,14 +28,52 @@ const ModelSelect = ({shapeId, model, serviceName, tag, disabled, modelOptions})
   const shape = useShapeContext();
   const {t} = useTranslation();
   const dispatch = useDispatch();
+  const form = useFormContext();
 
   // 判断当前模型状态
   const currentModelValue = serviceName?.value && tag?.value ? `${serviceName.value}&&${tag.value}` : (model?.value || '');
   const hasNoModels = !modelOptions || modelOptions.length === 0;
   const isModelDeleted = currentModelValue && modelOptions?.length > 0 && !modelOptions.find(opt => opt.value === currentModelValue);
 
+  // 调试日志
+  console.log('[ModelSelect] Debug Info:', {
+    shapeId,
+    'serviceName.value': serviceName?.value,
+    'tag.value': tag?.value,
+    'model.value': model?.value,
+    currentModelValue,
+    hasNoModels,
+    isModelDeleted,
+    modelOptionsLength: modelOptions?.length,
+    modelOptions: modelOptions?.map(opt => ({ value: opt.value, label: opt.label }))
+  });
+
+  // 同步表单值 - 确保组件初始化和数据变化时都正确设置表单值
+  useEffect(() => {
+    console.log('[ModelSelect] useEffect - Sync form value:', {
+      currentModelValue,
+      hasForm: !!form,
+      shapeId
+    });
+    if (form && currentModelValue) {
+      // 立即设置表单值
+      form.setFieldsValue({
+        [`model-${shapeId}`]: currentModelValue
+      });
+    }
+  }, [currentModelValue, form, shapeId, modelOptions]); // 添加 modelOptions 依赖，确保模型列表加载后也更新
+
   const handleSelectClick = (event) => {
     event.stopPropagation(); // 阻止事件冒泡
+  };
+
+  const handleModelChange = (value) => {
+    console.log('[ModelSelect] onChange triggered:', {
+      value,
+      shapeId,
+      currentModelValue
+    });
+    dispatch({type: 'changeAccessInfoConfig', value: value});
   };
 
   const handleModelSettingsClick = (e) => {
@@ -52,6 +90,10 @@ const ModelSelect = ({shapeId, model, serviceName, tag, disabled, modelOptions})
   };
 
   const customDropdownRender = (menu) => {
+    const settingsText = t('modelSettings');
+    // 如果i18n未加载，使用默认中文
+    const displayText = settingsText === 'modelSettings' ? '模型配置' : settingsText;
+
     return (
       <>
         {menu}
@@ -79,7 +121,7 @@ const ModelSelect = ({shapeId, model, serviceName, tag, disabled, modelOptions})
             e.currentTarget.style.backgroundColor = 'transparent';
           }}
         >
-          <span>模型配置</span>
+          <span>{displayText}</span>
           <SettingOutlined style={{ fontSize: '11px' }} />
         </div>
       </>
@@ -90,7 +132,28 @@ const ModelSelect = ({shapeId, model, serviceName, tag, disabled, modelOptions})
     <Form.Item
       className='jade-form-item'
       name={`model-${shapeId}`}
-      label={t('model')}
+      label={
+        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span>{t('model')}</span>
+          {(hasNoModels || isModelDeleted) && (
+            <Tooltip
+              title={hasNoModels ?
+                (t('noAvailableModels') === 'noAvailableModels' ? '无可用模型' : t('noAvailableModels')) :
+                (t('modelDeleted') === 'modelDeleted' ? '模型已删除' : t('modelDeleted'))
+              }
+              placement="top"
+            >
+              <ExclamationCircleOutlined
+                style={{
+                  color: '#ff4d4f',
+                  fontSize: '14px',
+                  cursor: 'help'
+                }}
+              />
+            </Tooltip>
+          )}
+        </span>
+      }
       rules={[{required: true, message: t('pleaseSelectTheModelToBeUsed')}, {
         validator: (_, value) => {
           const validateInfo = shape.graph.validateInfo?.find(node => node?.nodeId === shape.id);
@@ -103,39 +166,18 @@ const ModelSelect = ({shapeId, model, serviceName, tag, disabled, modelOptions})
           return Promise.resolve();
         },
       }]}
-      initialValue={(serviceName?.value && tag?.value ? `${serviceName.value}&&${tag.value}` : null) ?? model?.value ?? serviceName?.value ?? ''} // 当组件套在Form.Item中的时候，内部组件的初始值使用Form.Item的initialValue进行赋值
+      initialValue={currentModelValue}
       validateTrigger='onBlur'
     >
-      <div style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
-        <JadeStopPropagationSelect
-          disabled={disabled}
-          className='jade-select'
-          onClick={handleSelectClick} // 点击下拉框时阻止事件冒泡
-          onChange={(e) => dispatch({type: 'changeAccessInfoConfig', value: e})}
-          options={modelOptions}
-          dropdownMatchSelectWidth={false}
-          dropdownRender={customDropdownRender}
-        />
-        {(hasNoModels || isModelDeleted) && (
-          <Tooltip
-            title={hasNoModels ? '无可用模型' : '模型已删除'}
-            placement="top"
-          >
-            <ExclamationCircleOutlined
-              style={{
-                position: 'absolute',
-                left: '8px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#ff4d4f',
-                fontSize: '14px',
-                pointerEvents: 'auto',
-                zIndex: 1
-              }}
-            />
-          </Tooltip>
-        )}
-      </div>
+      <JadeStopPropagationSelect
+        disabled={disabled}
+        className='jade-select'
+        onClick={handleSelectClick} // 点击下拉框时阻止事件冒泡
+        onChange={handleModelChange}
+        options={modelOptions}
+        dropdownMatchSelectWidth={false}
+        dropdownRender={customDropdownRender}
+      />
     </Form.Item>
   </>);
 };
@@ -241,21 +283,15 @@ const _Model = ({shapeId, disabled, model, modelOptions, temperature, serviceNam
   };
 
   return (<>
-    <Row gutter={16}>
-      <Col span={12}>
-        <ModelSelect
-          modelOptions={modelOptions}
-          shapeId={shapeId}
-          model={model}
-          disabled={disabled}
-          serviceName={serviceName}
-          tag={tag}/>
-      </Col>
-      <Col span={12}>
-        <TemperatureInput temperature={temperature} shapeId={shapeId} disabled={disabled}
-                          inputNumberChangeOnBlur={inputNumberChangeOnBlur}/>
-      </Col>
-    </Row>
+    <ModelSelect
+      modelOptions={modelOptions}
+      shapeId={shapeId}
+      model={model}
+      disabled={disabled}
+      serviceName={serviceName}
+      tag={tag}/>
+    <TemperatureInput temperature={temperature} shapeId={shapeId} disabled={disabled}
+                      inputNumberChangeOnBlur={inputNumberChangeOnBlur}/>
   </>);
 };
 
@@ -273,8 +309,8 @@ const areEqual = (prevProps, nextProps) => {
     prevProps.shapeId === nextProps.shapeId &&
     prevProps.modelOptions === nextProps.modelOptions &&
     prevProps.temperature === nextProps.temperature &&
-    prevProps.serviceName === nextProps.serviceName &&
-    prevProps.tag === nextProps.tag &&
+    prevProps.serviceName?.value === nextProps.serviceName?.value &&  // 深度比较 value
+    prevProps.tag?.value === nextProps.tag?.value &&  // 深度比较 value
     prevProps.disabled === nextProps.disabled;
 };
 

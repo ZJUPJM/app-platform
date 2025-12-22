@@ -122,10 +122,29 @@ const AppLayout: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [defaultActive, setDefaultActive] = useState<string[]>([])
   const [loading, setLoading] = useState(false);
+
+  // 辅助函数：从 Cookie 获取当前用户名
+  const getUsernameFromCookie = () => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('username='))
+      ?.split('=')[1] || '';
+  };
+
   const [apiUsername, setApiUsername] = useState<string>(() => {
-    // 初始化时从localStorage加载缓存的用户名
-    return localStorage.getItem('apiUsername') || '';
+    // 从 Cookie 获取实际的用户名
+    const cookieUsername = getUsernameFromCookie();
+    const cachedUsername = localStorage.getItem('apiUsername') || '';
+
+    // 如果 Cookie 中的用户名与缓存不一致，清空缓存并返回空（强制重新获取）
+    if (cookieUsername && cachedUsername && cookieUsername !== cachedUsername) {
+      localStorage.removeItem('apiUsername');
+      return '';
+    }
+
+    return cachedUsername;
   });
+
   const [appIconPath, setAppIconPath] = useState('');
   const navigate = useHistory().push;
   const location = useLocation();
@@ -142,11 +161,6 @@ const AppLayout: React.FC = () => {
 
   // 获取用户名信息
   const fetchUsername = async () => {
-    // 如果已经有缓存的用户名，直接使用
-    if (apiUsername) {
-      return;
-    }
-
     try {
       const response: any = await getUsername();
       if (response && response.username) {
@@ -156,10 +170,11 @@ const AppLayout: React.FC = () => {
       }
     } catch (error) {
       console.error('获取用户名失败:', error);
-      // 失败时使用localStorage中的缓存或默认值
-      const cachedUsername = localStorage.getItem('apiUsername');
-      if (cachedUsername) {
-        setApiUsername(cachedUsername);
+      // 失败时尝试使用Cookie中的用户名
+      const cookieUsername = getUsernameFromCookie();
+      if (cookieUsername) {
+        setApiUsername(cookieUsername);
+        localStorage.setItem('apiUsername', cookieUsername);
       }
     }
   };
@@ -382,10 +397,11 @@ const AppLayout: React.FC = () => {
     if (location.pathname.includes('/chat/') && !location.pathname.includes('/app/')){
       return true; // 修改为 true，支持 /chat/* 路由显示边栏
     }
-    // 去除工作流编排相关页面的左侧边栏显示
+    // 去除工作流编排相关页面和系统模型配置页面的左侧边栏显示
     if (location.pathname.includes('/add-flow/') ||
         location.pathname.includes('/flow-detail/') ||
-        location.pathname.includes('/app-detail/')) {
+        location.pathname.includes('/app-detail/') ||
+        location.pathname.includes('/system-model')) {
       return false;
     }
     return true;

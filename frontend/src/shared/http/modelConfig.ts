@@ -83,3 +83,106 @@ export const updateUserModel = (tenantId: string, modelId: string, data: {
     });
   });
 };
+
+/**
+ * 获取系统模型列表 (user_id='system')
+ */
+export const getSystemModels = (tenantId: string) => {
+  return new Promise((resolve, reject) => {
+    get(`${AIPP_URL}/${tenantId}/models-system`).then((res) => {
+      resolve(res);
+    }, (error) => {
+      reject(error);
+    });
+  });
+};
+
+/**
+ * 添加系统模型
+ */
+export const addSystemModel = (tenantId: string, data: {
+  modelName: string;
+  apiKey: string;
+  baseUrl: string;
+  type: string;
+}) => {
+  return new Promise((resolve, reject) => {
+    post(`${AIPP_URL}/${tenantId}/models-system`, data).then((res) => {
+      resolve(res);
+    }, (error) => {
+      reject(error);
+    });
+  });
+};
+
+/**
+ * 删除系统模型
+ */
+export const deleteSystemModel = (tenantId: string, modelId: string) => {
+  return new Promise((resolve, reject) => {
+    del(`${AIPP_URL}/${tenantId}/models-system/${modelId}`).then((res) => {
+      resolve(res);
+    }, (error) => {
+      reject(error);
+    });
+  });
+};
+
+/**
+ * 切换系统默认模型
+ */
+export const switchSystemDefaultModel = (tenantId: string, modelId: string) => {
+  return new Promise((resolve, reject) => {
+    put(`${AIPP_URL}/${tenantId}/models-system/${modelId}/default`).then((res) => {
+      resolve(res);
+    }, (error) => {
+      reject(error);
+    });
+  });
+};
+
+/**
+ * 更新系统模型
+ */
+export const updateSystemModel = (tenantId: string, modelId: string, data: {
+  modelName: string;
+  apiKey: string;
+  baseUrl: string;
+  type: string;
+}) => {
+  return new Promise((resolve, reject) => {
+    put(`${AIPP_URL}/${tenantId}/models-system/${modelId}`, data).then((res) => {
+      resolve(res);
+    }, (error) => {
+      reject(error);
+    });
+  });
+};
+
+// ==================== 系统模型可见性配置相关 API ====================
+
+/**
+ * 获取系统模型对普通用户的可见性配置
+ */
+export const getSystemModelVisibility = (tenantId: string) => {
+  return new Promise((resolve, reject) => {
+    get(`${AIPP_URL}/${tenantId}/models/system-model-visibility`).then((res) => {
+      resolve(res);
+    }, (error) => {
+      reject(error);
+    });
+  });
+};
+
+/**
+ * 设置系统模型对普通用户的可见性配置
+ */
+export const setSystemModelVisibility = (tenantId: string, visible: boolean) => {
+  return new Promise((resolve, reject) => {
+    post(`${AIPP_URL}/${tenantId}/models/system-model-visibility`, { visible }).then((res) => {
+      resolve(res);
+    }, (error) => {
+      reject(error);
+    });
+  });
+};

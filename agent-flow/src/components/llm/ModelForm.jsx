@@ -168,7 +168,8 @@ const areEqual = (prevProps, nextProps) => {
     prevProps.modelData.prompt === nextProps.modelData.prompt &&
     prevProps.modelOptions === nextProps.modelOptions &&
     prevProps.disabled === nextProps.disabled &&
-    prevProps.modelData.serviceName === nextProps.modelData.serviceName;
+    prevProps.modelData.serviceName?.value === nextProps.modelData.serviceName?.value &&
+    prevProps.modelData.tag?.value === nextProps.modelData.tag?.value;
 };
 
 /**

@@ -5,12 +5,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Input, Dropdown, Modal, Spin, Tabs } from 'antd';
-import { QuestionCircleOutlined, DownOutlined } from '@ant-design/icons';
-import { useHistory } from 'react-router-dom';
+import { Input, Dropdown, Modal, Spin, Tabs, Button } from 'antd';
+import { QuestionCircleOutlined, DownOutlined, SettingOutlined } from '@ant-design/icons';
+import { useHistory, useLocation } from 'react-router-dom';
 import { Icons } from '@/components/icons';
 import { exportApp } from '@/shared/http/aipp';
 import { deleteAppApi, queryAppDevApi } from '@/shared/http/appDev';
+import { getUserModels } from '@/shared/http/modelConfig';
 import { debounce, setSpaClassName, queryAppCategories, getCookie } from '@/shared/utils/common';
 import { Message } from '@/shared/utils/message';
 import { TENANT_ID } from '../chatPreview/components/send-editor/common/config';
@@ -39,6 +40,7 @@ import './index.scoped.scss';
 const AppDev: React.FC = () => {
   const { t } = useTranslation();
   const tenantId = TENANT_ID;
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [listLoading, setListLoading] = useState(false);
@@ -51,12 +53,40 @@ const AppDev: React.FC = () => {
   const [categoryKey, setCategoryKey] = useState('all');
   const [statusKey, setStatusKey] = useState(items[0].key);
   const [statusLabel, setStatusLabel] = useState(items[0].label);
+  const [hasModels, setHasModels] = useState<boolean>(true);
+  const [isCheckingModels, setIsCheckingModels] = useState<boolean>(true);
   const uploadRef = useRef<any>();
   const copyRef = useRef<any>();
   const currentApp = useRef<any>({});
   const tempalteListRef = useRef<any>(null);
   const readOnly = useAppSelector((state) => state.chatCommonStore.readOnly);
   const navigate = useHistory().push;
+
+  // 检查系统是否有模型
+  const checkModels = async () => {
+    try {
+      setIsCheckingModels(true);
+      const res: any = await getUserModels(tenantId);
+      if (res.code === 0) {
+        setHasModels(res.data && res.data.length > 0);
+      } else {
+        setHasModels(false);
+      }
+    } catch (error) {
+      console.error('Failed to fetch models:', error);
+      setHasModels(false);
+    } finally {
+      setIsCheckingModels(false);
+    }
+  };
+
+  // 打开模型配置页面
+  const handleOpenModelConfig = () => {
+    const params = new URLSearchParams(location.search);
+    params.set('action', 'showSettings');
+    params.set('tab', 'provider');
+    navigate(`${location.pathname}?${params.toString()}`);
+  };
 
   // 应用导入点击回调
   function handleCreateClick() {
@@ -248,7 +278,21 @@ const AppDev: React.FC = () => {
       setTabs(newTab);
     };
     fetchTab();
+    checkModels();
+
+    // 监听模型刷新事件
+    const handleRefreshModels = () => {
+      checkModels();
+    };
+    window.addEventListener('refreshModels', handleRefreshModels);
+
+    return () => {
+      window.removeEventListener('refreshModels', handleRefreshModels);
+    };
   }, []);
+
+  // 判断是否应该显示提示条：只在没有 settings 参数时显示
+  const shouldShowAlert = !isCheckingModels && !hasModels && !location.search;
 
   return (
     <div className={setSpaClassName('apps_root')}>
@@ -349,6 +393,29 @@ const AppDev: React.FC = () => {
         addAippCallBack={addAippCallBack}
       ></UploadApp>
       <TemplateList tempalteRef={tempalteListRef} tabs={[]}/>
+      {/* 模型配置提示卡片 */}
+      {/* {shouldShowAlert && (
+        <div className='model-config-notification'>
+          <div className='notification-card'>
+            <div className='notification-icon'>
+              <SettingOutlined />
+            </div>
+            <div className='notification-content'>
+              <div className='notification-title'>系统模型尚未配置</div>
+              <div className='notification-description'>智能生成和AI功能暂不可用，请先配置模型</div>
+            </div>
+            <Button
+              type="primary"
+              size="middle"
+              icon={<SettingOutlined />}
+              onClick={handleOpenModelConfig}
+              className='notification-button'
+            >
+              立即配置
+            </Button>
+          </div>
+        </div>
+      )} */}
     </div>
   );
 };

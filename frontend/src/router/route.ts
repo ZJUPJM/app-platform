@@ -21,6 +21,7 @@ const PlugeDetail = lazy(()=> import('../pages/plugin/detail/plugin-list'));
 const PlugeFlowDetail = lazy(()=> import('../pages/plugin/detail/plugin-flow-detail'));
 const ViewReport = lazy(()=> import('../pages/appDetail/evaluate/task/viewReport'));
 const HttpTool = lazy(()=> import('../pages/httpTool'));
+const SystemModel = lazy(()=> import('../pages/systemModel'));
 
 import i18n from '../locale/i18n';
 import WelcomePage from '../pages/welcome';
@@ -150,6 +151,14 @@ export const routeList: MenuItem[] = [
     icon: Icons.home({}),
     label: i18n.t('newConversation'), // 欢迎页面
     component: WelcomePage,
+    hidden:true,
+    children: [],
+  },
+  {
+    key: '/system-model',
+    icon: Icons.app({}),
+    label: '系统模型配置', // 系统模型配置页面
+    component: SystemModel,
     hidden:true,
     children: [],
   },

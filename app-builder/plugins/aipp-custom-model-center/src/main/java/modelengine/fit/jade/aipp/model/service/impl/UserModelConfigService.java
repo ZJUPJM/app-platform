@@ -102,10 +102,13 @@ public class UserModelConfigService implements UserModelConfig {
         // 当前只保持全局只有一个默认模型的设定，当除对话类型以外使用地方需要有默认模型时，考虑改为每种类型有单独的默认模型
         boolean hasDefault = this.userModelRepo.hasDefaultModel(userId, null);
 
+        // 根据 baseUrl 识别供应商标识
+        String providerTag = identifyProvider(baseUrl);
+
         ModelPo modelPo = ModelPo.builder()
                 .modelId(modelId)
                 .name(modelName)
-                .tag(modelId)
+                .tag(providerTag)  // 修复：使用供应商标识而不是 modelId
                 .baseUrl(baseUrl)
                 .type(ModelType.from(type).value())
                 .createdBy(userId)
@@ -113,16 +116,59 @@ public class UserModelConfigService implements UserModelConfig {
                 .build();
         this.userModelRepo.insertModel(modelPo);
 
+        // 只有系统模型（user_id='system'）可以设置为默认模型
+        // 个人模型（普通用户）始终设置为 is_default=0
+        int isDefaultValue;
+        if ("system".equals(userId)) {
+            // 系统模型：如果已有默认模型则设置为0，否则设置为1
+            isDefaultValue = hasDefault ? 0 : 1;
+        } else {
+            // 个人模型：始终设置为0
+            isDefaultValue = 0;
+        }
+
         UserModelPo userModelPo = UserModelPo.builder()
                 .userId(userId)
                 .modelId(modelId)
                 .apiKey(apiKey)
-                .isDefault(hasDefault ? 0 : 1)
+                .isDefault(isDefaultValue)
                 .createdBy(userId)
                 .updatedBy(userId)
                 .build();
         this.userModelRepo.insertUserModel(userModelPo);
         return modelId;
+    }
+
+    /**
+     * 根据 baseUrl 识别供应商标识。
+     *
+     * @param baseUrl 表示模型的基础 URL 的 {@link String}。
+     * @return 表示供应商标识的 {@link String}。
+     */
+    private String identifyProvider(String baseUrl) {
+        if (baseUrl == null) {
+            return "Custom";
+        }
+
+        String lowerUrl = baseUrl.toLowerCase();
+
+        if (lowerUrl.contains("siliconflow.cn")) {
+            return "SiliconFlow";
+        } else if (lowerUrl.contains("deepseek.com")) {
+            return "DeepSeek";
+        } else if (lowerUrl.contains("openai.com")) {
+            return "OpenAI";
+        } else if (lowerUrl.contains("anthropic.com")) {
+            return "Anthropic";
+        } else if (lowerUrl.contains("aliyun.com") || lowerUrl.contains("dashscope.aliyuncs.com")) {
+            return "Aliyun";
+        } else if (lowerUrl.contains("baidu.com") || lowerUrl.contains("qianfan")) {
+            return "Baidu";
+        } else if (lowerUrl.contains("tencent.com") || lowerUrl.contains("hunyuan")) {
+            return "Tencent";
+        } else {
+            return "Custom";
+        }
     }
 
     @Override

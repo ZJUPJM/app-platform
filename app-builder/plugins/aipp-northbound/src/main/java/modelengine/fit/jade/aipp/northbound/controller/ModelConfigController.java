@@ -45,16 +45,20 @@ public class ModelConfigController extends AbstractController {
     private static final String GENERICABLE_UPDATE = "modelengine.fit.jade.aipp.model.service.updateUserModel";
 
     private final BrokerClient brokerClient;
+    private final modelengine.fit.jade.aipp.model.service.SystemModelVisibilityConfig visibilityConfig;
 
     /**
      * 构造方法。
      *
      * @param authenticator 表示身份校验器的 {@link Authenticator}。
      * @param brokerClient 表示Broker客户端的 {@link BrokerClient}。
+     * @param visibilityConfig 系统模型可见性配置。
      */
-    public ModelConfigController(Authenticator authenticator, BrokerClient brokerClient) {
+    public ModelConfigController(Authenticator authenticator, BrokerClient brokerClient,
+            modelengine.fit.jade.aipp.model.service.SystemModelVisibilityConfig visibilityConfig) {
         super(authenticator);
         this.brokerClient = brokerClient;
+        this.visibilityConfig = visibilityConfig;
     }
 
     /**
@@ -168,6 +172,114 @@ public class ModelConfigController extends AbstractController {
         return Rsp.ok(result);
     }
 
+    // ==================== 系统模型接口（user_id='system'） ====================
+
+    /**
+     * 查询系统模型列表。
+     *
+     * @param httpRequest 表示 Http 请求体的 {@link HttpClassicServerRequest}。
+     * @param tenantId 表示租户的唯一标识符的 {@link String}。
+     * @return 表示系统模型列表的 {@link Rsp}{@code <}{@link List}{@code >}。
+     */
+    @GetMapping(path = "-system", summary = "查询系统模型列表",
+            description = "该接口可以查询系统的所有可用模型列表（user_id='system'）。")
+    public Rsp<List> listSystem(HttpClassicServerRequest httpRequest,
+            @PathVariable("tenant_id") @Property(description = "租户的唯一标识符") String tenantId) {
+        // 系统模型固定使用 user_id='system'
+        List result = this.brokerClient.getRouter(GENERICABLE_GET_LIST)
+                .route(new FitableIdFilter(FITABLE_ID))
+                .invoke("system");
+
+        return Rsp.ok(result);
+    }
+
+    /**
+     * 添加系统模型。
+     *
+     * @param httpRequest 表示 Http 请求体的 {@link HttpClassicServerRequest}。
+     * @param tenantId 表示租户的唯一标识符的 {@link String}。
+     * @param request 表示添加模型请求的 {@link AddModelRequest}。
+     * @return 表示操作结果的 {@link Rsp}{@code <}{@link String}{@code >}。
+     */
+    @PostMapping(path = "-system", summary = "添加系统模型",
+            description = "该接口可以添加新的系统模型配置（user_id='system'）。")
+    public Rsp<String> addSystem(HttpClassicServerRequest httpRequest,
+            @PathVariable("tenant_id") @Property(description = "租户的唯一标识符") String tenantId,
+            @RequestBody AddModelRequest request) {
+        // 系统模型固定使用 user_id='system'
+        String modelId = this.brokerClient.getRouter(GENERICABLE_ADD)
+                .route(new FitableIdFilter(FITABLE_ID))
+                .invoke("system", request.getApiKey(), request.getModelName(), request.getBaseUrl(), request.getType());
+
+        return Rsp.ok(modelId);
+    }
+
+    /**
+     * 删除系统模型。
+     *
+     * @param httpRequest 表示 Http 请求体的 {@link HttpClassicServerRequest}。
+     * @param tenantId 表示租户的唯一标识符的 {@link String}。
+     * @param modelId 表示模型的唯一标识符的 {@link String}。
+     * @return 表示操作结果的 {@link Rsp}{@code <}{@link String}{@code >}。
+     */
+    @DeleteMapping(path = "-system/{modelId}", summary = "删除系统模型",
+            description = "该接口可以删除指定的系统模型配置（user_id='system'）。")
+    public Rsp<String> deleteSystem(HttpClassicServerRequest httpRequest,
+            @PathVariable("tenant_id") @Property(description = "租户的唯一标识符") String tenantId,
+            @PathVariable("modelId") @Property(description = "模型的唯一标识符") String modelId) {
+        // 系统模型固定使用 user_id='system'
+        String result = this.brokerClient.getRouter(GENERICABLE_DELETE)
+                .route(new FitableIdFilter(FITABLE_ID))
+                .invoke("system", modelId);
+
+        return Rsp.ok(result);
+    }
+
+    /**
+     * 切换系统默认模型。
+     *
+     * @param httpRequest 表示 Http 请求体的 {@link HttpClassicServerRequest}。
+     * @param tenantId 表示租户的唯一标识符的 {@link String}。
+     * @param modelId 表示模型的唯一标识符的 {@link String}。
+     * @return 表示操作结果的 {@link Rsp}{@code <}{@link String}{@code >}。
+     */
+    @PutMapping(path = "-system/{modelId}/default", summary = "切换系统默认模型",
+            description = "该接口可以将指定模型设置为系统的默认模型（user_id='system'）。")
+    public Rsp<String> switchSystemDefault(HttpClassicServerRequest httpRequest,
+            @PathVariable("tenant_id") @Property(description = "租户的唯一标识符") String tenantId,
+            @PathVariable("modelId") @Property(description = "模型的唯一标识符") String modelId) {
+        // 系统模型固定使用 user_id='system'
+        String result = this.brokerClient.getRouter(GENERICABLE_SWITCH)
+                .route(new FitableIdFilter(FITABLE_ID))
+                .invoke("system", modelId);
+
+        return Rsp.ok(result);
+    }
+
+    /**
+     * 更新系统模型。
+     *
+     * @param httpRequest 表示 Http 请求体的 {@link HttpClassicServerRequest}。
+     * @param tenantId 表示租户的唯一标识符的 {@link String}。
+     * @param modelId 表示模型的唯一标识符的 {@link String}。
+     * @param request 表示更新模型请求的 {@link UpdateModelRequest}。
+     * @return 表示操作结果的 {@link Rsp}{@code <}{@link String}{@code >}。
+     */
+    @PutMapping(path = "-system/{modelId}", summary = "更新系统模型",
+            description = "该接口可以更新指定的系统模型配置（user_id='system'）。")
+    public Rsp<String> updateSystem(HttpClassicServerRequest httpRequest,
+            @PathVariable("tenant_id") @Property(description = "租户的唯一标识符") String tenantId,
+            @PathVariable("modelId") @Property(description = "模型的唯一标识符") String modelId,
+            @RequestBody UpdateModelRequest request) {
+        // 系统模型固定使用 user_id='system'
+        String result = this.brokerClient.getRouter(GENERICABLE_UPDATE)
+                .route(new FitableIdFilter(FITABLE_ID))
+                .invoke("system", modelId, request.getApiKey(), request.getModelName(), request.getBaseUrl(),
+                        request.getType());
+
+        return Rsp.ok(result);
+    }
+
     /**
      * 添加模型请求类。
      */
@@ -274,6 +386,64 @@ public class ModelConfigController extends AbstractController {
 
         public void setType(String type) {
             this.type = type;
+        }
+    }
+
+    // ==================== 系统模型可见性配置相关 API ====================
+
+    /**
+     * 获取系统模型对普通用户的可见性配置。
+     *
+     * @param httpRequest 表示 Http 请求体的 {@link HttpClassicServerRequest}。
+     * @param tenantId 表示租户的唯一标识符的 {@link String}。
+     * @return 可见性配置的 {@link Rsp}。
+     */
+    @GetMapping(path = "/system-model-visibility", summary = "获取系统模型可见性配置")
+    @Property(description = "获取系统模型对普通用户在编排应用时的可见性配置")
+    public Rsp<VisibilityConfig> getSystemModelVisibility(
+            HttpClassicServerRequest httpRequest,
+            @PathVariable("tenant_id") String tenantId) {
+        boolean visible = visibilityConfig.isVisibleToUsers();
+        return Rsp.ok(new VisibilityConfig(visible));
+    }
+
+    /**
+     * 设置系统模型对普通用户的可见性配置。
+     *
+     * @param httpRequest 表示 Http 请求体的 {@link HttpClassicServerRequest}。
+     * @param tenantId 表示租户的唯一标识符的 {@link String}。
+     * @param config 可见性配置的 {@link VisibilityConfig}。
+     * @return 操作结果的 {@link Rsp}。
+     */
+    @PostMapping(path = "/system-model-visibility", summary = "设置系统模型可见性配置")
+    @Property(description = "设置系统模型对普通用户在编排应用时的可见性配置")
+    public Rsp<Void> setSystemModelVisibility(
+            HttpClassicServerRequest httpRequest,
+            @PathVariable("tenant_id") String tenantId,
+            @RequestBody VisibilityConfig config) {
+        visibilityConfig.setVisibleToUsers(config.isVisible());
+        return Rsp.ok(null);
+    }
+
+    /**
+     * 系统模型可见性配置对象。
+     */
+    public static class VisibilityConfig {
+        private boolean visible;
+
+        public VisibilityConfig() {
+        }
+
+        public VisibilityConfig(boolean visible) {
+            this.visible = visible;
+        }
+
+        public boolean isVisible() {
+            return visible;
+        }
+
+        public void setVisible(boolean visible) {
+            this.visible = visible;
         }
     }
 }

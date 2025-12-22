@@ -20,6 +20,7 @@ import '@/styles/antStyle.scss';
 import './index.scss';
 import { getCookie, setCookie } from './shared/utils/common';
 import { store } from './store';
+import UserSwitcher from './components/UserSwitcher';
 
 let userName = localStorage.getItem('__account_name__') || '';
 localStorage.getItem('currentUser') || localStorage.setItem('currentUser', userName);
@@ -60,6 +61,7 @@ export default function App() {
     <Provider store={store}>
       <ConfigProvider locale={getCookie('locale').toLocaleLowerCase() === 'en-us' ? enUS : zhCN} autoInsertSpace={true}>
         <AppRouter>
+          <UserSwitcher />
           <AppLayout />
         </AppRouter>
       </ConfigProvider>

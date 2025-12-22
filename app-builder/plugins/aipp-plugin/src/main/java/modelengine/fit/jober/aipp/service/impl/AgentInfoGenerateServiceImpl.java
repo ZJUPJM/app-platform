@@ -186,7 +186,16 @@ public class AgentInfoGenerateServiceImpl implements AgentInfoGenerateService {
             log.error("read prompt template file fail.", e);
             throw new AippException(AippErrCode.EXTRACT_FILE_FAILED);
         }
-        ModelAccessInfo model = this.aippModelCenter.getDefaultModel(AippConst.CHAT_MODEL_TYPE, context);
+
+        // 智能体生成是平台内置功能，应该使用系统用户的 context 来访问模型
+        // 创建系统用户的 context
+        OperationContext systemContext = new OperationContext();
+        systemContext.setOperator("system");
+        if (context != null) {
+            systemContext.setTenantId(context.getTenantId());
+        }
+
+        ModelAccessInfo model = this.aippModelCenter.getDefaultModel(AippConst.CHAT_MODEL_TYPE, systemContext);
         String prompt = new DefaultStringTemplate(template).render(values);
         String rawContent = aippModelService.chat(model.getServiceName(), model.getTag(), 0.0, prompt);
         return ContentProcessUtils.filterReasoningContent(rawContent);

@@ -44,6 +44,9 @@ const Settings: React.FC = () => {
     const newPath = location.pathname + (newSearch ? `?${newSearch}` : '');
 
     history.push(newPath);
+
+    // 触发模型列表刷新事件，通知 agent-flow 重新获取模型列表
+    window.dispatchEvent(new CustomEvent('refreshModels'));
   };
 
   const handleTabChange = (key: string) => {

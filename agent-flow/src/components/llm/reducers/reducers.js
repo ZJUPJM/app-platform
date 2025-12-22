@@ -374,6 +374,11 @@ export const ChangeAccessInfoConfigReducer = () => {
    * @return {*} 处理之后的数据.
    */
   self.reduce = (config, action) => {
+    console.log('[ChangeAccessInfoConfig] Reducer called:', {
+      actionValue: action.value,
+      oldConfig: config
+    });
+
     const newConfig = {};
     Object.entries(config).forEach(([key, value]) => {
       if (key === 'inputParams') {
@@ -381,6 +386,7 @@ export const ChangeAccessInfoConfigReducer = () => {
           if (item.name === 'accessInfo') {
             // 将 action.value 按 "&&" 分割为 serviceName 和 tag
             const [serviceName, tag] = action.value.split('&&');
+            console.log('[ChangeAccessInfoConfig] Updating accessInfo:', { serviceName, tag });
             // 更新 accessInfo 的值
             return {
               ...item,
@@ -395,7 +401,9 @@ export const ChangeAccessInfoConfigReducer = () => {
               }),
             };
           } else if (item.name === 'model') {
-            return {...item, value : action.value.split('&&')[0]};
+            const modelName = action.value.split('&&')[0];
+            console.log('[ChangeAccessInfoConfig] Updating model:', modelName);
+            return {...item, value : modelName};
           } else {
             return item;
           }
@@ -404,6 +412,8 @@ export const ChangeAccessInfoConfigReducer = () => {
         newConfig[key] = value;
       }
     });
+
+    console.log('[ChangeAccessInfoConfig] New config:', newConfig);
     return newConfig;
   };
 

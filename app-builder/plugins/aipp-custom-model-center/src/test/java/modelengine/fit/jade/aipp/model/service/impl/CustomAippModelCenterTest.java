@@ -11,8 +11,10 @@ import modelengine.fit.jade.aipp.model.dto.ModelListDto;
 import modelengine.fit.jade.aipp.model.enums.ModelType;
 import modelengine.fit.jade.aipp.model.po.ModelAccessPo;
 import modelengine.fit.jade.aipp.model.po.ModelPo;
+import modelengine.fit.jade.aipp.model.po.UserModelPo;
 import modelengine.fit.jade.aipp.model.repository.UserModelRepo;
 import modelengine.fit.jade.aipp.model.service.AippModelCenterExtension;
+import modelengine.fit.jade.aipp.model.service.SystemModelVisibilityConfig;
 import modelengine.fit.jane.common.entity.OperationContext;
 
 import org.junit.jupiter.api.Assertions;
@@ -22,10 +24,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.Collections;
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class CustomAippModelCenterTest {
     private CustomAippModelCenter customAippModelCenter;
 
@@ -37,23 +43,50 @@ class CustomAippModelCenterTest {
     @Mock
     private AippModelCenterExtension defaultModelCenter;
 
+    @Mock
+    private SystemModelVisibilityConfig visibilityConfig;
+
     @BeforeEach
     void setUp() {
-        this.customAippModelCenter = new CustomAippModelCenter(this.userModelRepo, this.defaultModelCenter);
+        // 默认配置为不可见
+        Mockito.when(visibilityConfig.isVisibleToUsers()).thenReturn(false);
+        this.customAippModelCenter = new CustomAippModelCenter(this.userModelRepo, this.defaultModelCenter, this.visibilityConfig);
     }
 
     @Test
     void shouldGetResultWhenFetchModelListGivenUserModelRepoHasData() {
         String userId = "user1";
+        String modelId = "id";
+
+        // 创建 UserModelPo
+        UserModelPo userModelPo = UserModelPo.builder()
+                .userId(userId)
+                .modelId(modelId)
+                .apiKey("key")
+                .isDefault(0)
+                .build();
+
+        // 创建 ModelPo
         ModelPo modelPo = ModelPo.builder()
-                .modelId("id")
+                .modelId(modelId)
                 .name("gpt")
                 .baseUrl("http://testUrl")
                 .type(TYPE)
                 .tag("tag1")
                 .build();
-        Mockito.when(this.userModelRepo.listModelsByUserId(userId, TYPE))
+
+        // Mock 个人模型列表
+        Mockito.when(this.userModelRepo.listUserModelsByUserId(userId))
+                .thenReturn(Collections.singletonList(userModelPo));
+
+        // Mock 系统模型列表（空）
+        Mockito.when(this.userModelRepo.listUserModelsByUserId("system"))
+                .thenReturn(Collections.emptyList());
+
+        // Mock 批量查询模型信息
+        Mockito.when(this.userModelRepo.listModels(List.of(modelId)))
                 .thenReturn(Collections.singletonList(modelPo));
+
         OperationContext context = new OperationContext();
         context.setOperator(userId);
 
@@ -66,6 +99,7 @@ class CustomAippModelCenterTest {
         Assertions.assertEquals(modelPo.getName(), targetModelAccessInfo.getServiceName());
         Assertions.assertEquals("tag1,user1", targetModelAccessInfo.getTag());
         Assertions.assertEquals(modelPo.getBaseUrl(), targetModelAccessInfo.getBaseUrl());
+        Assertions.assertFalse(targetModelAccessInfo.getIsDefault()); // 个人模型不是默认
         Mockito.verify(this.defaultModelCenter, Mockito.times(0))
                 .fetchModelList(Mockito.any(), Mockito.any(), Mockito.any());
     }
@@ -75,7 +109,15 @@ class CustomAippModelCenterTest {
         String userId = "user1";
         String scene = "scene";
         ModelAccessInfo model1 = ModelAccessInfo.builder().serviceName("gpt").baseUrl("").tag("").build();
-        Mockito.when(this.userModelRepo.listModelsByUserId(userId, TYPE)).thenReturn(Collections.emptyList());
+
+        // Mock 个人模型列表（空）
+        Mockito.when(this.userModelRepo.listUserModelsByUserId(userId))
+                .thenReturn(Collections.emptyList());
+
+        // Mock 系统模型列表（空）
+        Mockito.when(this.userModelRepo.listUserModelsByUserId("system"))
+                .thenReturn(Collections.emptyList());
+
         ModelListDto expectModelList = ModelListDto.builder()
                 .models(Collections.singletonList(model1))
                 .total(1)

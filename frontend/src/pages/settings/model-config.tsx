@@ -62,10 +62,8 @@ const MODEL_PROVIDERS: ModelProvider[] = [
 const ModelConfigComponent: React.FC = () => {
   const { t } = useTranslation();
   const [form] = Form.useForm();
-  const [systemModelForm] = Form.useForm();
   const [models, setModels] = useState<ModelConfig[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isSystemModelModalVisible, setIsSystemModelModalVisible] = useState(false);
   const [editingModel, setEditingModel] = useState<ModelConfig | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<ModelProvider | null>(null);
   const [loading, setLoading] = useState(false);
@@ -83,16 +81,19 @@ const ModelConfigComponent: React.FC = () => {
     try {
       const response: any = await getUserModels(tenantId);
       if (response.data) {
-        const formattedModels = response.data.map((item: any) => ({
-          id: item.modelId,
-          modelId: item.modelId,
-          modelName: item.modelName,
-          apiKey: item.apiKey || '',
-          baseUrl: item.baseUrl,
-          modelType: item.type,
-          isDefault: item.isDefault === 1,
-          provider: getProviderByBaseUrl(item.baseUrl),
-        }));
+        // 过滤掉系统模型（is_default=1的模型），只显示个人模型
+        const formattedModels = response.data
+          .filter((item: any) => item.isDefault !== 1) // 过滤掉系统默认模型
+          .map((item: any) => ({
+            id: item.modelId,
+            modelId: item.modelId,
+            modelName: item.modelName,
+            apiKey: item.apiKey || '',
+            baseUrl: item.baseUrl,
+            modelType: item.type,
+            isDefault: false, // 个人模型没有默认概念
+            provider: getProviderByBaseUrl(item.baseUrl),
+          }));
         setModels(formattedModels);
       }
     } catch (error) {
@@ -180,12 +181,6 @@ const ModelConfigComponent: React.FC = () => {
   const handleDelete = (record: ModelConfig) => {
     if (!tenantId) return;
 
-    // 默认模型不能删除
-    if (record.isDefault) {
-      message.warning(t('defaultModelCannotDelete'));
-      return;
-    }
-
     Modal.confirm({
       title: t('deleteModelConfirm'),
       onOk: async () => {
@@ -200,100 +195,24 @@ const ModelConfigComponent: React.FC = () => {
     });
   };
 
-  const handleSetDefault = async (record: ModelConfig) => {
-    if (!tenantId || record.isDefault) return;
-    try {
-      await switchDefaultModel(tenantId, record.modelId!);
-      message.success(t('defaultModelSet'));
-      loadModels();
-    } catch (error) {
-      console.error('Set default failed:', error);
-    }
-  };
-
-  // 打开系统模型设置Modal
-  const showSystemModelModal = () => {
-    const defaultModel = models.find(m => m.isDefault);
-    if (defaultModel) {
-      systemModelForm.setFieldsValue({ modelId: defaultModel.modelId });
-    }
-    setIsSystemModelModalVisible(true);
-  };
-
-  // 保存系统模型设置
-  const handleSystemModelOk = async () => {
-    try {
-      const values = await systemModelForm.validateFields();
-      if (!tenantId) return;
-
-      await switchDefaultModel(tenantId, values.modelId);
-      message.success(t('systemModelSetSuccess'));
-      setIsSystemModelModalVisible(false);
-      loadModels();
-    } catch (error) {
-      console.error('Set system model failed:', error);
-    }
-  };
-
-  // 取消系统模型设置
-  const handleSystemModelCancel = () => {
-    setIsSystemModelModalVisible(false);
-    systemModelForm.resetFields();
-  };
-
   const getProviderModels = (providerId: string) => {
     return models.filter(m => m.provider === providerId);
   };
 
-  const defaultModel = models.find(m => m.isDefault);
   const hasModels = models.length > 0;
 
   return (
     <div className="model-config-container">
-      {/* 系统模型设置区域 */}
-      <div className="system-model-section">
-        <Button
-          type="primary"
-          icon={<ApiOutlined />}
-          onClick={showSystemModelModal}
-          disabled={!hasModels}
-        >
-          {t('systemModelSettings')}
-        </Button>
-        {!hasModels ? (
-          <Alert
-            message={t('noModelsConfiguredHint')}
-            type="error"
-            showIcon
-            icon={<WarningOutlined />}
-            className="system-model-warning"
-          />
-        ) : !defaultModel ? (
-          <Alert
-            message={t('systemModelNotSetWarning')}
-            type="error"
-            showIcon
-            icon={<WarningOutlined />}
-            className="system-model-warning"
-          />
-        ) : (
-          <div className="system-model-info">
-            <Alert
-              message={
-                <div>
-                  <strong>{t('currentSystemModelInfo')}：</strong>
-                  <span style={{ color: '#1890ff', fontWeight: 600 }}>{defaultModel.modelName}</span>
-                  <span style={{ marginLeft: 8, color: '#8c8c8c' }}>({defaultModel.modelType})</span>
-                </div>
-              }
-              description={t('systemModelUsageHint')}
-              type="success"
-              showIcon
-              style={{ marginLeft: 16, marginBottom: 0 }}
-            />
-          </div>
-        )}
-      </div>
+      {/* 提示用户：个人模型配置区域 */}
+      {!hasModels && (
+        <Alert
+          message="尚未配置任何模型"
+          description="请在下方模型供应商卡片中添加您的个人模型。"
+          type="error"
+          showIcon
+          style={{ marginBottom: 24 }}
+        />
+      )}
 
       <div className="provider-cards-grid">
         {MODEL_PROVIDERS.map((provider) => {
@@ -358,11 +277,6 @@ const ModelConfigComponent: React.FC = () => {
                               <Tag color="blue" style={{ fontSize: 12 }}>
                                 {model.modelType}
                               </Tag>
-                              {model.isDefault && (
-                                <Tag color="gold" style={{ fontSize: 12 }}>
-                                  默认
-                                </Tag>
-                              )}
                             </Space>
                           }
                         />
@@ -444,44 +358,6 @@ const ModelConfigComponent: React.FC = () => {
             rules={[{ required: true, message: t('apiKeyRequired') }]}
           >
             <Input.Password placeholder={t('plsEnter') + ' API Key'} />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/* 系统模型设置Modal */}
-      <Modal
-        title={
-          <Space>
-            {t('systemModelSettings')}
-            <Tooltip title={t('systemModelTooltip')}>
-              <QuestionCircleOutlined style={{ color: '#8c8c8c', fontSize: 14 }} />
-            </Tooltip>
-          </Space>
-        }
-        open={isSystemModelModalVisible}
-        onOk={handleSystemModelOk}
-        onCancel={handleSystemModelCancel}
-        okText={t('confirm')}
-        cancelText={t('cancel')}
-        width={500}
-      >
-        <Form
-          form={systemModelForm}
-          layout="vertical"
-          style={{ marginTop: 24 }}
-        >
-          <Form.Item
-            name="modelId"
-            label={t('systemModel')}
-            rules={[{ required: true, message: t('pleaseSelectSystemModel') }]}
-          >
-            <Select placeholder={t('pleaseSelectSystemModel')}>
-              {models.map(model => (
-                <Select.Option key={model.modelId} value={model.modelId}>
-                  {model.modelName} ({model.modelType})
-                </Select.Option>
-              ))}
-            </Select>
           </Form.Item>
         </Form>
       </Modal>
