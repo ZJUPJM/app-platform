@@ -155,7 +155,10 @@ const _MemoryConfig = ({memoryConfig, disabled, templateType, isShowUseMemoryTyp
 
   const shape = useShapeContext();
   const startNode = shape.page.sm.findShapeBy(s => s.type === 'startNodeStart');
-  const [maxConversationTurn, setMaxConversationTurn] = useState(startNode.getConversationTurn());
+  // 如果在子流程中（如循环节点内部），startNode 可能不存在，使用默认值 3
+  const [maxConversationTurn, setMaxConversationTurn] = useState(
+    startNode ? startNode.getConversationTurn() : 3
+  );
 
   /**
    * 选择历史记录方式下拉框click回调
@@ -176,8 +179,12 @@ const _MemoryConfig = ({memoryConfig, disabled, templateType, isShowUseMemoryTyp
     dispatch({actionType: 'changeHistoryType', value: e});
   };
 
-  // 监听开始节点中，对话轮数的修改.
+  // 监听开始节点中，对话轮数的修改（仅在主流程中有效，子流程中无开始节点）.
   useEffect(() => {
+    if (!startNode) {
+      // 在子流程中（如循环节点内部），没有开始节点，跳过监听
+      return;
+    }
     const cancel = shape.observeTo('start_node_conversation_turn_count', startNode.id, 'start_node_conversation_turn_count',
         (args) => {
           if (args.value === null || args.value === undefined) {

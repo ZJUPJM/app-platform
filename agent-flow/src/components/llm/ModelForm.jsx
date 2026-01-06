@@ -35,7 +35,10 @@ const _ModelForm = ({shapeId, modelData, modelOptions, disabled}) => {
   const startNode = shape.page.sm.findShapeBy(s => s.type === 'startNodeStart');
   const maxMemoryRounds = modelData.maxMemoryRounds;
   const maxMemoryRoundsValue = parseInt(maxMemoryRounds.value);
-  const [maxTurnsOfStartNode, setMaxTurnsOfStartNode] = useState(startNode.getConversationTurn());
+  // 如果在子流程中（如循环节点内部），startNode 可能不存在，使用默认值 3
+  const [maxTurnsOfStartNode, setMaxTurnsOfStartNode] = useState(
+    startNode ? startNode.getConversationTurn() : 3
+  );
   const [promptOpen, setPromptOpen] = useState(false);
   const [systemPromptOpen, setSystemPromptOpen] = useState(false);
 
@@ -52,8 +55,12 @@ const _ModelForm = ({shapeId, modelData, modelOptions, disabled}) => {
     maxMemoryRoundsValueRef.current = e;
   };
 
-  // 监听开始节点中，对话轮数的修改.
+  // 监听开始节点中，对话轮数的修改（仅在主流程中有效，子流程中无开始节点）.
   useEffect(() => {
+    if (!startNode) {
+      // 在子流程中（如循环节点内部），没有开始节点，跳过监听
+      return;
+    }
     shape.observeTo('start_node_conversation_turn_count', startNode.id, 'start_node_conversation_turn_count',
       (args) => {
         if (args.value === null || args.value === undefined) {
