@@ -14,6 +14,9 @@ import {useEffect, useRef, useState} from "react";
 import httpUtil from "@/components/util/httpUtil.jsx";
 import {v4 as uuidv4} from 'uuid';
 
+// 模块级别的 Set，用于跟踪正在创建子流程的节点 ID
+const creatingNodes = new Set();
+
 /**
  * 循环节点Wrapper
  *
@@ -41,6 +44,8 @@ const LoopWrapper = ({shapeStatus}) => {
   // 添加状态管理 - 改为单个工具对象
   const [currentToolOption, setCurrentToolOption] = useState(null);
   const lastRequestedNameRef = useRef(null);
+  const [isCreatingSubflow, setIsCreatingSubflow] = useState(false);
+  const hasTriedAutoCreateRef = useRef(false);
 
   const handlePluginChange = (entity, uniqueName, name, tags, appId, tenantId, version) => {
     dispatch({
@@ -59,6 +64,161 @@ const LoopWrapper = ({shapeStatus}) => {
     dispatch({
       type: 'deletePlugin', formId: deletePluginId,
     });
+  };
+
+  /**
+   * 自动创建循环子流程
+   */
+  const autoCreateSubflow = () => {
+    // 使用模块级别的 Set 来防止重复创建
+    if (creatingNodes.has(shape.id)) {
+      console.log('[LoopNode] Already creating subflow for node:', shape.id);
+      return;
+    }
+
+    // 立即添加到创建集合中
+    creatingNodes.add(shape.id);
+    console.log('[LoopNode] Starting subflow creation for node:', shape.id);
+
+    // 立即标记已尝试创建
+    hasTriedAutoCreateRef.current = true;
+    setIsCreatingSubflow(true);
+
+    // 从 llmNodeState 配置中获取 tenantId
+    const llmConfig = shape.graph.configs.find(node => node.node === 'llmNodeState');
+    const currentTenantId = llmConfig?.params?.tenantId;
+
+    if (!currentTenantId) {
+      console.warn('[LoopNode] Cannot create subflow: tenantId not found');
+      creatingNodes.delete(shape.id); // 失败时移除
+      setIsCreatingSubflow(false);
+      return;
+    }
+
+    // 获取 endpoint
+    const loopConfig = shape.graph.configs.find(node => node.node === 'loopNodeState');
+    const endpoint = loopConfig?.urls?.endpoint || window.location.origin;
+
+    // 根据环境判断 baseUrl
+    let baseUrl;
+    if (endpoint.includes('/appbuilder')) {
+      baseUrl = endpoint;
+    } else if (process.env.PACKAGE_MODE === 'spa') {
+      baseUrl = `${endpoint}/appbuilder`;
+    } else {
+      baseUrl = `${endpoint}/api/jober`;
+    }
+
+    // 模板 ID
+    const LOOP_TEMPLATE_ID = 'df87073b9bc85a48a9b01eccc9afccc3';
+
+    // 调用创建应用 API
+    const createUrl = `${baseUrl}/v1/api/${currentTenantId}/app/${LOOP_TEMPLATE_ID}`;
+    const createParams = {
+      type: 'waterFlow',
+      name: `循环子流程_${shape.id.substring(0, 8)}`,
+      description: '自动创建的循环子流程',
+      app_built_type: 'workflow',
+      app_category: 'workflow'
+    };
+
+    httpUtil.post(
+      createUrl,
+      createParams,
+      new Map(),
+      (responseData) => {
+        if (responseData.code === 0 && responseData.data) {
+          const newAppId = responseData.data.id;
+          console.log('[LoopNode] Subflow created successfully:', newAppId);
+
+          // 获取子流程详情并更新节点
+          fetchAndUpdateSubflowParams(currentTenantId, newAppId, baseUrl);
+          // 注意：创建成功后不要从 Set 中移除，保持防护
+        } else {
+          console.error('[LoopNode] Failed to create subflow:', responseData);
+          creatingNodes.delete(shape.id); // 失败时移除，允许重试
+          setIsCreatingSubflow(false);
+        }
+      },
+      (error) => {
+        console.error('[LoopNode] Error creating subflow:', error);
+        creatingNodes.delete(shape.id); // 失败时移除，允许重试
+        setIsCreatingSubflow(false);
+      }
+    );
+  };
+
+  /**
+   * 获取子流程详情并更新节点参数
+   */
+  const fetchAndUpdateSubflowParams = (currentTenantId, appId, baseUrl) => {
+    const detailsUrl = `${baseUrl}/v1/api/${currentTenantId}/app/${appId}`;
+
+    httpUtil.get(
+      detailsUrl,
+      new Map(),
+      (responseData) => {
+        if (responseData.code === 0 && responseData.data) {
+          const appData = responseData.data;
+
+          // 从 flowGraph 中提取输入输出参数
+          const flowGraph = appData.flowGraph?.appearance;
+          if (!flowGraph || !flowGraph.nodes) {
+            console.warn('[LoopNode] No flowGraph found in subflow');
+            setIsCreatingSubflow(false);
+            return;
+          }
+
+          // 查找开始节点
+          const startNode = flowGraph.nodes.find(node => node.type === 'startNodeStart');
+          if (!startNode || !startNode.flowMeta?.jober?.converter?.entity?.outputParams) {
+            console.warn('[LoopNode] No start node found');
+            setIsCreatingSubflow(false);
+            return;
+          }
+
+          // 获取开始节点的输出参数作为子流程的输入参数
+          const startOutputParams = startNode.flowMeta.jober.converter.entity.outputParams || [];
+
+          // 构建 entity（这里简化处理，直接使用开始节点的输出）
+          const entity = {};
+          entity.inputParams = startOutputParams;
+
+          // 构建输出参数（数组类型）
+          const outputParams = {
+            id: uuidv4(),
+            name: 'result',
+            type: 'Array',
+            description: '循环输出结果',
+            value: [],
+          };
+          entity.outputParams = [outputParams];
+
+          // 生成 uniqueName
+          const uniqueName = `LOOP_SUBFLOW_${appId}`;
+
+          // 更新节点的 toolInfo
+          handlePluginChange(
+            entity,
+            uniqueName,
+            appData.name,
+            [TOOL_TYPE.WATER_FLOW],
+            appId,
+            currentTenantId,
+            appData.version || '1.0.0'
+          );
+
+          setIsCreatingSubflow(false);
+        } else {
+          console.error('[LoopNode] Failed to fetch subflow details:', responseData);
+          setIsCreatingSubflow(false);
+        }
+      },
+      (error) => {
+        console.error('[LoopNode] Error fetching subflow details:', error);
+        setIsCreatingSubflow(false);
+      }
+    );
   };
 
   /**
@@ -123,10 +283,37 @@ const LoopWrapper = ({shapeStatus}) => {
     if (lastRequestedNameRef.current === uniqueName) {
       return;
     }
-    
+
     lastRequestedNameRef.current = uniqueName;
     getSkillInfo();
   }, [toolInfo?.uniqueName]);
+
+  /**
+   * 自动创建子流程的 useEffect
+   * 当循环节点被拖出但没有选择工具时，自动创建子流程
+   */
+  useEffect(() => {
+    const uniqueName = toolInfo?.uniqueName;
+    const appId = toolInfo?.appId;
+
+    // 如果已经有工具或者已经有 appId，就不再自动创建
+    if (uniqueName || appId) {
+      return;
+    }
+
+    // 确保配置存在
+    if (!config?.urls?.toolListEndpoint) {
+      return;
+    }
+
+    // 如果已经尝试过创建或正在创建，就不再触发
+    if (hasTriedAutoCreateRef.current || isCreatingSubflow || creatingNodes.has(shape.id)) {
+      return;
+    }
+
+    // 自动创建子流程
+    autoCreateSubflow();
+  }, [toolInfo?.uniqueName, toolInfo?.appId]); // 依赖 uniqueName 和 appId
 
 
   /**
